@@ -43,7 +43,7 @@ $method          = $parts[1] ?? 'index';
 $is_public = in_array(strtolower($parts[0] ?? ''), $public_routes);
 
 if (!$is_public && empty($_SESSION['admin_id'])) {
-    header('Location: /SkillLink/admin/login.php');
+    header('Location: ' . admin_url('login.php'));
     exit;
 }
 
@@ -51,7 +51,7 @@ if (!$is_public && empty($_SESSION['admin_id'])) {
 if (strtolower($parts[0] ?? '') === 'logout') {
     $_SESSION = [];
     session_destroy();
-    header('Location: /SkillLink/admin/login.php');
+    header('Location: ' . admin_url('login.php'));
     exit;
 }
 

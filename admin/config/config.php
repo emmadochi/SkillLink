@@ -3,6 +3,8 @@
  * Global Configuration - SkillLink Admin
  * Dynamically detects the base URL to prevent broken links in different environments.
  */
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Define the root URL path for the admin panel
 if (!defined('ADMIN_ROOT')) {

@@ -3,11 +3,17 @@
  * SkillLink Admin Login
  * Authenticates admin users using a POST form and PHP sessions.
  */
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/db.php';
+
 session_start();
 
 // If already logged in, go to dashboard
 if (!empty($_SESSION['admin_id'])) {
-    header('Location: /SkillLink/admin/');
+    header('Location: ' . admin_url());
     exit;
 }
 
@@ -18,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if ($email && $password) {
-        require_once __DIR__ . '/config/db.php';
         $db   = getDB();
         $stmt = $db->prepare(
             "SELECT id, name, password_hash FROM users WHERE email = ? AND role = 'admin' LIMIT 1"
