@@ -20,7 +20,6 @@ dependencies:
 
   # Networking
   dio: ^5.4.3+1
-  retrofit: ^4.1.0
 
   # Local Storage
   shared_preferences: ^2.2.3
@@ -62,10 +61,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  build_runner: ^2.4.9
+  build_runner: ^2.4.10
   riverpod_generator: ^2.4.0
-  retrofit_generator: 8.1.0
   json_serializable: ^6.8.0
+
 
 flutter:
   uses-material-design: true

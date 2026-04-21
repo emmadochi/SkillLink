@@ -1,49 +1,70 @@
 import 'package:dio/dio.dart';
-import 'package:retrofit/retrofit.dart';
+import 'package:json_annotation/json_annotation.dart';
 import '../../features/auth/data/models/user_model.dart';
 import '../../features/artisan/data/models/artisan_model.dart';
 import '../../features/booking/data/models/booking_model.dart';
 
 part 'api_client.g.dart';
 
-@RestApi()
-abstract class ApiClient {
-  factory ApiClient(Dio dio, {String baseUrl}) = _ApiClient;
+class ApiClient {
+  final Dio dio;
 
-  @POST('/auth/signup')
-  Future<ApiResponse<AuthData>> signup(@Body() Map<String, dynamic> body);
+  ApiClient(this.dio, {String? baseUrl}) {
+    if (baseUrl != null) dio.options.baseUrl = baseUrl;
+  }
 
-  @POST('/auth/login')
-  Future<ApiResponse<AuthData>> login(@Body() Map<String, dynamic> body);
+  Future<ApiResponse<AuthData>> signup(Map<String, dynamic> body) async {
+    final response = await dio.post('/auth/signup', data: body);
+    return ApiResponse.fromJson(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
+  }
 
-  @GET('/artisan')
-  Future<ApiResponse<List<Artisan>>> getArtisans({
-    @Query('category') int? categoryId,
-    @Query('rating') double? minRating,
-  });
+  Future<ApiResponse<AuthData>> login(Map<String, dynamic> body) async {
+    final response = await dio.post('/auth/login', data: body);
+    return ApiResponse.fromJson(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
+  }
 
-  @GET('/artisan/profile/{id}')
-  Future<ApiResponse<Artisan>> getArtisanProfile(@Path('id') int id);
+  Future<ApiResponse<List<Artisan>>> getArtisans({int? categoryId, double? minRating}) async {
+    final response = await dio.get('/artisan', queryParameters: {
+      if (categoryId != null) 'category': categoryId,
+      if (minRating != null) 'rating': minRating,
+    });
+    return ApiResponse.fromJson(response.data, (json) => (json as List).map((i) => Artisan.fromJson(i as Map<String, dynamic>)).toList());
+  }
 
-  @GET('/category')
-  Future<ApiResponse<List<Map<String, dynamic>>>> getCategories();
+  Future<ApiResponse<Artisan>> getArtisanProfile(int id) async {
+    final response = await dio.get('/artisan/profile/$id');
+    return ApiResponse.fromJson(response.data, (json) => Artisan.fromJson(json as Map<String, dynamic>));
+  }
 
-  // Booking Endpoints
-  @POST('/booking/create')
-  Future<ApiResponse<Map<String, dynamic>>> createBooking(@Body() Map<String, dynamic> body);
+  Future<ApiResponse<List<Map<String, dynamic>>>> getCategories() async {
+    final response = await dio.get('/category');
+    return ApiResponse.fromJson(response.data, (json) => List<Map<String, dynamic>>.from(json as List));
+  }
 
-  @GET('/booking/history')
-  Future<ApiResponse<List<Booking>>> getBookingHistory();
+  Future<ApiResponse<Map<String, dynamic>>> createBooking(Map<String, dynamic> body) async {
+    final response = await dio.post('/booking/create', data: body);
+    return ApiResponse.fromJson(response.data, (json) => json as Map<String, dynamic>);
+  }
 
-  @POST('/booking/updateStatus')
-  Future<ApiResponse<Map<String, dynamic>>> updateStatus(@Body() Map<String, dynamic> body);
+  Future<ApiResponse<List<Booking>>> getBookingHistory() async {
+    final response = await dio.get('/booking/history');
+    return ApiResponse.fromJson(response.data, (json) => (json as List).map((i) => Booking.fromJson(i as Map<String, dynamic>)).toList());
+  }
 
-  // Payment Endpoints
-  @POST('/payment/initialize')
-  Future<ApiResponse<Map<String, dynamic>>> initializePayment(@Body() Map<String, dynamic> body);
+  Future<ApiResponse<Map<String, dynamic>>> updateStatus(Map<String, dynamic> body) async {
+    final response = await dio.post('/booking/updateStatus', data: body);
+    return ApiResponse.fromJson(response.data, (json) => json as Map<String, dynamic>);
+  }
 
-  @POST('/payment/verify')
-  Future<ApiResponse<Map<String, dynamic>>> verifyPayment(@Body() Map<String, dynamic> body);
+  Future<ApiResponse<Map<String, dynamic>>> initializePayment(Map<String, dynamic> body) async {
+    final response = await dio.post('/payment/initialize', data: body);
+    return ApiResponse.fromJson(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> verifyPayment(Map<String, dynamic> body) async {
+    final response = await dio.post('/payment/verify', data: body);
+    return ApiResponse.fromJson(response.data, (json) => json as Map<String, dynamic>);
+  }
 }
 
 @JsonSerializable(genericArgumentFactories: true)
