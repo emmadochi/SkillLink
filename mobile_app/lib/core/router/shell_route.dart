@@ -1,0 +1,189 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/chat/presentation/screens/chat_list_screen.dart';
+import '../../features/dashboard/presentation/screens/customer_dashboard_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
+import 'app_router.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
+
+class AppShellRoute {
+  static final route = ShellRoute(
+    builder: (context, state, child) => _AppShell(child: child),
+    routes: [
+      GoRoute(
+        path: AppRoutes.home,
+        name: 'home',
+        builder: (_, __) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.chatList,
+        name: 'chat-list',
+        builder: (_, __) => const ChatListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.customerDashboard,
+        name: 'customer-dashboard',
+        builder: (_, __) => const CustomerDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        name: 'notifications',
+        builder: (_, __) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        name: 'settings',
+        builder: (_, __) => const SettingsScreen(),
+      ),
+    ],
+  );
+}
+
+class _AppShell extends StatefulWidget {
+  final Widget child;
+  const _AppShell({required this.child});
+
+  @override
+  State<_AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<_AppShell> {
+  int _selectedIndex = 0;
+
+  static const _routes = [
+    AppRoutes.home,
+    AppRoutes.customerDashboard,
+    AppRoutes.chatList,
+    AppRoutes.settings,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: widget.child,
+      bottomNavigationBar: _GlassBottomNav(
+        selectedIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() => _selectedIndex = index);
+          context.go(_routes[index]);
+        },
+      ),
+    );
+  }
+}
+
+class _GlassBottomNav extends StatelessWidget {
+  final int selectedIndex;
+  final ValueChanged<int> onTap;
+
+  const _GlassBottomNav({required this.selectedIndex, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      _NavItem(icon: Icons.home_rounded, label: 'Home'),
+      _NavItem(icon: Icons.calendar_month_rounded, label: 'Bookings'),
+      _NavItem(icon: Icons.chat_bubble_rounded, label: 'Chat'),
+      _NavItem(icon: Icons.person_rounded, label: 'Profile'),
+    ];
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      height: 72,
+      decoration: BoxDecoration(
+        color: AppColors.glassBackground.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.12),
+            blurRadius: 32,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final itemWidth = constraints.maxWidth / items.length;
+                
+                return Stack(
+                  children: [
+                    // Sliding Indicator
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.fastOutSlowIn,
+                      left: selectedIndex * itemWidth,
+                      top: 10,
+                      bottom: 10,
+                      width: itemWidth,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                    ),
+                    
+                    // Nav Items
+                    Row(
+                      children: List.generate(items.length, (i) {
+                        final selected = selectedIndex == i;
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: () => onTap(i),
+                            behavior: HitTestBehavior.opaque,
+                            child: AnimatedScale(
+                              scale: selected ? 1.05 : 1.0,
+                              duration: const Duration(milliseconds: 200),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    items[i].icon,
+                                    color: selected ? AppColors.primary : AppColors.outline,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    items[i].label,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.labelSm.copyWith(
+                                      color: selected ? AppColors.primary : AppColors.outline,
+                                      fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem {
+  final IconData icon;
+  final String label;
+  _NavItem({required this.icon, required this.label});
+}

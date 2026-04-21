@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#edf1f5",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#6f86ff",
+                    "inverse-surface": "#2c3134",
+                    "on-secondary-container": "#45627e",
+                    "on-background": "#171c1f",
+                    "primary-fixed-dim": "#bac3ff",
+                    "tertiary": "#201100",
+                    "inverse-primary": "#bac3ff",
+                    "surface-container-highest": "#dfe3e7",
+                    "surface-container": "#eaeef2",
+                    "on-surface": "#171c1f",
+                    "secondary-fixed": "#cee5ff",
+                    "on-surface-variant": "#43474d",
+                    "on-primary": "#ffffff",
+                    "background": "#f6fafe",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#bfddfe",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#f6fafe",
+                    "surface": "#f6fafe",
+                    "surface-variant": "#dfe3e7",
+                    "tertiary-container": "#3c2300",
+                    "surface-dim": "#d6dade",
+                    "secondary": "#44617d",
+                    "surface-tint": "#2c4de1",
+                    "surface-container-high": "#e4e9ed",
+                    "on-secondary-fixed-variant": "#2c4964",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#accaea",
+                    "on-primary-fixed-variant": "#0031c5",
+                    "surface-container-low": "#f0f4f8",
+                    "outline-variant": "#c3c6ce",
+                    "on-tertiary-container": "#c88000",
+                    "on-secondary-fixed": "#001d33",
+                    "primary": "#000c47",
+                    "tertiary-fixed": "#ffddb8",
+                    "primary-container": "#001b7a",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#74777e",
+                    "on-primary-fixed": "#001159",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#dee1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- Top AppBar -->
+<header class="sticky top-0 w-full z-40 bg-[#f6fafe] dark:bg-slate-950">
+<nav class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full">
+<span class="material-symbols-outlined text-[#000c47] dark:text-blue-400">arrow_back</span>
+</button>
+<h1 class="text-2xl font-extrabold text-[#000c47] dark:text-blue-200 tracking-tighter">ArtisanHub</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full">
+<span class="material-symbols-outlined text-[#000c47] dark:text-blue-400">share</span>
+</button>
+<img alt="User profile" class="w-10 h-10 rounded-full border-2 border-primary-container" data-alt="close-up portrait of a professional male user in a clean studio setting with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrl6Fjmwp_j3vZzM4NWuuZNgP6XpIq5dPR5mwJ-hYY9IJQf-f5WmqdaE6fiv7XoYHJo1vNZf1OSlspz2raU-sjwee9EPop7Z9i9AkvcFTjMz58sPaU8Dd4DQESWsSOLAWbcKRwPa1gc0Or9460F4GFyCyYiBAzTflz4i6lhoFFvr-OU4vd6YHBvvZhDhkk8MTK8U4ZXSCuvzTraEU3wsFAaTMADoV_BBxfFy_ORtxTkg_6j1fpP9sA5lI8Y4eLSGgvQqVcdvoSJQIc"/>
+</div>
+</nav>
+</header>
+<main class="max-w-5xl mx-auto px-6 mt-8">
+<!-- Hero Section: Asymmetric Layout -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+<!-- Artisan Portrait -->
+<div class="lg:col-span-5 relative">
+<div class="rounded-xl overflow-hidden aspect-[4/5] shadow-2xl">
+<img alt="Artisan Profile" class="w-full h-full object-cover" data-alt="professional carpenter working in a sunlit workshop, dust motes dancing in warm light, holding a wood chisel with focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCztFzopxMYkQ24boGTXW-DbXJGHvEoo5pA2e3mPYeh0H0jyk9G3WX23Ixmw_m2GzneaEfuepJdytdYELSR5rcuKbjXc9fsdTBuw7-Y8Pk6b_EHTjIHdSoW7208bjrQWx7OB2Qifpb18oKue2ezAy3_d4SkUko0XRqkVXwfO_oDGScpDKSM1p2elWjlhSFaRReyyvkKza63nn1N7vcBjwUUQyJHrLIpCLtKeYJ_bO5jMZo_gK7TAgG2d3DVCp2sil02EkT8a_8w-eEL"/>
+</div>
+<!-- Experience Badge Overlay -->
+<div class="absolute -bottom-4 -right-4 bg-tertiary-fixed p-6 rounded-xl shadow-lg border-4 border-surface">
+<p class="text-on-tertiary-fixed text-xs font-bold uppercase tracking-widest mb-1">Experience</p>
+<p class="text-on-tertiary-fixed text-2xl font-black">12 Years</p>
+</div>
+</div>
+<!-- Profile Info -->
+<div class="lg:col-span-7 flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-4">
+<span class="bg-secondary-container text-on-secondary-fixed px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Top Rated Pro</span>
+<div class="flex items-center gap-1 text-on-tertiary-container">
+<span class="material-symbols-outlined fill-icon text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold">4.9</span>
+<span class="text-outline text-sm font-medium">(128 Reviews)</span>
+</div>
+</div>
+<h2 class="text-5xl font-extrabold text-primary mb-2 tracking-tight">Marcus Sterling</h2>
+<p class="text-xl text-secondary font-medium mb-6">Master Carpenter &amp; Custom Furniture Maker</p>
+<div class="flex flex-wrap gap-2 mb-8">
+<span class="px-4 py-2 bg-surface-container-high rounded-full text-sm font-semibold">Fine Woodworking</span>
+<span class="px-4 py-2 bg-surface-container-high rounded-full text-sm font-semibold">Cabinetry</span>
+<span class="px-4 py-2 bg-surface-container-high rounded-full text-sm font-semibold">Restoration</span>
+<span class="px-4 py-2 bg-surface-container-high rounded-full text-sm font-semibold">Modern Inlay</span>
+</div>
+<p class="text-on-surface-variant leading-relaxed text-lg mb-8 max-w-2xl">
+                    Crafting legacy pieces for modern homes. I specialize in sustainable hardwood furniture that tells a story. From bespoke dining tables to intricate cabinetry, every joint is a testament to precision and passion.
+                </p>
+<div class="flex items-center gap-4">
+<button class="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-full font-bold text-lg flex items-center gap-2 transition-all shadow-lg hover:shadow-primary/20">
+                        Hire Marcus Now
+                        <span class="material-symbols-outlined">trending_flat</span>
+</button>
+<button class="p-4 bg-surface-container-lowest border border-outline-variant/30 hover:bg-surface-container-low text-primary rounded-full transition-colors shadow-sm">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Main Content Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Service Pricing List -->
+<div class="md:col-span-2 bg-surface-container-low rounded-xl p-8">
+<h3 class="text-2xl font-bold text-primary mb-6 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">payments</span>
+                    Service Packages
+                </h3>
+<div class="space-y-4">
+<div class="bg-surface-container-lowest p-6 rounded-xl flex justify-between items-center group hover:bg-primary hover:text-white transition-all">
+<div>
+<h4 class="font-bold text-lg">Initial Consultation</h4>
+<p class="text-sm opacity-70">1 hour project assessment and sketching</p>
+</div>
+<div class="text-right">
+<span class="text-2xl font-black">$85</span>
+<p class="text-[10px] uppercase font-bold">Starting at</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl flex justify-between items-center group hover:bg-primary hover:text-white transition-all">
+<div>
+<h4 class="font-bold text-lg">Custom Shelf Installation</h4>
+<p class="text-sm opacity-70">Live edge or floating hardwood shelves</p>
+</div>
+<div class="text-right">
+<span class="text-2xl font-black">$320</span>
+<p class="text-[10px] uppercase font-bold">Average project</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border-2 border-primary/10 flex justify-between items-center group hover:bg-primary hover:text-white transition-all">
+<div>
+<h4 class="font-bold text-lg">Full Furniture Commission</h4>
+<p class="text-sm opacity-70">Bespoke tables, desks, or bed frames</p>
+</div>
+<div class="text-right">
+<span class="text-2xl font-black">$1,200+</span>
+<p class="text-[10px] uppercase font-bold">Quote required</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Stats & Location -->
+<div class="flex flex-col gap-6">
+<div class="bg-primary text-white p-8 rounded-xl relative overflow-hidden">
+<div class="relative z-10">
+<h4 class="font-bold text-lg mb-4">Response Time</h4>
+<p class="text-4xl font-black mb-1">&lt; 2 hours</p>
+<p class="text-sm opacity-70">Highly Responsive</p>
+</div>
+<span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10">bolt</span>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10">
+<h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">location_on</span>
+                        Service Area
+                    </h4>
+<div class="rounded-lg overflow-hidden h-32 mb-4">
+<img alt="Map area" class="w-full h-full object-cover grayscale opacity-50" data-alt="abstract stylized topographic map in deep blue and gold tones showing city streets and urban density" data-location="San Francisco" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpffUWacJP8QW-BHlS5hek2gtp7HFRobdrtNi5S8Cy28Dyh2jj_b9w5qvHKgumT2XyJct8spiSLlXPlLIeYKrUNNW6rw-O2bIzZzJdkix_26LTR64byRavMcGxhjFCaNPTMdqsCE84macc7hmcDYqO61yJlAsXea3WzKSLEXfvuPk80Nwo3lspa8EZlXWci7j0gHVVmKANtCOBK2w_qTT2XV42ZVOqFKF36mrlRmwPiO855hlTrDPxwNdHtOhv_lfWPIQXLOxAqBcI"/>
+</div>
+<p class="text-sm text-on-surface-variant font-medium">Serving San Francisco, Oakland, and the Greater Bay Area.</p>
+</div>
+</div>
+<!-- Recent Reviews -->
+<div class="md:col-span-3">
+<div class="flex items-center justify-between mb-8 mt-4">
+<h3 class="text-3xl font-bold text-primary tracking-tight">Recent Client Stories</h3>
+<button class="text-primary font-bold hover:underline flex items-center gap-1">
+                        See All Reviews
+                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="flex items-center gap-4 mb-4">
+<img alt="Reviewer" class="w-12 h-12 rounded-full object-cover" data-alt="close-up portrait of a smiling woman with glasses in an urban setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBfTfWsrR5bpHWPEslkhTcNHFhAdeEwa532dRHzVHNIQtNou1m9n2hSc77xml7y0k2C4nOn5uLSW_zN_IpBWq0yrCpdZdc_CWK_qSNkDId3R_TpZuhx50BlSOG0e7y-k9SRv76BCku72ni9zg2jzsJjv5QiMa09ag-LMo0I0qu9wCJJm8HxVPTvGXCTbY2m2xbc4lOD1w3lK_xiP0ECf1ZCz72jYHdcFnaDRlW4mgGFyaWGObpOShJpCfbFcRB4IhRLUCDBoyPZfqi"/>
+<div>
+<p class="font-bold text-primary">Sarah Jenkins</p>
+<div class="flex text-on-tertiary-container">
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="text-on-surface-variant leading-relaxed">"Marcus built a custom walnut dining table for our new home and it is absolutely the centerpiece of the room. His attention to detail and the way he matched the wood grain is incredible."</p>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="flex items-center gap-4 mb-4">
+<img alt="Reviewer" class="w-12 h-12 rounded-full object-cover" data-alt="portrait of a bearded man smiling in soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChqrzE-aiEQjGichxEMJvyuhnuuR95YokYVGnVc0qGeEkhuplnTuSyh_clPprO2ohcXYUOqwEbEbLOXKW6MwKy6UIDrFYytF8I2tgROI4chepL-ptPScr1ZwmrTkS0b79WpjvwET3-6R0MyE_T8WxogtFEi21tRF4bHNyOIw6pBBQVcBI0BEA-KpJzYwcyfPMd88-9eh1xvBokqloChco-V_4ojot1FeZbTw7gMlntYXsSZKrExPCqN5UFP5jX7uxuRWWnwpxTk_wI"/>
+<div>
+<p class="font-bold text-primary">David Chen</p>
+<div class="flex text-on-tertiary-container">
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined fill-icon text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="text-on-surface-variant leading-relaxed">"True professional. On time, kept the workspace immaculate, and the repair he did on my vintage dresser is invisible. You can tell he really cares about the craft."</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile & Desktop Floating Hybrid) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-6 bg-[#f6fafe]/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-[#c3c6ce]/15 shadow-[0_-8px_24px_rgba(0,12,71,0.06)] rounded-t-[1.5rem] md:max-w-md md:left-1/2 md:-translate-x-1/2 md:mb-6 md:rounded-full">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-[#000c47] dark:hover:text-blue-300 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-[#000c47] dark:hover:text-blue-300 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Bookings</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-[#000c47] dark:hover:text-blue-300 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Messages</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#000c47] text-white dark:bg-blue-600 rounded-2xl px-6 py-2 transition-all duration-300" href="#">
+<span class="material-symbols-outlined fill-icon">person</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ArtisanHub | Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#edf1f5",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#6f86ff",
+                    "inverse-surface": "#2c3134",
+                    "on-secondary-container": "#45627e",
+                    "on-background": "#171c1f",
+                    "primary-fixed-dim": "#bac3ff",
+                    "tertiary": "#201100",
+                    "inverse-primary": "#bac3ff",
+                    "surface-container-highest": "#dfe3e7",
+                    "surface-container": "#eaeef2",
+                    "on-surface": "#171c1f",
+                    "secondary-fixed": "#cee5ff",
+                    "on-surface-variant": "#43474d",
+                    "on-primary": "#ffffff",
+                    "background": "#f6fafe",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#bfddfe",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#f6fafe",
+                    "surface": "#f6fafe",
+                    "surface-variant": "#dfe3e7",
+                    "tertiary-container": "#3c2300",
+                    "surface-dim": "#d6dade",
+                    "secondary": "#44617d",
+                    "surface-tint": "#2c4de1",
+                    "surface-container-high": "#e4e9ed",
+                    "on-secondary-fixed-variant": "#2c4964",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#accaea",
+                    "on-primary-fixed-variant": "#0031c5",
+                    "surface-container-low": "#f0f4f8",
+                    "outline-variant": "#c3c6ce",
+                    "on-tertiary-container": "#c88000",
+                    "on-secondary-fixed": "#001d33",
+                    "primary": "#000c47",
+                    "tertiary-fixed": "#ffddb8",
+                    "primary-container": "#001b7a",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#74777e",
+                    "on-primary-fixed": "#001159",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#dee1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-glass {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-secondary-container">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-40 bg-[#f6fafe] dark:bg-slate-950">
+<div class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#000c47] dark:text-blue-400 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full">menu</button>
+<h1 class="text-2xl font-extrabold text-[#000c47] dark:text-blue-200 tracking-tighter font-['Plus_Jakarta_Sans']">ArtisanHub</h1>
+</div>
+<div class="flex items-center gap-6">
+<!-- Availability Toggle -->
+<div class="hidden md:flex items-center gap-3 bg-surface-container-low px-4 py-2 rounded-full">
+<span class="text-label-md font-semibold text-secondary">Online</span>
+<button class="w-10 h-5 bg-primary rounded-full relative transition-colors">
+<span class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></span>
+</button>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="User avatar thumbnail" class="w-full h-full object-cover" data-alt="Professional headshot of a skilled carpenter in a workshop setting, soft cinematic natural lighting, shallow depth of field" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmqsvaKzRYBMMPM7w936HfXD72O1AeCFYEPpPcl5H_gwM8e1M3yFL_ldgAZonCgvJDt1XLLVKZNOcOi8omM3TQPTjRNaTKtmNfzJlECMZA4gb6iMhwoE-8VmbMjl-oeb8LPR2RP8DXZ4mMhz1THkJKRaR1wcXUs8xPCzC9JHTu4accRfrOmsCJs4TMPSuQiHqMV6ROSa8DX0k53vEoj9wHh4bSYeAesUPCYJmkIKlSu3emi_MnzKyY3YUgG6TJUMMW_aAwTziOGVAE"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-6 pt-8 pb-32">
+<!-- Hero Earnings Section (Bento Grid Style) -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
+<!-- Main Earnings Card -->
+<div class="md:col-span-8 relative overflow-hidden bg-gradient-to-br from-primary to-primary-container rounded-xl p-8 text-on-primary shadow-xl">
+<div class="relative z-10">
+<p class="font-label text-sm uppercase tracking-widest opacity-80 mb-2">Total Earnings</p>
+<h2 class="font-headline text-5xl font-extrabold tracking-tight mb-8">$14,280.50</h2>
+<div class="flex flex-wrap gap-8">
+<div>
+<p class="text-xs uppercase tracking-widest opacity-70 mb-1">This Week</p>
+<p class="text-2xl font-bold text-tertiary-fixed">$1,840.00</p>
+</div>
+<div class="h-12 w-px bg-white/10 hidden sm:block"></div>
+<div>
+<p class="text-xs uppercase tracking-widest opacity-70 mb-1">Jobs Completed</p>
+<p class="text-2xl font-bold">124</p>
+</div>
+<div class="h-12 w-px bg-white/10 hidden sm:block"></div>
+<div>
+<p class="text-xs uppercase tracking-widest opacity-70 mb-1">Rating</p>
+<div class="flex items-center gap-1">
+<span class="text-2xl font-bold text-tertiary-fixed">4.9</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Abstract Decorative Element -->
+<div class="absolute -right-20 -bottom-20 w-64 h-64 bg-surface-tint opacity-20 blur-3xl rounded-full"></div>
+<div class="absolute right-10 top-10 flex flex-col items-end">
+<span class="material-symbols-outlined text-6xl opacity-10">payments</span>
+</div>
+</div>
+<!-- Quick Links / Wallet Mini Card -->
+<div class="md:col-span-4 flex flex-col gap-6">
+<div class="flex-1 bg-surface-container-lowest rounded-xl p-6 shadow-sm border-outline-variant/15 border">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 bg-secondary-container rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+</div>
+<button class="text-primary font-semibold text-sm hover:underline">Withdraw</button>
+</div>
+<p class="text-sm text-outline mb-1">Available for Payout</p>
+<p class="text-2xl font-bold text-on-surface">$2,450.00</p>
+</div>
+<div class="flex-1 bg-surface-container-lowest rounded-xl p-6 shadow-sm border-outline-variant/15 border flex items-center justify-between group cursor-pointer hover:bg-primary transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-surface-container-high rounded-full flex items-center justify-center group-hover:bg-white/20">
+<span class="material-symbols-outlined text-primary group-hover:text-white">person</span>
+</div>
+<div>
+<p class="font-bold group-hover:text-white transition-colors">Profile Settings</p>
+<p class="text-xs text-outline group-hover:text-white/70 transition-colors">Manage your portfolio</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-white">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Job Requests & Activity Header -->
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-headline text-2xl font-bold tracking-tight text-primary">Job Requests</h3>
+<div class="flex gap-2">
+<span class="px-4 py-1.5 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold uppercase tracking-wider">New (3)</span>
+</div>
+</div>
+<!-- Job Requests List (Bespoke Pattern) -->
+<div class="space-y-4">
+<!-- Job Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-1 flex flex-col md:flex-row shadow-sm hover:shadow-md transition-shadow">
+<div class="md:w-48 h-32 md:h-auto rounded-lg overflow-hidden m-2">
+<img alt="Job location thumbnail" class="w-full h-full object-cover" data-alt="Interior of a modern luxury living room with high ceilings and minimalist decor, bright afternoon light, architectural photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbDQhWKm5HOg2t4BcRv06IpamxzdGi-kFY4ipbgJKElcaO4E6OIqE6r1ZOeyakfFw4x4vnz_t9AsUnQrLJnWUtKpFNdPv_Wo2fOTqGtejoW29M7IsExA9OyL3PMXXBeP3I6236T4fDNdPw-nymVnAkPPkNP8_mX5YTd8FSMqx8ta7Sc5BVXGXI0o9QDfca6oaLtE67UoY8uog7jKChEfm_bMHo8B0FfEy8i9fCWoHnesjjINzbbCo8VseM_ktuIpxNZoHUWVB_jAmi"/>
+</div>
+<div class="flex-1 p-4 md:p-6 flex flex-col md:flex-row justify-between">
+<div class="mb-4 md:mb-0">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-surface-container-highest rounded text-[10px] font-bold text-outline uppercase">Electrical</span>
+<span class="text-xs text-outline">• 2.4 miles away</span>
+</div>
+<h4 class="text-lg font-bold text-on-surface mb-1">Smart Lighting Installation</h4>
+<p class="text-sm text-outline max-w-md">Installation of Philips Hue ecosystem and custom recessed lighting in master suite.</p>
+<div class="mt-4 flex items-center gap-4 text-xs font-medium text-secondary">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">schedule</span> Starts tomorrow, 10:00 AM</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">payments</span> Est. $450 - $600</span>
+</div>
+</div>
+<div class="flex md:flex-col justify-end gap-3 min-w-[140px]">
+<button class="flex-1 md:flex-none px-6 py-3 bg-primary text-white rounded-full font-bold text-sm hover:bg-primary-container transition-all active:scale-95">Accept</button>
+<button class="flex-1 md:flex-none px-6 py-3 bg-surface-container-high text-on-surface rounded-full font-bold text-sm hover:bg-surface-container-highest transition-all active:scale-95">Reject</button>
+</div>
+</div>
+</div>
+<!-- Job Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-1 flex flex-col md:flex-row shadow-sm hover:shadow-md transition-shadow">
+<div class="md:w-48 h-32 md:h-auto rounded-lg overflow-hidden m-2">
+<img alt="Job location thumbnail" class="w-full h-full object-cover" data-alt="Close up of high-end wood grain floor planks with soft warm overhead lighting, artisan flooring detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4puPIe8Ib65JPiih-yIrWzvaG-zb9RCv8zU_Mj5cJ0Uj35fzC3nWFY-Tgl7AsI0mvFUfEy9HkS3oAMKDJgNypIk08p_ZDSNj6WvSoOlmfamwHqSLVnIVKxl8xdqd0DWYnqYHtRKN_dIHuECGtIbNwcjBbEwBXb1VXtyWWoBcZBEeG6enBH4oppv__vcbxv4WzWzietVrHwk7HPmw3__9gXi7cbtvpVAl1dZANj1Q_dBIOqD1cMPKIRltj_X_22ctsA62PCDD_iPJc"/>
+</div>
+<div class="flex-1 p-4 md:p-6 flex flex-col md:flex-row justify-between">
+<div class="mb-4 md:mb-0">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-surface-container-highest rounded text-[10px] font-bold text-outline uppercase">Carpentry</span>
+<span class="text-xs text-outline">• 0.8 miles away</span>
+</div>
+<h4 class="text-lg font-bold text-on-surface mb-1">Custom Walnut Bookshelf</h4>
+<p class="text-sm text-outline max-w-md">Refinishing and structural repair for a mid-century modern walnut library unit.</p>
+<div class="mt-4 flex items-center gap-4 text-xs font-medium text-secondary">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">schedule</span> Wednesday, Sep 15</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">payments</span> Fixed $1,200</span>
+</div>
+</div>
+<div class="flex md:flex-col justify-end gap-3 min-w-[140px]">
+<button class="flex-1 md:flex-none px-6 py-3 bg-primary text-white rounded-full font-bold text-sm hover:bg-primary-container transition-all active:scale-95">Accept</button>
+<button class="flex-1 md:flex-none px-6 py-3 bg-surface-container-high text-on-surface rounded-full font-bold text-sm hover:bg-surface-container-highest transition-all active:scale-95">Reject</button>
+</div>
+</div>
+</div>
+<!-- Empty State / Placeholder for more -->
+<div class="py-8 text-center">
+<button class="text-primary font-bold text-sm flex items-center gap-2 mx-auto hover:gap-3 transition-all">
+                    View 12 More Requests <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-6 bg-[#f6fafe]/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_-8px_24px_rgba(0,12,71,0.06)] rounded-t-[1.5rem]">
+<!-- Explore (Inactive) -->
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-[#000c47] dark:hover:text-blue-300 tap-highlight-transparent transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1">explore</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Explore</span>
+</a>
+<!-- Bookings (Inactive) -->
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-[#000c47] dark:hover:text-blue-300 tap-highlight-transparent transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1">calendar_month</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Bookings</span>
+</a>
+<!-- Dashboard (Active - Closest match to "Home" context for Artisan) -->
+<a class="flex flex-col items-center justify-center bg-[#000c47] text-white dark:bg-blue-600 rounded-2xl px-6 py-2 tap-highlight-transparent transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Dashboard</span>
+</a>
+<!-- Messages (Inactive) -->
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-[#000c47] dark:hover:text-blue-300 tap-highlight-transparent transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1">chat_bubble</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Messages</span>
+</a>
+<!-- Profile (Inactive) -->
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-[#000c47] dark:hover:text-blue-300 tap-highlight-transparent transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Profile</span>
+</a>
+</nav>
+<!-- FAB (Suppressed on Dashboard as per shell rules) -->
+</body></html>
