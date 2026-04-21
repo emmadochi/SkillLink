@@ -29,7 +29,7 @@ $request_uri = $_SERVER['REQUEST_URI'] ?? '/';
 $base_path   = ADMIN_ROOT; // Dynamically detected base
 
 // Unified path parsing
-$path = str_replace($base_path, '', $request_uri);
+$path = substr($request_uri, strlen($base_path));
 $path = trim(strtok($path, '?'), '/');
 
 $public_routes = ['logout'];

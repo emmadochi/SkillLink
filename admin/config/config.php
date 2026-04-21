@@ -15,9 +15,10 @@ if (!defined('ADMIN_ROOT')) {
     $base = rtrim($script_dir, '/') . '/';
     
     // If we're deep in a controller or subfile, we need to climb back to the 'admin' root
-    // This logic ensures 'ADMIN_ROOT' always points to the folder containing index.php
-    if (strpos($base, '/admin/') !== false) {
-        $base = substr($base, 0, strpos($base, '/admin/') + 7);
+    // We use stripos for case-insensitive detection (e.g. /Admin/ vs /admin/)
+    $admin_pos = stripos($base, '/admin/');
+    if ($admin_pos !== false) {
+        $base = substr($base, 0, $admin_pos + 7);
     }
     
     define('ADMIN_ROOT', $base);
