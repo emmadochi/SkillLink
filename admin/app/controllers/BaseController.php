@@ -41,7 +41,7 @@ abstract class BaseController {
             session_start();
         }
         if (empty($_SESSION['admin_id'])) {
-            header('Location: /SkillLink/admin/login.php');
+            header('Location: ' . admin_url('login.php'));
             exit;
         }
     }
@@ -50,7 +50,7 @@ abstract class BaseController {
      * Redirect helper.
      */
     protected function redirect(string $path): void {
-        header("Location: $path");
+        header("Location: " . admin_url($path));
         exit;
     }
 

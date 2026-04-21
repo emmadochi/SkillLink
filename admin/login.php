@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['admin_id']   = $admin['id'];
                 $_SESSION['admin_name'] = $admin['name'];
                 session_regenerate_id(true);
-                header('Location: /SkillLink/admin/');
+                header('Location: ' . admin_url());
                 exit;
             }
         }
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="description" content="Secure administrative portal for the SkillLink artisan marketplace platform.">
     
     <!-- Shared Design System -->
-    <link rel="stylesheet" href="/SkillLink/admin/public/css/admin.css">
+    <link rel="stylesheet" href="<?php echo admin_url('public/css/admin.css'); ?>">
 </head>
 <body class="login-body">
     <div class="login-blob" style="top: -200px; right: -200px;"></div>
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="login-card">
         <div class="login-logo-badge">
-            <img src="/SkillLink/logo1.png" alt="SkillLink Logo" style="width: 32px; height: 32px; object-fit: contain;">
+            <img src="<?php echo asset_url('logo1.png'); ?>" alt="SkillLink Logo" style="width: 32px; height: 32px; object-fit: contain;">
         </div>
         
         <h1 class="login-title">SkillLink</h1>
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <?php endif; ?>
 
-        <form action="/SkillLink/admin/login.php" method="POST" autocomplete="on" class="flex-column gap-4">
+        <form action="<?php echo admin_url('login.php'); ?>" method="POST" autocomplete="on" class="flex-column gap-4">
             <div class="flex-column gap-2">
                 <label for="admin-email" class="input-label">Email Address</label>
                 <input

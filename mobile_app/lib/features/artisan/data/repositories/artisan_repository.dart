@@ -1,0 +1,49 @@
+import '../models/artisan_model.dart';
+import '../../../../core/network/api_client.dart';
+import 'package:dio/dio.dart';
+
+abstract class ArtisanRepository {
+  Future<List<Artisan>> getArtisans({int? categoryId, double? minRating});
+  Future<Artisan> getArtisanProfile(int id);
+}
+
+class ArtisanRepositoryImpl implements ArtisanRepository {
+  final ApiClient _apiClient;
+
+  ArtisanRepositoryImpl(this._apiClient);
+
+  @override
+  Future<List<Artisan>> getArtisans({int? categoryId, double? minRating}) async {
+    try {
+      final response = await _apiClient.getArtisans(
+        categoryId: categoryId,
+        minRating: minRating,
+      );
+      if (response.status == 'success' && response.data != null) {
+        return response.data!;
+      } else {
+        throw response.message ?? 'Failed to fetch artisans';
+      }
+    } on DioException catch (e) {
+      throw e.response?.data['error'] ?? 'Network error';
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Artisan> getArtisanProfile(int id) async {
+    try {
+      final response = await _apiClient.getArtisanProfile(id);
+      if (response.status == 'success' && response.data != null) {
+        return response.data!;
+      } else {
+        throw response.message ?? 'Profile not found';
+      }
+    } on DioException catch (e) {
+      throw e.response?.data['error'] ?? 'Network error';
+    } catch (e) {
+      rethrow;
+    }
+  }
+}

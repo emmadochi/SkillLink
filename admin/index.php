@@ -11,6 +11,9 @@ session_start();
 define('ROOT_PATH', __DIR__);
 define('APP_PATH', ROOT_PATH . '/app');
 
+// Include configuration
+require_once ROOT_PATH . '/config/config.php';
+
 // Autoload classes (PSR-4 style simplicity)
 spl_autoload_register(function ($class) {
     $file = APP_PATH . '/' . str_replace('\\', '/', $class) . '.php';
@@ -23,7 +26,7 @@ spl_autoload_register(function ($class) {
 // Allow login.php to handle its own authentication
 // All other admin routes require a valid admin session
 $request_uri = $_SERVER['REQUEST_URI'] ?? '/';
-$base_path   = '/SkillLink/admin/';
+$base_path   = ADMIN_ROOT; // Dynamically detected base
 
 // Unified path parsing
 $path = str_replace($base_path, '', $request_uri);
