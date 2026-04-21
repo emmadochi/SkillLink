@@ -6,30 +6,28 @@
 
 namespace controllers;
 
-class PaymentController {
+use models\PaymentModel;
+
+class PaymentController extends BaseController {
     
     public function index() {
+        $this->requireAuth();
+        $paymentModel = new PaymentModel($this->db());
+
+        $page = (int)($_GET['page'] ?? 1);
+        $limit = 20;
+        $offset = ($page - 1) * $limit;
+
         $data = [
             'title' => 'Payment Management',
-            'balance' => '₦4,250,800',
-            'monthly_revenue' => '₦850,200',
-            'transactions' => [
-                ['id' => 'TXN-9021', 'customer' => 'John Doe', 'amount' => '₦5,000', 'fee' => '₦500', 'date' => '2026-04-20', 'status' => 'Successful'],
-                ['id' => 'TXN-9020', 'customer' => 'Jane Smith', 'amount' => '₦15,000', 'fee' => '₦1,500', 'date' => '2026-04-20', 'status' => 'Successful'],
-                ['id' => 'TXN-9019', 'customer' => 'Michael Obi', 'amount' => '₦12,500', 'fee' => '₦1,250', 'date' => '2026-04-19', 'status' => 'Successful'],
-            ]
+            'balance' => $paymentModel->getEscrowBalance(),
+            'monthly_revenue' => $paymentModel->getMonthlyRevenue(),
+            'transactions' => $paymentModel->getTransactions($limit, $offset),
+            'total_transactions' => $paymentModel->countTransactions(),
+            'current_page' => $page,
+            'limit' => $limit
         ];
         
         $this->render('payments/index', $data);
-    }
-    
-    protected function render($view, $data = []) {
-        extract($data);
-        $view_file = APP_PATH . '/views/' . $view . '.php';
-        if (file_exists($view_file)) {
-            require_once APP_PATH . '/views/layout.php';
-        } else {
-            echo "View '$view' not found";
-        }
     }
 }

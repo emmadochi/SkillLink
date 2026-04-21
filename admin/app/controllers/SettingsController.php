@@ -6,35 +6,61 @@
 
 namespace controllers;
 
-class SettingsController {
+use models\CategoryModel;
+
+class SettingsController extends BaseController {
     
     public function index() {
+        $this->requireAuth();
+        $categoryModel = new CategoryModel($this->db());
+
         $data = [
             'title' => 'Platform Settings',
-            'categories' => [
-                ['id' => 1, 'name' => 'Plumbing', 'count' => 125],
-                ['id' => 2, 'name' => 'Electrical', 'count' => 98],
-                ['id' => 3, 'name' => 'Cleaning', 'count' => 156],
-                ['id' => 4, 'name' => 'Catering', 'count' => 42],
-                ['id' => 5, 'name' => 'Carpentry', 'count' => 31],
-            ],
-            'settings' => [
-                'platform_fee' => '10%',
-                'min_payout' => '₦5,000',
-                'support_email' => 'support@skilllink.com'
-            ]
+            'categories' => $categoryModel->getAll(),
+            'settings' => $categoryModel->getSettings()
         ];
         
         $this->render('settings/index', $data);
     }
-    
-    protected function render($view, $data = []) {
-        extract($data);
-        $view_file = APP_PATH . '/views/' . $view . '.php';
-        if (file_exists($view_file)) {
-            require_once APP_PATH . '/views/layout.php';
-        } else {
-            echo "View '$view' not found";
+
+    public function addCategory() {
+        $this->requireAuth();
+        $this->requireMethod('POST');
+        
+        $name = trim($_POST['name'] ?? '');
+        if ($name) {
+            $categoryModel = new CategoryModel($this->db());
+            $categoryModel->create($name);
         }
+        
+        $this->redirect('/SkillLink/admin/settings');
+    }
+
+    public function updateCategory() {
+        $this->requireAuth();
+        $this->requireMethod('POST');
+        
+        $id = (int)($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        
+        if ($id && $name) {
+            $categoryModel = new CategoryModel($this->db());
+            $categoryModel->update($id, $name);
+        }
+        
+        $this->redirect('/SkillLink/admin/settings');
+    }
+
+    public function deleteCategory() {
+        $this->requireAuth();
+        $this->requireMethod('POST');
+        
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id) {
+            $categoryModel = new CategoryModel($this->db());
+            $categoryModel->delete($id);
+        }
+        
+        $this->redirect('/SkillLink/admin/settings');
     }
 }

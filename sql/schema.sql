@@ -100,8 +100,22 @@ CREATE TABLE IF NOT EXISTS `reviews` (
     FOREIGN KEY (`artisan_id`) REFERENCES `artisans`(`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 8. Disputes
+CREATE TABLE IF NOT EXISTS `disputes` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `booking_id` INT NOT NULL,
+    `raised_by` INT NOT NULL COMMENT 'user_id of reporter',
+    `reason` TEXT NOT NULL,
+    `status` ENUM('open','under_review','resolved','closed') DEFAULT 'open',
+    `resolution` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`booking_id`) REFERENCES `bookings`(`id`),
+    FOREIGN KEY (`raised_by`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Seed Initial Categories
-INSERT INTO `categories` (`name`, `slug`, `icon`) VALUES
+INSERT IGNORE INTO `categories` (`name`, `slug`, `icon`) VALUES
 ('Plumbing', 'plumbing', 'water_drop'),
 ('Electrical', 'electrical', 'bolt'),
 ('Cleaning', 'cleaning', 'cleaning_services'),
@@ -109,3 +123,7 @@ INSERT INTO `categories` (`name`, `slug`, `icon`) VALUES
 ('Catering', 'catering', 'restaurant'),
 ('Painting', 'painting', 'format_paint'),
 ('Laundry', 'laundry', 'local_laundry_service');
+
+-- Seed Admin User (Password: admin123)
+INSERT IGNORE INTO `users` (`name`, `email`, `password_hash`, `role`, `is_verified`) 
+VALUES ('System Admin', 'admin@skilllink.com', '$2y$10$ci29oZj/o/j.y0uZ7qV2Hu0y8NkFDCBE.8CGtIy5VoTcjxnmBdHJ2', 'admin', 1);

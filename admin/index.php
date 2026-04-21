@@ -4,6 +4,9 @@
  * Implements a simple MVC router for Pure PHP.
  */
 
+// Start session early for auth checks
+session_start();
+
 // Define constants
 define('ROOT_PATH', __DIR__);
 define('APP_PATH', ROOT_PATH . '/app');
@@ -16,46 +19,64 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// Simple Router
+// --- Auth Guard ---
+// Allow login.php to handle its own authentication
+// All other admin routes require a valid admin session
 $request_uri = $_SERVER['REQUEST_URI'] ?? '/';
-$base_path = '/SkillLink/admin/';
-$path = str_replace($base_path, '', $request_uri);
-$path = trim($path, '/');
+$base_path   = '/SkillLink/admin/';
 
-// Default Route
-if ($path === '' || $path === 'index.php') {
-    $controller = 'DashboardController';
-    $method = 'index';
-} else {
-    $parts = explode('/', $path);
-    $controller = ucfirst($parts[0]) . 'Controller';
-    $method = $parts[1] ?? 'index';
+// Unified path parsing
+$path = str_replace($base_path, '', $request_uri);
+$path = trim(strtok($path, '?'), '/');
+
+$public_routes = ['logout'];
+
+// Determine controller and method
+$parts           = explode('/', $path === '' ? 'dashboard' : $path);
+$controller_name = ucfirst($parts[0] ?? 'dashboard') . 'Controller';
+$method          = $parts[1] ?? 'index';
+
+// Check auth unless it's a public route
+$is_public = in_array(strtolower($parts[0] ?? ''), $public_routes);
+
+if (!$is_public && empty($_SESSION['admin_id'])) {
+    header('Location: /SkillLink/admin/login.php');
+    exit;
 }
 
-// Dispatch
-$controller_class = "controllers\\$controller";
+// --- Logout ---
+if (strtolower($parts[0] ?? '') === 'logout') {
+    $_SESSION = [];
+    session_destroy();
+    header('Location: /SkillLink/admin/login.php');
+    exit;
+}
+
+// --- Dispatch ---
+$controller_class = "controllers\\$controller_name";
+
 if (class_exists($controller_class)) {
     $obj = new $controller_class();
     if (method_exists($obj, $method)) {
         $obj->$method();
     } else {
         http_response_code(404);
-        echo "404 - Method '$method' not found in $controller";
+        echo "404 — Method '<strong>$method</strong>' not found in <strong>$controller_name</strong>";
     }
 } else {
-    // If controller file exists but class not found, might need full path
-    $controller_file = APP_PATH . '/controllers/' . $controller . '.php';
+    // Fallback: try including the file directly
+    $controller_file = APP_PATH . '/controllers/' . $controller_name . '.php';
     if (file_exists($controller_file)) {
         require_once $controller_file;
-        $obj = new $controller();
+        $obj = new $controller_name();
         if (method_exists($obj, $method)) {
             $obj->$method();
         } else {
             http_response_code(404);
-            echo "404 - Method '$method' not found";
+            echo "404 — Method '<strong>$method</strong>' not found";
         }
     } else {
         http_response_code(404);
-        echo "404 - Controller '$controller' not found. Path: $path";
+        echo "404 — Controller '<strong>$controller_name</strong>' not found. Path: <em>$path</em>";
     }
 }

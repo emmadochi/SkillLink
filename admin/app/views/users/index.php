@@ -1,148 +1,133 @@
-<!-- User & Artisan Management -->
-<div class="card-tabs mb-4">
-    <button class="tab-btn active" onclick="switchTab('customers')">Customers</button>
-    <button class="tab-btn" onclick="switchTab('artisans')">Artisans</button>
+<!-- User & Artisan Management Portal -->
+<div class="card-header pb-4" style="background: none; border: none;">
+    <div class="tab-controls flex-row gap-2" style="background: #e2e8f0; padding: 6px; border-radius: var(--radius-md); width: fit-content;">
+        <button id="btn-customers" class="btn-premium <?php echo (!isset($_GET['tab']) || $_GET['tab'] === 'customers') ? 'btn-primary' : 'btn-outline'; ?>" onclick="window.location.href='?tab=customers'">Customers</button>
+        <button id="btn-artisans" class="btn-premium <?php echo ($_GET['tab'] ?? '') === 'artisans' ? 'btn-primary' : 'btn-outline'; ?>" onclick="window.location.href='?tab=artisans'">Artisans</button>
+    </div>
 </div>
 
-<!-- Customers Section -->
-<div id="customers-tab" class="tab-content transition-fade">
-    <div class="glass p-5 rounded-3xl">
-        <div class="flex-row justify-between mb-4">
-            <h3>Registered Customers</h3>
-            <div class="search-box">
-                <input type="text" placeholder="Search customers..." class="admin-input">
-            </div>
+<?php if (!isset($_GET['tab']) || $_GET['tab'] === 'customers'): ?>
+<div id="customers-tab" class="premium-table-card animate-fade-in">
+    <div class="card-header">
+        <h3 class="text-sm">Registered Customers</h3>
+        <div class="flex-row gap-3">
+            <input type="text" placeholder="Search customers..." class="admin-input" style="width: 280px;">
         </div>
-        
-        <table class="admin-table">
+    </div>
+    
+    <div class="table-responsive">
+        <table class="premium-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Customer Name</th>
+                    <th>Email Address</th>
+                    <th>Phone</th>
+                    <th>KYC Status</th>
+                    <th style="text-align: right;">Action</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach($users as $user): ?>
-                <tr>
-                    <td>#<?php echo $user['id']; ?></td>
-                    <td><strong><?php echo $user['name']; ?></strong></td>
-                    <td><?php echo $user['email']; ?></td>
-                    <td><span class="badge success"><?php echo $user['status']; ?></span></td>
-                    <td><button class="btn btn-outlined btn-sm">Manage</button></td>
-                </tr>
-                <?php endforeach; ?>
+                <?php if (empty($users)): ?>
+                    <tr><td colspan="5" class="text-center" style="padding: 3rem; color: var(--text-muted);">No customers registered yet.</td></tr>
+                <?php else: ?>
+                    <?php foreach($users as $user): ?>
+                    <tr>
+                        <td>
+                             <div class="flex-row gap-3">
+                                <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 11px; background: var(--info);">
+                                    <?php echo strtoupper(substr($user['name'], 0, 1)); ?>
+                                </div>
+                                <strong class="text-sm"><?php echo htmlspecialchars($user['name']); ?></strong>
+                            </div>
+                        </td>
+                        <td><span class="text-sm"><?php echo htmlspecialchars($user['email']); ?></span></td>
+                        <td><span class="text-sm"><?php echo htmlspecialchars($user['phone'] ?: '—'); ?></span></td>
+                        <td>
+                            <span class="status-badge <?php echo $user['is_verified'] ? 'badge-success' : 'badge-warning'; ?>">
+                                <?php echo $user['is_verified'] ? 'Verified' : 'Pending'; ?>
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <button class="btn-premium btn-outline btn-icon-only">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
-
-<!-- Artisans Section -->
-<div id="artisans-tab" class="tab-content hidden transition-fade">
-    <div class="glass p-5 rounded-3xl">
-        <div class="flex-row justify-between mb-4">
-            <h3>Service Providers</h3>
-            <div class="search-box">
-                <input type="text" placeholder="Search artisans..." class="admin-input">
-            </div>
+<?php else: ?>
+<div id="artisans-tab" class="premium-table-card animate-fade-in">
+    <div class="card-header">
+        <h3 class="text-sm">Service Providers (Artisans)</h3>
+        <div class="flex-row gap-3">
+             <input type="text" placeholder="Search artisans..." class="admin-input" style="width: 280px;">
         </div>
-        
-        <table class="admin-table">
+    </div>
+    
+    <div class="table-responsive">
+        <table class="premium-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Skill</th>
+                    <th>Artisan</th>
+                    <th>Top Skill</th>
+                    <th>City / Region</th>
                     <th>Rating</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Vetting Status</th>
+                    <th style="text-align: right;">Action</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach($artisans as $a): ?>
-                <tr>
-                    <td>#<?php echo $a['id']; ?></td>
-                    <td><strong><?php echo $a['name']; ?></strong></td>
-                    <td><?php echo $a['skill']; ?></td>
-                    <td>⭐ <?php echo $a['rating']; ?></td>
-                    <td>
-                        <span class="badge <?php echo $a['status'] === 'Pending' ? 'warning' : 'success'; ?>">
-                            <?php echo $a['status']; ?>
-                        </span>
-                    </td>
-                    <td>
-                        <a href="/SkillLink/admin/user/details?id=<?php echo $a['id']; ?>" class="btn btn-sm">
-                            <?php echo $a['status'] === 'Pending' ? 'Review' : 'View'; ?>
-                        </a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
+                <?php if (empty($artisans)): ?>
+                    <tr><td colspan="6" class="text-center" style="padding: 3rem; color: var(--text-muted);">No artisans found.</td></tr>
+                <?php else: ?>
+                    <?php foreach($artisans as $a): ?>
+                    <tr>
+                        <td>
+                            <div class="flex-row gap-3">
+                                <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 11px;">
+                                    <?php echo strtoupper(substr($a['name'], 0, 1)); ?>
+                                </div>
+                                <strong class="text-sm"><?php echo htmlspecialchars($a['name']); ?></strong>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-sm" style="background: var(--surface); padding: 4px 8px; border-radius: 6px; font-weight: 500;">
+                                <?php echo htmlspecialchars($a['skills'] ?: 'Misc'); ?>
+                            </span>
+                        </td>
+                        <td><span class="text-sm"><?php echo htmlspecialchars($a['location_name'] ?: 'N/A'); ?></span></td>
+                        <td>
+                            <div class="flex-row gap-1 font-bold text-sm">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                <?php echo number_format($a['rating'], 1); ?>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge <?php 
+                                echo match($a['status']) {
+                                    'approved' => 'badge-success',
+                                    'pending' => 'badge-warning',
+                                    'rejected' => 'badge-danger',
+                                    default => 'badge-muted'
+                                };
+                            ?>">
+                                <?php echo ucfirst($a['status']); ?>
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                             <a href="/SkillLink/admin/user/details?id=<?php echo $a['id']; ?>" class="btn-premium btn-primary btn-sm">
+                                <?php echo $a['status'] === 'pending' ? 'Verify Application' : 'Manage'; ?>
+                             </a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
-
-<script>
-function switchTab(tab) {
-    const tabs = ['customers', 'artisans'];
-    tabs.forEach(t => {
-        document.getElementById(t + '-tab').classList.add('hidden');
-        document.querySelector(`.tab-btn:nth-child(${tabs.indexOf(t) + 1})`).classList.remove('active');
-    });
-    
-    document.getElementById(tab + '-tab').classList.remove('hidden');
-    event.currentTarget.classList.add('active');
-}
-</script>
-
-<style>
-    .flex-row { display: flex; align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .mb-4 { margin-bottom: 24px; }
-    .p-5 { padding: 32px; }
-    .rounded-3xl { border-radius: 24px; }
-    .hidden { display: none; }
-    
-    .card-tabs {
-        display: flex;
-        gap: 12px;
-        background: #ebedef;
-        padding: 6px;
-        border-radius: 16px;
-        width: fit-content;
-    }
-    
-    .tab-btn {
-        padding: 10px 24px;
-        border: none;
-        background: none;
-        border-radius: 12px;
-        cursor: pointer;
-        font-weight: 500;
-        color: var(--outline);
-        transition: all 0.2s;
-    }
-    
-    .tab-btn.active {
-        background: white;
-        color: var(--primary);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    
-    .admin-input {
-        padding: 10px 16px;
-        border-radius: 12px;
-        border: 1px solid #ddd;
-        font-family: inherit;
-        outline: none;
-        width: 240px;
-    }
-    
-    .btn-outlined {
-        background: none;
-        border: 1px solid var(--primary);
-        color: var(--primary);
-    }
-</style>
+<?php endif; ?>

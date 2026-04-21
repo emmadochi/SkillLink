@@ -6,30 +6,30 @@
 
 namespace controllers;
 
-class DashboardController {
+use models\UserModel;
+use models\BookingModel;
+use models\PaymentModel;
+
+class DashboardController extends BaseController {
     
     public function index() {
-        // Mock data for the dashboard
+        $this->requireAuth();
+        
+        $db = $this->db();
+        $userModel = new UserModel($db);
+        $bookingModel = new BookingModel($db);
+        $paymentModel = new PaymentModel($db);
+
+        // Fetch real data
         $data = [
-            'total_users' => 1250,
-            'active_artisans' => 450,
-            'recent_bookings' => 85,
-            'revenue' => '₦1.2M',
-            'title' => 'Admin Dashboard'
+            'total_users'     => $userModel->getTotalUsers(),
+            'active_artisans' => $userModel->getTotalArtisans(),
+            'recent_bookings' => $bookingModel->getBookingsToday(),
+            'revenue'         => $paymentModel->getMonthlyRevenue(), //Net Platform Revenue (MTD)
+            'title'           => 'Admin Dashboard',
+            'pending_artisans'=> array_slice($userModel->getArtisans(5), 0, 5) // For the "Recent Artisan Requests" table
         ];
         
         $this->render('dashboard/index', $data);
-    }
-    
-    protected function render($view, $data = []) {
-        extract($data);
-        $view_file = APP_PATH . '/views/' . $view . '.php';
-        
-        if (file_exists($view_file)) {
-            // Load the full layout
-            require_once APP_PATH . '/views/layout.php';
-        } else {
-            echo "View '$view' not found at $view_file";
-        }
     }
 }

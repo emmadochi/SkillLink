@@ -1,6 +1,6 @@
 abstract class AppConstants {
   static const String appName    = 'SkillLink';
-  static const String baseUrl    = 'http://localhost/SkillLink/api/v1';
+  static const String baseUrl    = 'https://skilllink.gulfmexicooffshorerig.com/api/v1';
   static const String apiVersion = 'v1';
 
   // Shared Pref Keys
