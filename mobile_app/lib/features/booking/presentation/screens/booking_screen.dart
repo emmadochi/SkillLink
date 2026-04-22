@@ -7,20 +7,25 @@ import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 
-class BookingScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skilllink_app/features/booking/presentation/providers/booking_provider.dart';
+import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
+
+class BookingScreen extends ConsumerStatefulWidget {
   final String artisanId;
   const BookingScreen({super.key, required this.artisanId});
 
   @override
-  State<BookingScreen> createState() => _BookingScreenState();
+  ConsumerState<BookingScreen> createState() => _BookingScreenState();
 }
 
-class _BookingScreenState extends State<BookingScreen> {
+class _BookingScreenState extends ConsumerState<BookingScreen> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   final _descCtrl = TextEditingController();
   String _selectedService = '';
   int _step = 0; // 0: service, 1: date/time, 2: confirm
+  bool _isLoading = false;
 
   static const _services = [
     'Wiring & Installation',
@@ -122,6 +127,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           },
                         )
                       : _ConfirmStep(
+                          artisanId: widget.artisanId,
                           service: _selectedService,
                           date: _selectedDate,
                           time: _selectedTime,
@@ -135,16 +141,35 @@ class _BookingScreenState extends State<BookingScreen> {
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
             child: SkillLinkButton.gradient(
               label: _step < 2 ? 'Continue' : 'Confirm Booking',
-              width: double.infinity,
-              icon: _step < 2
-                  ? const Icon(Icons.arrow_forward_rounded, size: 16, color: Colors.white)
-                  : const Icon(Icons.check_circle_outline_rounded, size: 16, color: Colors.white),
+              isLoading: _isLoading,
               onPressed: _canProceed()
-                  ? () {
+                  ? () async {
                       if (_step < 2) {
                         setState(() => _step++);
                       } else {
-                        context.go(AppRoutes.bookingConfirmation);
+                        setState(() => _isLoading = true);
+                        try {
+                          final repo = ref.read(bookingRepositoryProvider);
+                          await repo.createBooking({
+                            'artisan_id': widget.artisanId,
+                            'service_description': '$_selectedService: ${_descCtrl.text}',
+                            'booking_date': _selectedDate!.toIso8601String().split('T')[0],
+                            'booking_time': '${_selectedTime!.hour}:${_selectedTime!.minute}',
+                          });
+                          if (mounted) {
+                            context.go(AppRoutes.bookingConfirmation);
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            setState(() => _isLoading = false);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        }
                       }
                     }
                   : null,
@@ -292,13 +317,15 @@ class _DateTimeStep extends StatelessWidget {
   }
 }
 
-class _ConfirmStep extends StatelessWidget {
+class _ConfirmStep extends ConsumerWidget {
+  final String artisanId;
   final String service;
   final DateTime? date;
   final TimeOfDay? time;
   final String desc;
 
   const _ConfirmStep({
+    required this.artisanId,
     required this.service,
     this.date,
     this.time,
@@ -306,7 +333,8 @@ class _ConfirmStep extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final artisanAsync = ref.watch(artisanProfileProvider(int.parse(artisanId)));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -318,7 +346,13 @@ class _ConfirmStep extends StatelessWidget {
         SkillLinkCard(
           padding: const EdgeInsets.all(20),
           child: Column(children: [
-            _ConfirmRow(label: 'Artisan', value: 'Emmanuel Okafor'),
+            _ConfirmRow(
+                label: 'Artisan',
+                value: artisanAsync.when(
+                  data: (a) => a.user?.name ?? 'Artisan',
+                  loading: () => 'Loading...',
+                  error: (_, __) => 'Error',
+                )),
             _ConfirmRow(label: 'Service', value: service),
             if (date != null)
               _ConfirmRow(label: 'Date', value: '${date!.day}/${date!.month}/${date!.year}'),

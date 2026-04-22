@@ -6,14 +6,17 @@ import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
 
-class SignupScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skilllink_app/features/auth/presentation/providers/auth_repository_provider.dart';
+
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
@@ -32,16 +35,35 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  void _signup() {
+  void _signup() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 2), () {
+
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      await repository.signup({
+        'name': _nameCtrl.text.trim(),
+        'email': _emailCtrl.text.trim(),
+        'phone': _phoneCtrl.text.trim(),
+        'password': _passwordCtrl.text,
+        'role': _role,
+      });
+
       if (mounted) {
         setState(() => _isLoading = false);
-        context.go(AppRoutes.otp,
-            extra: {'phone': _phoneCtrl.text});
+        context.go(AppRoutes.otp, extra: {'phone': _phoneCtrl.text});
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   @override

@@ -6,15 +6,19 @@ import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 
-class ArtisanProfileScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
+import 'package:skilllink_app/features/artisan/data/models/artisan_model.dart';
+
+class ArtisanProfileScreen extends ConsumerStatefulWidget {
   final String artisanId;
   const ArtisanProfileScreen({super.key, required this.artisanId});
 
   @override
-  State<ArtisanProfileScreen> createState() => _ArtisanProfileScreenState();
+  ConsumerState<ArtisanProfileScreen> createState() => _ArtisanProfileScreenState();
 }
 
-class _ArtisanProfileScreenState extends State<ArtisanProfileScreen>
+class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isSaved = false;
@@ -35,148 +39,152 @@ class _ArtisanProfileScreenState extends State<ArtisanProfileScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: CustomScrollView(
-        slivers: [
-          // ── Hero Header ──────────────────────────────────────────────
-          SliverAppBar(
-            expandedHeight: 320,
-            pinned: true,
-            backgroundColor: AppColors.primary,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-              onPressed: () => context.pop(),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  _isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
-                  color: Colors.white,
-                ),
-                onPressed: () => setState(() => _isSaved = !_isSaved),
-              ),
-              IconButton(
-                icon: const Icon(Icons.share_outlined, color: Colors.white),
-                onPressed: () {},
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Portrait
-                  Image.network(
-                    'https://i.pravatar.cc/400?img=${widget.artisanId}',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                        color: AppColors.primaryContainer),
+      body: ref.watch(artisanProfileProvider(int.parse(widget.artisanId))).when(
+            data: (artisan) => CustomScrollView(
+              slivers: [
+                // ── Hero Header ──────────────────────────────────────────────
+                SliverAppBar(
+                  expandedHeight: 320,
+                  pinned: true,
+                  backgroundColor: AppColors.primary,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                    onPressed: () => context.pop(),
                   ),
-                  // Gradient overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          AppColors.primary.withOpacity(0.85),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                  actions: [
+                    IconButton(
+                      icon: Icon(
+                        _isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+                        color: Colors.white,
                       ),
+                      onPressed: () => setState(() => _isSaved = !_isSaved),
                     ),
-                  ),
-                  // Name overlay
-                  Positioned(
-                    bottom: 24,
-                    left: 24,
-                    right: 24,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    IconButton(
+                      icon: const Icon(Icons.share_outlined, color: Colors.white),
+                      onPressed: () {},
+                    ),
+                  ],
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                      fit: StackFit.expand,
                       children: [
-                        Row(children: [
-                          Text('Emmanuel Okafor',
-                              style: AppTypography.headlineSm.copyWith(
-                                  color: Colors.white)),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.verified,
-                              size: 18, color: AppColors.tertiaryFixed),
-                        ]),
-                        const SizedBox(height: 4),
-                        Text('Master Electrician • 8 yrs experience',
-                            style: AppTypography.bodyMd.copyWith(
-                                color: Colors.white70)),
-                        const SizedBox(height: 10),
-                        Row(children: [
-                          const Icon(Icons.star_rounded,
-                              size: 16, color: Color(0xFFFFB84D)),
-                          const SizedBox(width: 4),
-                          Text('4.9 (147 reviews)',
-                              style: AppTypography.labelLg.copyWith(
-                                  color: Colors.white70)),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade600,
-                              borderRadius: BorderRadius.circular(100),
+                        // Portrait
+                        Image.network(
+                          artisan.user?.avatarUrl ?? 'https://i.pravatar.cc/400?u=${artisan.userId}',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                              color: AppColors.primaryContainer),
+                        ),
+                        // Gradient overlay
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                AppColors.primary.withOpacity(0.85),
+                              ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
                             ),
-                            child: Text('Available',
-                                style: AppTypography.labelSm.copyWith(
-                                    color: Colors.white)),
                           ),
-                        ]),
+                        ),
+                        // Name overlay
+                        Positioned(
+                          bottom: 24,
+                          left: 24,
+                          right: 24,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(children: [
+                                Text(artisan.user?.name ?? 'Artisan',
+                                    style: AppTypography.headlineSm.copyWith(
+                                        color: Colors.white)),
+                                const SizedBox(width: 8),
+                                const Icon(Icons.verified,
+                                    size: 18, color: AppColors.tertiaryFixed),
+                              ]),
+                              const SizedBox(height: 4),
+                              Text('${artisan.bio ?? artisan.skill ?? 'Professional Artisan'} • ${artisan.experienceYears} yrs experience',
+                                  style: AppTypography.bodyMd.copyWith(
+                                      color: Colors.white70)),
+                              const SizedBox(height: 10),
+                              Row(children: [
+                                const Icon(Icons.star_rounded,
+                                    size: 16, color: Color(0xFFFFB84D)),
+                                const SizedBox(width: 4),
+                                Text('${artisan.rating} (0 reviews)',
+                                    style: AppTypography.labelLg.copyWith(
+                                        color: Colors.white70)),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade600,
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Text('Available',
+                                      style: AppTypography.labelSm.copyWith(
+                                          color: Colors.white)),
+                                ),
+                              ]),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
 
-          // ── Stats row ────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  _StatChip(label: 'Jobs', value: '212'),
-                  _StatChip(label: 'Rating', value: '4.9'),
-                  _StatChip(label: 'Rate', value: '₦5k/hr'),
-                  _StatChip(label: 'Resp.', value: '< 30m'),
-                ],
-              ),
-            ),
-          ),
+                // ── Stats row ────────────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        _StatChip(label: 'Jobs', value: '0'),
+                        _StatChip(label: 'Rating', value: '${artisan.rating}'),
+                        _StatChip(label: 'Rate', value: '₦5k/hr'),
+                        _StatChip(label: 'Resp.', value: '< 30m'),
+                      ],
+                    ),
+                  ),
+                ),
 
-          // ── Tabs ─────────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: TabBar(
-              controller: _tabController,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.outline,
-              indicatorColor: AppColors.primary,
-              indicatorSize: TabBarIndicatorSize.label,
-              labelStyle: AppTypography.labelLg.copyWith(
-                  fontWeight: FontWeight.w600),
-              tabs: const [
-                Tab(text: 'About'),
-                Tab(text: 'Portfolio'),
-                Tab(text: 'Reviews'),
+                // ── Tabs ─────────────────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: TabBar(
+                    controller: _tabController,
+                    labelColor: AppColors.primary,
+                    unselectedLabelColor: AppColors.outline,
+                    indicatorColor: AppColors.primary,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    labelStyle: AppTypography.labelLg.copyWith(
+                        fontWeight: FontWeight.w600),
+                    tabs: const [
+                      Tab(text: 'About'),
+                      Tab(text: 'Portfolio'),
+                      Tab(text: 'Reviews'),
+                    ],
+                  ),
+                ),
+
+                SliverFillRemaining(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _AboutTab(artisan: artisan),
+                      _PortfolioTab(),
+                      _ReviewsTab(),
+                    ],
+                  ),
+                ),
               ],
             ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, __) => Center(child: Text('Error: $err')),
           ),
-
-          SliverFillRemaining(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _AboutTab(),
-                _PortfolioTab(),
-                _ReviewsTab(),
-              ],
-            ),
-          ),
-        ],
-      ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         decoration: BoxDecoration(
@@ -244,6 +252,9 @@ class _StatChip extends StatelessWidget {
 }
 
 class _AboutTab extends StatelessWidget {
+  final Artisan artisan;
+  const _AboutTab({required this.artisan});
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -252,26 +263,16 @@ class _AboutTab extends StatelessWidget {
         Text('Bio', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         Text(
-          'Emmanuel is a certified Master Electrician with over 8 years of hands-on experience across residential, commercial and industrial projects. He is known for his precision, reliability, and 100% safety compliance.',
+          artisan.bio ?? 'No bio available.',
           style: AppTypography.bodyMd.copyWith(height: 1.6),
         ),
         const SizedBox(height: 20),
-        Text('Skills', style: Theme.of(context).textTheme.titleSmall),
+        Text('Location', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 12),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final s in ['Wiring', 'Fault Diagnosis', 'Panel Setup', 'Solar', 'CCTV'])
-            Chip(label: Text(s)),
-        ]),
-        const SizedBox(height: 20),
-        Text('Service Areas', style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 8),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final a in ['Lagos Island', 'Victoria Island', 'Lekki', 'Ajah'])
-            Chip(
-              label: Text(a),
-              avatar: const Icon(Icons.location_on_outlined, size: 14),
-            ),
-        ]),
+        Chip(
+          label: Text(artisan.locationName ?? 'Lagos, Nigeria'),
+          avatar: const Icon(Icons.location_on_outlined, size: 14),
+        ),
       ],
     );
   }

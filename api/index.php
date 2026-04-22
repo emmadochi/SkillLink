@@ -39,7 +39,10 @@ spl_autoload_register(function ($class) {
 
 // Route requested URI
 $request_uri = $_SERVER['REQUEST_URI'];
-$base_path = '/SkillLink/api/v1/';
+$script_name = $_SERVER['SCRIPT_NAME']; // e.g., /SkillLink/api/index.php
+$base_dir = dirname($script_name); // e.g., /SkillLink/api
+$base_path = rtrim($base_dir, '/') . '/v1/';
+
 $path = str_replace($base_path, '', $request_uri);
 $path = explode('?', $path)[0]; // Remove query strings
 $path = trim($path, '/');

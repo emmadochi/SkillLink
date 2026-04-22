@@ -6,14 +6,20 @@ import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
 
-class LoginScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skilllink_app/features/auth/presentation/providers/auth_repository_provider.dart';
+import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
+import 'package:skilllink_app/core/constants/app_constants.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
@@ -27,16 +33,39 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    // TODO: Integrate API
-    Future.delayed(const Duration(seconds: 2), () {
+
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      final authData = await repository.login(
+        _emailCtrl.text.trim(),
+        _passwordCtrl.text,
+      );
+
+      // Save token to secure storage
+      const storage = FlutterSecureStorage();
+      await storage.write(key: AppConstants.keyToken, value: authData.token);
+      
+      // Update User Provider
+      await ref.read(userStateProvider.notifier).setUser(authData.user);
+
       if (mounted) {
         setState(() => _isLoading = false);
         context.go(AppRoutes.home);
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   @override

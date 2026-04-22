@@ -6,15 +6,19 @@ import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
 
-class ArtisanListingScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
+import 'package:skilllink_app/features/artisan/data/models/artisan_model.dart';
+
+class ArtisanListingScreen extends ConsumerStatefulWidget {
   final String? category;
   const ArtisanListingScreen({super.key, this.category});
 
   @override
-  State<ArtisanListingScreen> createState() => _ArtisanListingScreenState();
+  ConsumerState<ArtisanListingScreen> createState() => _ArtisanListingScreenState();
 }
 
-class _ArtisanListingScreenState extends State<ArtisanListingScreen> {
+class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
   String _sortBy = 'Rating';
   String? _selectedFilter;
   final _searchCtrl = TextEditingController();
@@ -90,100 +94,137 @@ class _ArtisanListingScreenState extends State<ArtisanListingScreen> {
 
           // Artisan list
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              itemCount: 12,
-              itemBuilder: (context, i) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SkillLinkCard(
-                  elevated: true,
-                  onTap: () =>
-                      context.go('${AppRoutes.artisanProfile}/${i + 1}'),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Avatar
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(24),
-                          bottomLeft: Radius.circular(24),
-                        ),
-                        child: Image.network(
-                          'https://i.pravatar.cc/120?img=${i + 5}',
-                          width: 110,
-                          height: 130,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: 110,
-                            height: 130,
-                            color: AppColors.surfaceContainerLow,
-                            child: const Icon(Icons.person,
-                                size: 40, color: AppColors.outline),
-                          ),
-                        ),
-                      ),
+            child: ref.watch(artisansProvider()).when(
+                  data: (artisans) {
+                    if (artisans.isEmpty) {
+                      return Center(
+                        child: Text('No artisans found',
+                            style: AppTypography.bodyLg),
+                      );
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      itemCount: artisans.length,
+                      itemBuilder: (context, i) {
+                        final artisan = artisans[i];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: SkillLinkCard(
+                            elevated: true,
+                            onTap: () => context.go(
+                                '${AppRoutes.artisanProfile}/${artisan.userId}'),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Avatar
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(24),
+                                    bottomLeft: Radius.circular(24),
+                                  ),
+                                  child: Image.network(
+                                    artisan.user?.avatarUrl ??
+                                        'https://i.pravatar.cc/120?u=${artisan.userId}',
+                                    width: 110,
+                                    height: 130,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      width: 110,
+                                      height: 130,
+                                      color: AppColors.surfaceContainerLow,
+                                      child: const Icon(Icons.person,
+                                          size: 40, color: AppColors.outline),
+                                    ),
+                                  ),
+                                ),
 
-                      const SizedBox(width: 16),
+                                const SizedBox(width: 16),
 
-                      // Info
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16)
-                              .copyWith(right: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(children: [
-                                Text('Artisan ${i + 1}.',
-                                    style:
-                                        Theme.of(context).textTheme.titleSmall),
-                                const SizedBox(width: 6),
-                                const Icon(Icons.verified,
-                                    size: 14, color: AppColors.primary),
-                              ]),
-                              const SizedBox(height: 3),
-                              Text(widget.category ?? 'Electrician',
-                                  style:
-                                      Theme.of(context).textTheme.bodySmall),
-                              const SizedBox(height: 10),
-                              Row(children: [
-                                const Icon(Icons.star_rounded,
-                                    size: 14,
-                                    color: Color(0xFFFFB84D)),
-                                const SizedBox(width: 3),
-                                Text('4.${(i % 3) + 6}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium),
-                                const SizedBox(width: 8),
-                                Text('(${(i + 1) * 12} jobs)',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall),
-                              ]),
-                              const SizedBox(height: 6),
-                              Row(children: [
-                                const Icon(Icons.location_on_outlined,
-                                    size: 12, color: AppColors.outline),
-                                const SizedBox(width: 4),
-                                Text('${2 + i} km away',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium),
-                              ]),
-                              const SizedBox(height: 10),
-                              Text('₦${(i + 3) * 1500}/hr',
-                                  style: AppTypography.titleSm.copyWith(
-                                      color: AppColors.primary)),
-                            ],
+                                // Info
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                            vertical: 16)
+                                        .copyWith(right: 16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(children: [
+                                          Expanded(
+                                            child: Text(artisan.user?.name ?? 'Artisan',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleSmall),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          const Icon(Icons.verified,
+                                              size: 14,
+                                              color: AppColors.primary),
+                                        ]),
+                                        const SizedBox(height: 3),
+                                        Text(artisan.bio ?? artisan.skill ?? 'Professional Artisan',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall),
+                                        const SizedBox(height: 10),
+                                        Row(children: [
+                                          const Icon(Icons.star_rounded,
+                                              size: 14,
+                                              color: Color(0xFFFFB84D)),
+                                          const SizedBox(width: 3),
+                                          Text('${artisan.rating}',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelMedium),
+                                          const SizedBox(width: 8),
+                                          Text('(${artisan.experienceYears} yrs exp)',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelSmall),
+                                        ]),
+                                        const SizedBox(height: 6),
+                                        Row(children: [
+                                          const Icon(Icons.location_on_outlined,
+                                              size: 12,
+                                              color: AppColors.outline),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                              artisan.locationName ??
+                                                  'Nearby',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelMedium),
+                                        ]),
+                                        const SizedBox(height: 10),
+                                        Text('₦5,000/hr', // Default or from model if added
+                                            style: AppTypography.titleSm
+                                                .copyWith(
+                                                    color: AppColors.primary)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  error: (err, stack) => Center(
+                    child: Text('Error: $err',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodyMd
+                            .copyWith(color: AppColors.error)),
                   ),
                 ),
-              ),
-            ),
           ),
         ],
       ),

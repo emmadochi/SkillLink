@@ -7,14 +7,19 @@ import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
 
-class HomeScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
+import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
+import 'package:skilllink_app/features/booking/presentation/providers/booking_provider.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _searchCtrl = TextEditingController();
   String? _selectedCategory;
 
@@ -68,10 +73,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: AppTypography.labelLg.copyWith(
                                     color: AppColors.onPrimary.withOpacity(0.70))),
                             const SizedBox(height: 2),
-                            Text('John Doe',
-                                style: AppTypography.headlineSm.copyWith(
-                                    color: AppColors.onPrimary,
-                                    fontSize: 18)),
+                            ref.watch(userStateProvider).when(
+                                  data: (user) => Text(user?.name ?? 'Guest User',
+                                      style: AppTypography.headlineSm.copyWith(
+                                          color: AppColors.onPrimary,
+                                          fontSize: 18)),
+                                  loading: () => const Text('...',
+                                      style: TextStyle(color: Colors.white)),
+                                  error: (_, __) => const Text('Error',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
                           ],
                         ),
                       ),
@@ -235,28 +246,40 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: SizedBox(
               height: 280,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                itemBuilder: (context, i) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: SkillLinkArtisanCard(
-                      name: 'Emmanuel O.',
-                      craft: 'Master Plumber',
-                      imageUrl: 'https://i.pravatar.cc/200?img=${i + 10}',
-                      rating: 4.8,
-                      price: '₦5,000/hr',
-                      location: 'Lagos Island',
-                      isVerified: i % 2 == 0,
-                      onTap: () =>
-                          context.go('${AppRoutes.artisanProfile}/${i + 1}'),
-                    ),
-                  );
-                },
-              ),
+              child: ref.watch(artisansProvider()).when(
+                    data: (artisans) {
+                      if (artisans.isEmpty) {
+                        return const Center(child: Text('No artisans available'));
+                      }
+                      return ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: artisans.length > 5 ? 5 : artisans.length,
+                        itemBuilder: (context, i) {
+                          final artisan = artisans[i];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 16),
+                            child: SkillLinkArtisanCard(
+                              name: artisan.user?.name ?? 'Artisan',
+                              craft: artisan.bio ?? artisan.skill ?? 'Professional Artisan',
+                              imageUrl: artisan.user?.avatarUrl ??
+                                  'https://i.pravatar.cc/200?u=${artisan.userId}',
+                              rating: artisan.rating.toDouble(),
+                              price: '₦5,000/hr',
+                              location: artisan.locationName ?? 'Lagos',
+                              isVerified: true,
+                              onTap: () => context.go(
+                                  '${AppRoutes.artisanProfile}/${artisan.userId}'),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    loading: () => const Center(
+                        child: CircularProgressIndicator(color: AppColors.primary)),
+                    error: (err, __) => Center(child: Text('Error: $err')),
+                  ),
             ),
           ),
 
@@ -269,56 +292,84 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, i) => Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-                child: SkillLinkCard(
-                  padding: const EdgeInsets.all(16),
-                  onTap: () {},
-                  child: Row(children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.secondaryContainer,
-                        borderRadius: BorderRadius.circular(14),
+          ref.watch(bookingHistoryProvider).when(
+                data: (bookings) {
+                  if (bookings.isEmpty) {
+                    return const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(child: Text('No recent activity')),
                       ),
-                      child: const Icon(Icons.bolt_outlined,
-                          color: AppColors.primary),
+                    );
+                  }
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, i) {
+                        final booking = bookings[i];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 6),
+                          child: SkillLinkCard(
+                            padding: const EdgeInsets.all(16),
+                            onTap: () {},
+                            child: Row(children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Icon(Icons.bolt_outlined,
+                                    color: AppColors.primary),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(booking.serviceDescription ?? 'Service',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall),
+                                    const SizedBox(height: 3),
+                                    Text('Status: ${booking.status}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: booking.status == 'completed'
+                                      ? const Color(0xFFD6FFE8)
+                                      : const Color(0xFFFFF4D6),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: Text(booking.status,
+                                    style: AppTypography.labelSm.copyWith(
+                                        color: booking.status == 'completed'
+                                            ? const Color(0xFF0A6E3A)
+                                            : const Color(0xFF856404))),
+                              ),
+                            ]),
+                          ),
+                        );
+                      },
+                      childCount: bookings.length > 3 ? 3 : bookings.length,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Electrical Repair',
-                              style:
-                                  Theme.of(context).textTheme.titleSmall),
-                          const SizedBox(height: 3),
-                          Text('Chukwudi A. • Yesterday',
-                              style: Theme.of(context).textTheme.labelMedium),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD6FFE8),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Text('Completed',
-                          style: AppTypography.labelSm.copyWith(
-                              color: const Color(0xFF0A6E3A))),
-                    ),
-                  ]),
+                  );
+                },
+                loading: () => const SliverToBoxAdapter(
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (err, __) => SliverToBoxAdapter(
+                  child: Center(child: Text('Error: $err')),
                 ),
               ),
-              childCount: 3,
-            ),
-          ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],

@@ -22,7 +22,6 @@ class Artisan {
     this.bio,
     this.experienceYears = 0,
     this.rating = 0.0,
-    this.location,
     this.locationName,
     this.skill,
     this.user,
