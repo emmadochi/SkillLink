@@ -6,7 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/presentation/providers/user_provider.dart';
+import '../providers/user_provider.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   final String phone;

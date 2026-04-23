@@ -133,6 +133,7 @@ abstract class AppRoutes {
   static const artisanListing     = '/artisans';
   static const artisanProfile      = '/artisan-profile';
   static const artisanProfileSetup = '/artisan-setup';
+  static const booking             = '/booking';
   static const bookingDetail      = '/booking-detail';
   static const bookingConfirmation= '/booking/confirmation';
   static const chatList           = '/messages';

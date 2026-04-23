@@ -107,7 +107,7 @@ class _SavedAddressesScreenState extends ConsumerState<SavedAddressesScreen> {
             itemBuilder: (context, index) {
               final addr = addresses[index];
               return Card(
-                margin: const EdgeInsets.bottom(12),
+                margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 child: ListTile(
