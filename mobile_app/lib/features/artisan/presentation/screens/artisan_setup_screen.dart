@@ -76,9 +76,22 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
         context.go(AppRoutes.artisanDashboard);
       }
     } catch (e) {
+      String errorMessage = e.toString();
+      if (e is DioException) {
+        final response = e.response;
+        if (response != null && response.data is Map) {
+          errorMessage = response.data['message'] ?? response.data['error'] ?? e.message;
+        } else {
+          errorMessage = e.message ?? 'Unknown server error';
+        }
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(
+            content: Text('Error: $errorMessage'),
+            backgroundColor: Colors.redAccent,
+          ),
         );
       }
     } finally {
