@@ -10,6 +10,8 @@ import '../../../../shared/widgets/skilllink_input.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/location_provider.dart';
+import '../providers/category_provider.dart';
+import '../../data/models/category_model.dart';
 
 class ArtisanSetupScreen extends ConsumerStatefulWidget {
   const ArtisanSetupScreen({super.key});
@@ -19,7 +21,6 @@ class ArtisanSetupScreen extends ConsumerStatefulWidget {
 }
 
 class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
-  final _skillCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
   final _expCtrl = TextEditingController();
   final _businessAddrCtrl = TextEditingController();
@@ -28,10 +29,11 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
   final _idNumberCtrl = TextEditingController();
   
   String _idType = 'national_id';
+  Category? _selectedCategory;
   bool _isLoading = false;
 
   Future<void> _submit() async {
-    if (_skillCtrl.text.isEmpty || _bioCtrl.text.isEmpty || _expCtrl.text.isEmpty) {
+    if (_selectedCategory == null || _bioCtrl.text.isEmpty || _expCtrl.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required professional fields')),
       );
@@ -43,19 +45,21 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
     try {
       final dio = ref.read(dioProvider);
       final apiClient = ApiClient(dio);
-      final location = ref.read(currentLocationProvider).value ?? 'Unknown';
+      
+      final locationState = ref.read(currentLocationProvider);
+      final locationData = locationState.value;
 
       // 1. Update Profile
       final profileResponse = await apiClient.updateArtisanProfile({
-        'skill': _skillCtrl.text,
+        'skill': _selectedCategory!.name,
         'bio': _bioCtrl.text,
         'experience_years': int.tryParse(_expCtrl.text) ?? 0,
-        'location_name': location,
+        'location_name': locationData?.name ?? 'Unknown',
+        'latitude': locationData?.latitude ?? 0.0,
+        'longitude': locationData?.longitude ?? 0.0,
         'business_address': _businessAddrCtrl.text,
         'guarantor_name': _guarantorNameCtrl.text,
         'guarantor_phone': _guarantorPhoneCtrl.text,
-        'latitude': 0.0,
-        'longitude': 0.0,
       });
 
       if (profileResponse.status != 'success') throw profileResponse.message ?? 'Update failed';
@@ -65,7 +69,8 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
         await apiClient.submitVerification({
           'id_type': _idType,
           'id_number': _idNumberCtrl.text,
-          'id_image_front': '', // To be handled with file picker
+          'passport_photo': '', // Placeholder for now
+          'id_image_front': '', 
           'id_image_back': '',
         });
       }
@@ -114,10 +119,23 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
           children: [
             _buildSectionHeader('Professional Details', 'Showcase your skills'),
             const SizedBox(height: 20),
-            SkillLinkInput(
-              label: 'Primary Skill / Profession',
-              hint: 'e.g. Master Plumber, Electrician',
-              controller: _skillCtrl,
+            const Text('Primary Skill / Profession', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            ref.watch(categoriesProvider).when(
+              data: (categories) => DropdownButtonFormField<Category>(
+                value: _selectedCategory,
+                decoration: const InputDecoration(
+                  hintText: 'Select your primary skill',
+                  border: OutlineInputBorder(),
+                ),
+                items: categories.map((cat) => DropdownMenuItem(
+                  value: cat,
+                  child: Text(cat.name),
+                )).toList(),
+                onChanged: (val) => setState(() => _selectedCategory = val),
+              ),
+              loading: () => const LinearProgressIndicator(),
+              error: (e, _) => Text('Error loading categories: $e'),
             ),
             const SizedBox(height: 16),
             SkillLinkInput(
@@ -133,6 +151,8 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
               controller: _bioCtrl,
               maxLines: 3,
             ),
+            const SizedBox(height: 16),
+            _buildLocationPicker(),
             
             const SizedBox(height: 32),
             _buildSectionHeader('Business & Trust', 'Essential for security tracking'),
@@ -190,6 +210,50 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
             const SizedBox(height: 40),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLocationPicker() {
+    final locationState = ref.watch(currentLocationProvider);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.outline.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.location_on, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text('Based Location', style: AppTypography.titleMd),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () => ref.read(currentLocationProvider.notifier).detectLocation(),
+                icon: const Icon(Icons.my_location, size: 16),
+                label: const Text('Detect'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          locationState.when(
+            data: (loc) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(loc.name, style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.bold)),
+                Text('${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}', 
+                     style: AppTypography.bodySm.copyWith(color: AppColors.outline)),
+              ],
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Text('Error detecting location: $e', style: const TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

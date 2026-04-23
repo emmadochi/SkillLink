@@ -4,11 +4,13 @@ namespace core;
 use PDO;
 use PDOException;
 
+require_once dirname(__DIR__) . '/config.php';
+
 class Database {
-    private $host = "localhost";
-    private $db_name = "skilllink_db";
-    private $username = "root";
-    private $password = "";
+    private $host = DB_HOST;
+    private $db_name = DB_NAME;
+    private $username = DB_USER;
+    private $password = DB_PASS;
     public $conn;
 
     public function getConnection() {

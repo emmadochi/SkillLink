@@ -6,15 +6,19 @@ part 'location_provider.g.dart';
 @riverpod
 class CurrentLocation extends _$CurrentLocation {
   @override
-  Future<String> build() async {
+  Future<ArtisanLocation> build() async {
     try {
       final position = await LocationService.getCurrentPosition();
       if (position != null) {
-        final address = await LocationService.getAddressFromLatLng(position);
-        if (address != null) return address;
+        final address = await LocationService.getAddressFromLatLng(position.latitude, position.longitude);
+        return ArtisanLocation(
+          name: address ?? 'Lagos, Nigeria',
+          latitude: position.latitude,
+          longitude: position.longitude,
+        );
       }
     } catch (_) {}
-    return 'Lagos, Nigeria'; // Fallback if detection fails
+    return ArtisanLocation(name: 'Lagos, Nigeria', latitude: 6.5244, longitude: 3.3792);
   }
 
   Future<void> detectLocation() async {
@@ -22,13 +26,15 @@ class CurrentLocation extends _$CurrentLocation {
     try {
       final position = await LocationService.getCurrentPosition();
       if (position != null) {
-        final address = await LocationService.getAddressFromLatLng(position);
-        if (address != null) {
-          state = AsyncValue.data(address);
-          return;
-        }
+        final address = await LocationService.getAddressFromLatLng(position.latitude, position.longitude);
+        state = AsyncValue.data(ArtisanLocation(
+          name: address ?? 'Unknown',
+          latitude: position.latitude,
+          longitude: position.longitude,
+        ));
+      } else {
+        state = AsyncValue.error('Location services disabled', StackTrace.current);
       }
-      state = const AsyncValue.data('Location unavailable');
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

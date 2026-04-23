@@ -120,7 +120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               size: 14, color: AppColors.tertiaryFixed),
                           const SizedBox(width: 6),
                           ref.watch(currentLocationProvider).when(
-                                data: (loc) => Text(loc,
+                                data: (loc) => Text(loc.name,
                                     style: AppTypography.labelMd.copyWith(
                                         color: Colors.white)),
                                 loading: () => const SizedBox(

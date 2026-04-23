@@ -1,6 +1,14 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
+class ArtisanLocation {
+  final String name;
+  final double latitude;
+  final double longitude;
+
+  ArtisanLocation({required this.name, required this.latitude, required this.longitude});
+}
+
 class LocationService {
   static Future<Position?> getCurrentPosition() async {
     bool serviceEnabled;
@@ -26,12 +34,9 @@ class LocationService {
     return await Geolocator.getCurrentPosition();
   }
 
-  static Future<String?> getAddressFromLatLng(Position position) async {
+  static Future<String?> getAddressFromLatLng(double lat, double lng) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];

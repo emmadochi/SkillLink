@@ -6,12 +6,12 @@ part of 'location_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$currentLocationHash() => r'2e1788105e8d040ca71310848ea4dc81e4f46a4b';
+String _$currentLocationHash() => r'3733b196a26b9164bc12b9ce360f17fc2c0438d1';
 
 /// See also [CurrentLocation].
 @ProviderFor(CurrentLocation)
 final currentLocationProvider =
-    AutoDisposeAsyncNotifierProvider<CurrentLocation, String>.internal(
+    AutoDisposeAsyncNotifierProvider<CurrentLocation, ArtisanLocation>.internal(
   CurrentLocation.new,
   name: r'currentLocationProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -21,6 +21,6 @@ final currentLocationProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$CurrentLocation = AutoDisposeAsyncNotifier<String>;
+typedef _$CurrentLocation = AutoDisposeAsyncNotifier<ArtisanLocation>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
