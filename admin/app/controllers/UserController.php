@@ -34,12 +34,7 @@ class UserController extends BaseController {
             $this->redirect('/SkillLink/admin/users');
         }
 
-        // For now, mock portfolio as we don't have a table for it in the schema yet
-        // but the view expects it.
-        $artisan['portfolio'] = [
-            ['title' => 'Project A', 'img' => 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400'],
-            ['title' => 'Project B', 'img' => 'https://images.unsplash.com/photo-1542013936693-884638332954?auto=format&fit=crop&w=400'],
-        ];
+        $artisan['portfolio'] = $userModel->getArtisanPortfolio((int)$id);
 
         $data = [
             'title' => 'Artisan Verification',

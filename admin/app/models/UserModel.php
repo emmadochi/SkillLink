@@ -64,18 +64,28 @@ class UserModel {
                     a.bio, a.experience_years, a.location_name,
                     a.verification_status AS status,
                     a.average_rating AS rating, a.total_reviews,
+                    v.id_type, v.id_number, v.id_image_front, v.id_image_back, v.passport_photo, v.status as id_status,
                     GROUP_CONCAT(c.name SEPARATOR ', ') AS skills
              FROM users u
              JOIN artisans a ON a.user_id = u.id
+             LEFT JOIN artisan_verifications v ON v.artisan_id = a.user_id
              LEFT JOIN artisan_categories ac ON ac.artisan_id = a.user_id
              LEFT JOIN categories c ON c.id = ac.category_id
              WHERE u.id = ?
-             GROUP BY u.id"
+             GROUP BY u.id
+             ORDER BY v.created_at DESC"
         );
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         return $row ?: null;
+    }
+
+    public function getArtisanPortfolio(int $id): array {
+        $stmt = $this->db->prepare("SELECT * FROM artisan_portfolios WHERE artisan_id = ? ORDER BY created_at DESC");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     /** Update artisan verification status */

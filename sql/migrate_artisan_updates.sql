@@ -1,12 +1,12 @@
 -- Migration Script for Artisan Profile Enhancements
 -- This script adds the necessary security and skill verification fields to the existing database.
 
--- 1. Update the artisans table
-ALTER TABLE `artisans` 
-ADD COLUMN `business_address` TEXT AFTER `location_name`,
-ADD COLUMN `guarantor_name` VARCHAR(100) AFTER `business_address`,
-ADD COLUMN `guarantor_phone` VARCHAR(20) AFTER `guarantor_name`,
-ADD COLUMN `identity_verified` BOOLEAN DEFAULT FALSE AFTER `verification_status`;
+-- 1. Update the artisans table (Add missing security/verification fields)
+-- Note: If you get "Duplicate column" errors, it means the column is already present.
+ALTER TABLE `artisans` ADD COLUMN IF NOT EXISTS `business_address` TEXT AFTER `location_name`;
+ALTER TABLE `artisans` ADD COLUMN IF NOT EXISTS `guarantor_name` VARCHAR(100) AFTER `business_address`;
+ALTER TABLE `artisans` ADD COLUMN IF NOT EXISTS `guarantor_phone` VARCHAR(20) AFTER `guarantor_name`;
+ALTER TABLE `artisans` ADD COLUMN IF NOT EXISTS `identity_verified` BOOLEAN DEFAULT FALSE AFTER `verification_status`;
 
 -- 2. Create Artisan Verifications table (Security/Tracking)
 CREATE TABLE IF NOT EXISTS `artisan_verifications` (
@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `artisan_verifications` (
     `id_number` VARCHAR(50) NOT NULL,
     `id_image_front` VARCHAR(255),
     `id_image_back` VARCHAR(255),
+    `passport_photo` VARCHAR(255),
     `status` ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     `admin_notes` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -11,8 +11,12 @@
     <div class="stat-card" style="padding: 2.5rem; min-height: auto; flex: 2;">
         <div class="flex-row justify-between mb-5 align-start">
             <div class="flex-row gap-4">
-                <div class="avatar-circle" style="width: 100px; height: 100px; font-size: 2.5rem;">
-                    <?php echo strtoupper(substr($artisan['name'], 0, 1)); ?>
+                <div class="avatar-circle" style="width: 100px; height: 100px; font-size: 2.5rem; overflow: hidden;">
+                    <?php if (!empty($artisan['passport_photo'])): ?>
+                        <img src="<?php echo asset_url($artisan['passport_photo']); ?>" alt="Passport" style="width: 100%; height: 100%; object-fit: cover;">
+                    <?php else: ?>
+                        <?php echo strtoupper(substr($artisan['name'], 0, 1)); ?>
+                    <?php endif; ?>
                 </div>
                 <div>
                     <h1 class="mb-2" style="font-size: 1.85rem;"><?php echo htmlspecialchars($artisan['name']); ?></h1>
@@ -27,8 +31,8 @@
                         ?>">
                             <?php echo ucfirst($artisan['status']); ?> Status
                         </span>
-                        <span class="status-badge" style="background: var(--info-bg); color: var(--info);">
-                             Verified Identity
+                        <span class="status-badge" style="background: <?php echo $artisan['id_status'] === 'approved' ? 'var(--success-bg)' : 'var(--info-bg)'; ?>; color: <?php echo $artisan['id_status'] === 'approved' ? 'var(--success)' : 'var(--info)'; ?>;">
+                             <?php echo $artisan['id_status'] === 'approved' ? 'Verified Identity' : 'Identity ' . ucfirst($artisan['id_status'] ?: 'Not Submitted'); ?>
                         </span>
                     </div>
                 </div>
@@ -108,14 +112,18 @@
                 Portfolio Gallery
             </h3>
             <div class="portfolio-grid">
-                <?php foreach($artisan['portfolio'] as $work): ?>
-                <div class="portfolio-item animate-fade-in" style="position: relative; border-radius: var(--radius-md); overflow: hidden; height: 160px;">
-                    <img src="<?php echo $work['img']; ?>" alt="<?php echo htmlspecialchars($work['title']); ?>" style="width: 100%; height: 100%; object-fit: cover;">
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 12px; color: white;">
-                        <span style="font-size: 0.75rem; font-weight: 600;"><?php echo htmlspecialchars($work['title']); ?></span>
+                <?php if (empty($artisan['portfolio'])): ?>
+                    <p class="text-sm text-muted">No portfolio items uploaded.</p>
+                <?php else: ?>
+                    <?php foreach($artisan['portfolio'] as $work): ?>
+                    <div class="portfolio-item animate-fade-in" style="position: relative; border-radius: var(--radius-md); overflow: hidden; height: 160px;">
+                        <img src="<?php echo asset_url($work['image_url']); ?>" alt="<?php echo htmlspecialchars($work['description']); ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 12px; color: white;">
+                            <span style="font-size: 0.75rem; font-weight: 600;"><?php echo htmlspecialchars($work['description']); ?></span>
+                        </div>
                     </div>
-                </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -123,17 +131,23 @@
             <h3 class="mb-4" style="color: var(--accent); font-size: 0.875rem; text-transform: uppercase;">Compliance Checklist</h3>
             <div class="compliance-list">
                 <div class="compliance-item">
-                    <span>Government ID</span>
-                    <span style="color: var(--success); font-weight: 800;">✓ Verified</span>
+                    <span><?php echo strtoupper(str_replace('_', ' ', $artisan['id_type'] ?: 'Identity ID')); ?></span>
+                    <span style="color: <?php echo $artisan['id_status'] === 'approved' ? 'var(--success)' : 'var(--accent)'; ?>; font-weight: 800;">
+                        <?php echo $artisan['id_status'] === 'approved' ? '✓ Verified' : '— ' . ucfirst($artisan['id_status'] ?: 'Pending'); ?>
+                    </span>
                 </div>
-                <div class="compliance-item">
-                    <span>Police Clearance</span>
-                    <span style="color: var(--success); font-weight: 800;">✓ Verified</span>
+                <?php if ($artisan['id_image_front']): ?>
+                <div class="flex-column gap-2 mt-3">
+                    <label class="text-xs opacity-70">ID Front</label>
+                    <img src="<?php echo asset_url($artisan['id_image_front']); ?>" style="width: 100%; border-radius: 4px; cursor: pointer;" onclick="window.open(this.src)">
                 </div>
-                <div class="compliance-item">
-                    <span>Skill Certification</span>
-                    <span style="color: var(--accent); font-weight: 800;">- Pending</span>
+                <?php endif; ?>
+                <?php if ($artisan['id_image_back']): ?>
+                <div class="flex-column gap-2 mt-2">
+                    <label class="text-xs opacity-70">ID Back</label>
+                    <img src="<?php echo asset_url($artisan['id_image_back']); ?>" style="width: 100%; border-radius: 4px; cursor: pointer;" onclick="window.open(this.src)">
                 </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

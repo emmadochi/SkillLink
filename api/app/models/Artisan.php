@@ -129,8 +129,8 @@ class Artisan {
 
     public function submitVerification($data) {
         $query = "INSERT INTO artisan_verifications 
-                  (artisan_id, id_type, id_number, id_image_front, id_image_back, status) 
-                  VALUES (:aid, :type, :num, :front, :back, 'pending')";
+                  (artisan_id, id_type, id_number, id_image_front, id_image_back, passport_photo, status) 
+                  VALUES (:aid, :type, :num, :front, :back, :passport, 'pending')";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':aid', $data['artisan_id']);
@@ -138,6 +138,7 @@ class Artisan {
         $stmt->bindParam(':num', $data['id_number']);
         $stmt->bindParam(':front', $data['id_image_front']);
         $stmt->bindParam(':back', $data['id_image_back']);
+        $stmt->bindParam(':passport', $data['passport_photo']);
 
         return $stmt->execute();
     }
