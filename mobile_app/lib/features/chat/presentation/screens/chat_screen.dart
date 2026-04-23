@@ -1,7 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../artisan/presentation/providers/artisan_provider.dart';
+import '../presentation/providers/chat_provider.dart';
+import '../data/models/chat_model.dart';
+import '../../auth/presentation/providers/auth_repository_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String conversationId;
@@ -14,32 +18,34 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _msgCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
-  final List<_Message> _messages = [
-    _Message('Hello! I saw your profile and I\'m interested in your services.', false, '10:00'),
-  ];
 
-  void _sendMessage() {
-    if (_msgCtrl.text.trim().isEmpty) return;
-    setState(() {
-      _messages.add(_Message(_msgCtrl.text.trim(), false, '${TimeOfDay.now().hour}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}'));
-    });
+  void _sendMessage() async {
+    final text = _msgCtrl.text.trim();
+    if (text.isEmpty) return;
+    
+    final partnerId = int.tryParse(widget.conversationId) ?? 1;
+    final repo = ref.read(chatRepositoryProvider);
+    
     _msgCtrl.clear();
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (_scrollCtrl.hasClients) {
-        _scrollCtrl.animateTo(
-          _scrollCtrl.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
+    
+    try {
+      await repo.sendMessage(partnerId, text);
+      ref.invalidate(conversationProvider(partnerId));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send: $e')),
         );
       }
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Attempt to parse conversationId as artisanId for now
-    final artisanId = int.tryParse(widget.conversationId) ?? 1;
-    final artisanAsync = ref.watch(artisanProfileProvider(artisanId));
+    final partnerId = int.tryParse(widget.conversationId) ?? 1;
+    final artisanAsync = ref.watch(artisanProfileProvider(partnerId));
+    final messagesAsync = ref.watch(conversationProvider(partnerId));
+    final user = ref.watch(authRepositoryProvider).currentUser;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -70,33 +76,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           loading: () => const Text('Loading...'),
           error: (_, __) => const Text('Chat'),
         ),
-        actions: [
-          IconButton(icon: const Icon(Icons.call_outlined), onPressed: () {}),
-          IconButton(
-              icon: const Icon(Icons.more_vert_rounded), onPressed: () {}),
-        ],
       ),
       body: Column(
         children: [
-          // Messages
           Expanded(
-            child: artisanAsync.when(
-              data: (artisan) => ListView.builder(
-                controller: _scrollCtrl,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                itemCount: _messages.length,
-                itemBuilder: (context, i) => _MessageBubble(
-                  msg: _messages[i],
-                  artisanAvatar: artisan.user?.avatarUrl,
-                ),
-              ),
+            child: messagesAsync.when(
+              data: (messages) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_scrollCtrl.hasClients) {
+                    _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
+                  }
+                });
+                return ListView.builder(
+                  controller: _scrollCtrl,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  itemCount: messages.length,
+                  itemBuilder: (context, i) {
+                    final msg = messages[i];
+                    final isPartner = msg.senderId == partnerId;
+                    return _MessageBubble(
+                      text: msg.message,
+                      isPartner: isPartner,
+                      time: _formatTime(msg.createdAt),
+                      partnerAvatar: isPartner ? artisanAsync.value?.user?.avatarUrl : null,
+                    );
+                  },
+                );
+              },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => ListView.builder(
-                controller: _scrollCtrl,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                itemCount: _messages.length,
-                itemBuilder: (context, i) => _MessageBubble(msg: _messages[i]),
-              ),
+              error: (e, __) => Center(child: Text('Error: $e')),
             ),
           ),
 
@@ -105,11 +113,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             color: AppColors.surfaceContainerLowest,
             child: Row(children: [
-              IconButton(
-                icon: const Icon(Icons.attach_file_rounded,
-                    color: AppColors.outline),
-                onPressed: () {},
-              ),
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -120,10 +123,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   child: TextField(
                     controller: _msgCtrl,
                     style: AppTypography.bodyMd,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Type a message...',
-                      hintStyle: AppTypography.bodyMd.copyWith(
-                          color: AppColors.outline),
                       border: InputBorder.none,
                     ),
                     onSubmitted: (_) => _sendMessage(),
@@ -150,33 +151,43 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
     );
   }
+
+  String _formatTime(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('h:mm a').format(date);
+    } catch (e) {
+      return '';
+    }
+  }
 }
 
-class _Message {
+class _MessageBubble extends StatelessWidget {
   final String text;
-  final bool isArtisan;
+  final bool isPartner;
   final String time;
-  _Message(this.text, this.isArtisan, this.time);
-}
+  final String? partnerAvatar;
 
-class _MessageBubble extends ConsumerWidget {
-  final _Message msg;
-  final String? artisanAvatar;
-  const _MessageBubble({required this.msg, this.artisanAvatar});
+  const _MessageBubble({
+    required this.text,
+    required this.isPartner,
+    required this.time,
+    this.partnerAvatar,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment:
-            msg.isArtisan ? MainAxisAlignment.start : MainAxisAlignment.end,
+            isPartner ? MainAxisAlignment.start : MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (msg.isArtisan) ...[
+          if (isPartner) ...[
             CircleAvatar(
               radius: 14,
-              backgroundImage: NetworkImage(artisanAvatar ?? 'https://i.pravatar.cc/40?img=10'),
+              backgroundImage: NetworkImage(partnerAvatar ?? 'https://i.pravatar.cc/40?img=10'),
             ),
             const SizedBox(width: 8),
           ],
@@ -186,34 +197,27 @@ class _MessageBubble extends ConsumerWidget {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
             decoration: BoxDecoration(
-              color: msg.isArtisan
+              color: isPartner
                   ? AppColors.surfaceContainerLowest
                   : AppColors.primary,
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(18),
                 topRight: const Radius.circular(18),
-                bottomLeft: Radius.circular(msg.isArtisan ? 4 : 18),
-                bottomRight: Radius.circular(msg.isArtisan ? 18 : 4),
+                bottomLeft: Radius.circular(isPartner ? 4 : 18),
+                bottomRight: Radius.circular(isPartner ? 18 : 4),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.06),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(msg.text,
+                Text(text,
                     style: AppTypography.bodyMd.copyWith(
-                      color: msg.isArtisan ? AppColors.onSurface : Colors.white,
+                      color: isPartner ? AppColors.onSurface : Colors.white,
                     )),
                 const SizedBox(height: 4),
-                Text(msg.time,
+                Text(time,
                     style: AppTypography.labelSm.copyWith(
-                      color: msg.isArtisan
+                      color: isPartner
                           ? AppColors.outline
                           : Colors.white.withOpacity(0.60),
                       fontSize: 10,

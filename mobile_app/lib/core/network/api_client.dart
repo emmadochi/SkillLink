@@ -4,6 +4,7 @@ import '../../features/auth/data/models/user_model.dart';
 import '../../features/artisan/data/models/artisan_model.dart';
 import '../../features/booking/data/models/booking_model.dart';
 import '../../features/settings/data/models/address_model.dart';
+import '../../features/chat/data/models/chat_model.dart';
 
 part 'api_client.g.dart';
 
@@ -103,6 +104,21 @@ class ApiClient {
   Future<ApiResponse<Map<String, dynamic>>> addPortfolio(Map<String, dynamic> body) async {
     final response = await dio.post('/artisan/portfolio', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> sendMessage(Map<String, dynamic> body) async {
+    final response = await dio.post('/chat/send', data: body);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  Future<ApiResponse<List<ChatMessage>>> getConversation(int partnerId) async {
+    final response = await dio.get('/chat/conversation/$partnerId');
+    return _safeParse(response.data, (json) => (json as List).map((i) => ChatMessage.fromJson(i as Map<String, dynamic>)).toList());
+  }
+
+  Future<ApiResponse<List<ChatConversation>>> getChatHistory() async {
+    final response = await dio.get('/chat/history');
+    return _safeParse(response.data, (json) => (json as List).map((i) => ChatConversation.fromJson(i as Map<String, dynamic>)).toList());
   }
 
   ApiResponse<T> _safeParse<T>(dynamic data, T Function(Object? json) fromJsonT) {
