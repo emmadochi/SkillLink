@@ -121,6 +121,14 @@ class ApiClient {
     return _safeParse(response.data, (json) => (json as List).map((i) => ChatConversation.fromJson(i as Map<String, dynamic>)).toList());
   }
 
+  Future<ApiResponse<Map<String, dynamic>>> uploadAvatar(String filePath) async {
+    final formData = FormData.fromMap({
+      'avatar': await MultipartFile.fromFile(filePath),
+    });
+    final response = await dio.post('/user/upload-avatar', data: formData);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
   ApiResponse<T> _safeParse<T>(dynamic data, T Function(Object? json) fromJsonT) {
     if (data is Map<String, dynamic>) {
       try {

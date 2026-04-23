@@ -4,9 +4,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../auth/presentation/providers/auth_repository_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -20,6 +21,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   late TextEditingController _emailCtrl;
   late TextEditingController _phoneCtrl;
   late TextEditingController _addressCtrl;
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -29,6 +31,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _emailCtrl = TextEditingController(text: user?.email ?? '');
     _phoneCtrl = TextEditingController(text: user?.phone ?? '');
     _addressCtrl = TextEditingController(text: '');
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (image != null) {
+      setState(() => _isUploading = true);
+      try {
+        final repo = ref.read(authRepositoryProvider);
+        await repo.uploadAvatar(image.path);
+        
+        // Refresh user state to show new avatar
+        ref.invalidate(userStateProvider);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile picture updated successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Upload failed: $e'), backgroundColor: AppColors.error),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isUploading = false);
+      }
+    }
   }
 
   @override
@@ -42,6 +77,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userStateProvider).value;
+    
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -62,16 +99,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             // Avatar
             Stack(
               children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: NetworkImage(ref.watch(userStateProvider).value?.avatarUrl ??
-                      'https://i.pravatar.cc/150?u=${ref.watch(userStateProvider).value?.id ?? 0}'),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary, width: 2),
+                  ),
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppColors.surfaceContainerLow,
+                    backgroundImage: user?.avatarUrl != null 
+                        ? NetworkImage(user!.avatarUrl!.startsWith('http') ? user.avatarUrl! : 'http://localhost/SkillLink/api/public/${user.avatarUrl}') 
+                        : null,
+                    child: user?.avatarUrl == null 
+                        ? const Icon(Icons.person, size: 50, color: AppColors.outline)
+                        : null,
+                  ),
                 ),
+                if (_isUploading)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+                    ),
+                  ),
                 Positioned(
-                  bottom: 0,
-                  right: 0,
+                  bottom: 4,
+                  right: 4,
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: _pickAndUploadImage,
                     child: Container(
                       width: 32,
                       height: 32,
@@ -95,7 +154,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 16),
             SkillLinkInput(label: 'Default Address', hint: 'Your address', controller: _addressCtrl, maxLines: 2),
             const SizedBox(height: 32),
-            SkillLinkButton.gradient(label: 'Save Changes', width: double.infinity, onPressed: () => context.pop()),
+            SkillLinkButton.gradient(
+              label: 'Save Changes', 
+              width: double.infinity, 
+              onPressed: () => context.pop()
+            ),
           ],
         ),
       ),

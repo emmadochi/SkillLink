@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 abstract class AuthRepository {
   Future<AuthData> signup(Map<String, dynamic> data);
   Future<AuthData> login(String email, String password);
+  Future<String> uploadAvatar(String filePath);
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -48,6 +49,26 @@ class AuthRepositoryImpl implements AuthRepository {
       final responseData = e.response?.data;
       if (responseData is Map<String, dynamic>) {
         throw responseData['error'] ?? responseData['message'] ?? 'Invalid credentials';
+      }
+      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> uploadAvatar(String filePath) async {
+    try {
+      final response = await _apiClient.uploadAvatar(filePath);
+      if (response.status == 'success' && response.data != null) {
+        return response.data!['avatar_url'];
+      } else {
+        throw response.message ?? 'Upload failed';
+      }
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Upload error';
       }
       throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {

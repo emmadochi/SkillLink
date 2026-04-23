@@ -31,6 +31,17 @@ class User {
     }
 
     /**
+     * Find user by ID.
+     */
+    public function findById($id) {
+        $query = "SELECT id, name, email, phone, role, avatar_url, is_verified FROM " . $this->table . " WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
+    /**
      * Create new user.
      */
     public function create($data) {
@@ -49,6 +60,17 @@ class User {
             return $this->conn->lastInsertId();
         }
         return false;
+    }
+
+    /**
+     * Update user avatar URL.
+     */
+    public function updateAvatar($id, $url) {
+        $query = "UPDATE " . $this->table . " SET avatar_url = :url WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':url', $url);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
     }
 
     /**
