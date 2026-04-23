@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /SkillLink/admin/
+RewriteBase /admin/
 
 # Don't rewrite if the request is for a real file or directory
 RewriteCond %{REQUEST_FILENAME} !-f

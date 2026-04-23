@@ -9,16 +9,15 @@ ini_set('display_errors', 1);
 // Define the root URL path for the admin panel
 if (!defined('ADMIN_ROOT')) {
     // Detect the script's directory relative to the document root
-    $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+    $script_name = $_SERVER['SCRIPT_NAME'];
+    $admin_pos = stripos($script_name, '/admin/');
     
-    // Ensure it ends with a slash, but handle root cases
-    $base = rtrim($script_dir, '/') . '/';
-    
-    // If we're deep in a controller or subfile, we need to climb back to the 'admin' root
-    // We use stripos for case-insensitive detection (e.g. /Admin/ vs /admin/)
-    $admin_pos = stripos($base, '/admin/');
     if ($admin_pos !== false) {
-        $base = substr($base, 0, $admin_pos + 7);
+        $base = substr($script_name, 0, $admin_pos + 7);
+    } else {
+        // Fallback to simple directory detection
+        $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+        $base = rtrim($script_dir, '/') . '/';
     }
     
     define('ADMIN_ROOT', $base);
