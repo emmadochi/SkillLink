@@ -19,6 +19,7 @@ import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/settings/presentation/screens/profile_screen.dart';
 import '../../features/settings/presentation/screens/saved_addresses_screen.dart';
 import '../../features/settings/presentation/screens/payment_methods_screen.dart';
+import '../../features/artisan/presentation/screens/artisan_setup_screen.dart';
 import '../constants/app_constants.dart';
 import 'shell_route.dart';
 
@@ -75,6 +76,11 @@ final GoRouter appRouter = GoRouter(
         artisanId: state.pathParameters['id']!,
       ),
     ),
+    GoRoute(
+      path: AppRoutes.artisanProfileSetup,
+      name: 'artisan-setup',
+      builder: (_, __) => const ArtisanSetupScreen(),
+    ),
 
     // ── Booking ───────────────────────────────────────────────────────
     GoRoute(
@@ -125,8 +131,9 @@ abstract class AppRoutes {
   static const otp                = '/otp';
   static const home               = '/home';
   static const artisanListing     = '/artisans';
-  static const artisanProfile     = '/artisan';
-  static const booking            = '/booking';
+  static const artisanProfile      = '/artisan-profile';
+  static const artisanProfileSetup = '/artisan-setup';
+  static const bookingDetail      = '/booking-detail';
   static const bookingConfirmation= '/booking/confirmation';
   static const chatList           = '/messages';
   static const chat               = '/chat';

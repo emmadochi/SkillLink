@@ -74,4 +74,35 @@ class Artisan {
         $stmt->execute();
         return $stmt->fetch();
     }
+
+    public function updateProfile($data) {
+        // Check if artisan record exists
+        $query = "SELECT user_id FROM " . $this->table . " WHERE user_id = :uid";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':uid', $data['user_id']);
+        $stmt->execute();
+        $exists = $stmt->fetch();
+
+        if ($exists) {
+            $query = "UPDATE " . $this->table . " 
+                      SET bio = :bio, skill = :skill, experience_years = :exp, 
+                          location_name = :loc, latitude = :lat, longitude = :lng 
+                      WHERE user_id = :uid";
+        } else {
+            $query = "INSERT INTO " . $this->table . " 
+                      (user_id, bio, skill, experience_years, location_name, latitude, longitude, verification_status) 
+                      VALUES (:uid, :bio, :skill, :exp, :loc, :lat, :lng, 'approved')"; // Auto-approve for demo
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':uid', $data['user_id']);
+        $stmt->bindParam(':bio', $data['bio']);
+        $stmt->bindParam(':skill', $data['skill']);
+        $stmt->bindParam(':exp', $data['experience_years']);
+        $stmt->bindParam(':loc', $data['location_name']);
+        $stmt->bindParam(':lat', $data['latitude']);
+        $stmt->bindParam(':lng', $data['longitude']);
+
+        return $stmt->execute();
+    }
 }

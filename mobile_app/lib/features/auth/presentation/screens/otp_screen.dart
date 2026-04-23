@@ -5,16 +5,18 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../auth/presentation/providers/user_provider.dart';
 
-class OtpScreen extends StatefulWidget {
+class OtpScreen extends ConsumerStatefulWidget {
   final String phone;
   const OtpScreen({super.key, required this.phone});
 
   @override
-  State<OtpScreen> createState() => _OtpScreenState();
+  ConsumerState<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> {
+class _OtpScreenState extends ConsumerState<OtpScreen> {
   final List<TextEditingController> _controllers =
       List.generate(6, (_) => TextEditingController());
   final List<FocusNode> _nodes = List.generate(6, (_) => FocusNode());
@@ -44,7 +46,12 @@ class _OtpScreenState extends State<OtpScreen> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() => _isLoading = false);
-        context.go(AppRoutes.home);
+        final user = ref.read(userStateProvider).value;
+        if (user?.role == 'artisan') {
+          context.go(AppRoutes.artisanProfileSetup);
+        } else {
+          context.go(AppRoutes.home);
+        }
       }
     });
   }

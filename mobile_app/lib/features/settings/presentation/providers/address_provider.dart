@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/network/api_client.dart';
-import '../data/repositories/address_repository.dart';
-import '../data/models/address_model.dart';
+import '../../data/repositories/address_repository.dart';
+import '../../data/models/address_model.dart';
 
 part 'address_provider.g.dart';
 

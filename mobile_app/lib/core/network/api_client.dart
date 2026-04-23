@@ -85,6 +85,11 @@ class ApiClient {
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
+  Future<ApiResponse<Map<String, dynamic>>> updateArtisanProfile(Map<String, dynamic> body) async {
+    final response = await dio.post('/artisan/update', data: body);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
   ApiResponse<T> _safeParse<T>(dynamic data, T Function(Object? json) fromJsonT) {
     if (data is Map<String, dynamic>) {
       try {

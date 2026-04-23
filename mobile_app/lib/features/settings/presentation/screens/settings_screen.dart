@@ -114,6 +114,12 @@ class SettingsScreen extends ConsumerWidget {
                         label: 'Payment Methods',
                         onTap: () => context.push(AppRoutes.paymentMethods),
                       ),
+                      if (userAsync.value?.role == 'artisan')
+                        _SettingsItem(
+                          icon: Icons.business_center_outlined,
+                          label: 'Professional Profile',
+                          onTap: () => context.push(AppRoutes.artisanProfileSetup),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 16),

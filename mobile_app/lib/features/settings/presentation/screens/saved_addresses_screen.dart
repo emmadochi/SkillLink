@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
-import '../models/address_model.dart';
+import '../../data/models/address_model.dart';
 import '../providers/address_provider.dart';
 
 class SavedAddressesScreen extends ConsumerStatefulWidget {

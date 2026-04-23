@@ -55,5 +55,30 @@ class ArtisanController extends Controller {
         } catch (\Exception $e) {
             $this->error('Error loading profile: ' . $e->getMessage(), 500);
         }
+    public function update() {
+        $this->requireAuth();
+        $user = $this->getCurrentUser();
+
+        if ($user['role'] !== 'artisan') {
+            $this->error('Only artisans can update professional profiles', 403);
+        }
+
+        $data = $this->getPostData();
+
+        try {
+            $artisanModel = new Artisan();
+            $data['user_id'] = $user['id'];
+            
+            if ($artisanModel->updateProfile($data)) {
+                $this->json([
+                    'status' => 'success',
+                    'message' => 'Artisan profile updated successfully'
+                ]);
+            } else {
+                $this->error('Failed to update artisan profile');
+            }
+        } catch (\Exception $e) {
+            $this->error('Error updating profile: ' . $e->getMessage(), 500);
+        }
     }
 }
