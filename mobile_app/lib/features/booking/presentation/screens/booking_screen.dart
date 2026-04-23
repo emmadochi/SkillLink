@@ -150,11 +150,16 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         setState(() => _isLoading = true);
                         try {
                           final repo = ref.read(bookingRepositoryProvider);
+                          
+                          String formattedTime = '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}:00';
+                          String scheduledAt = '${_selectedDate!.toIso8601String().split('T')[0]} $formattedTime';
+                          
                           await repo.createBooking({
                             'artisan_id': widget.artisanId,
+                            'category_id': 2, // Default to Electrical for now
                             'service_description': '$_selectedService: ${_descCtrl.text}',
-                            'booking_date': _selectedDate!.toIso8601String().split('T')[0],
-                            'booking_time': '${_selectedTime!.hour}:${_selectedTime!.minute}',
+                            'scheduled_at': scheduledAt,
+                            'price': 5000,
                           });
                           if (mounted) {
                             context.go(AppRoutes.bookingConfirmation);

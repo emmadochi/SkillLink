@@ -261,25 +261,25 @@ class _AboutTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        Text('Bio', style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.bold)),
+        Text('Bio', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Text(
           artisan.bio ?? 'No bio available.',
           style: AppTypography.bodyMd.copyWith(height: 1.6),
         ),
         const SizedBox(height: 24),
-        Text('Service Location', style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.bold)),
+        Text('Service Location', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Row(children: [
           const Icon(Icons.location_on_outlined, size: 16, color: AppColors.primary),
           const SizedBox(width: 8),
-          Text(artisan.locationName ?? 'Lagos, Nigeria', style: AppTypography.bodyMedium),
+          Text(artisan.locationName ?? 'Lagos, Nigeria', style: AppTypography.bodyMd),
         ]),
         if (artisan.businessAddress != null && artisan.businessAddress!.isNotEmpty) ...[
           const SizedBox(height: 16),
-          Text('Business Address', style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.bold)),
+          Text('Business Address', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text(artisan.businessAddress!, style: AppTypography.bodyMedium),
+          Text(artisan.businessAddress!, style: AppTypography.bodyMd),
         ],
         const SizedBox(height: 24),
         _SecurityCard(artisan: artisan),
@@ -316,7 +316,7 @@ class _SecurityCard extends StatelessWidget {
             const SizedBox(width: 12),
             Text(
               isVerified ? 'Identity Verified' : 'Identity Verification Pending',
-              style: AppTypography.labelLarge.copyWith(
+              style: AppTypography.labelLg.copyWith(
                 color: isVerified ? Colors.blue.shade900 : Colors.orange.shade900,
                 fontWeight: FontWeight.bold,
               ),
@@ -327,7 +327,7 @@ class _SecurityCard extends StatelessWidget {
             isVerified 
               ? 'This artisan has provided a valid government-issued ID and has been cleared for professional service.'
               : 'This artisan is currently undergoing identity verification. Exercise caution and verify details manually.',
-            style: AppTypography.bodySmall.copyWith(
+            style: AppTypography.bodySm.copyWith(
               color: isVerified ? Colors.blue.shade800 : Colors.orange.shade800,
             ),
           ),
@@ -350,7 +350,7 @@ class _PortfolioTab extends StatelessWidget {
           children: [
             Icon(Icons.collections_outlined, size: 48, color: AppColors.outlineVariant),
             const SizedBox(height: 16),
-            Text('No portfolio items yet', style: AppTypography.bodyMedium),
+            Text('No portfolio items yet', style: AppTypography.bodyMd),
           ],
         ),
       );
@@ -400,8 +400,8 @@ class _ReviewsTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Customer ${i + 1}',
-                      style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.bold)),
-                  Text('3 days ago', style: AppTypography.labelSmall),
+                      style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
+                  Text('3 days ago', style: AppTypography.labelSm),
                 ],
               )),
               Row(children: List.generate(5, (j) => Icon(

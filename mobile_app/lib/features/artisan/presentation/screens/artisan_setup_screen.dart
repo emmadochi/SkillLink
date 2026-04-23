@@ -184,8 +184,8 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: AppTypography.titleLarge.copyWith(fontWeight: FontWeight.bold)),
-        Text(subtitle, style: AppTypography.bodySmall.copyWith(color: AppColors.outline)),
+        Text(title, style: AppTypography.titleLg.copyWith(fontWeight: FontWeight.bold)),
+        Text(subtitle, style: AppTypography.bodySm.copyWith(color: AppColors.outline)),
       ],
     );
   }
