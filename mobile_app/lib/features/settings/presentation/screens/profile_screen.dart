@@ -5,18 +5,40 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
 
-class ProfileScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
+
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  final _nameCtrl = TextEditingController(text: 'John Doe');
-  final _emailCtrl = TextEditingController(text: 'john@example.com');
-  final _phoneCtrl = TextEditingController(text: '+234 800 000 0000');
-  final _addressCtrl = TextEditingController(text: '15 Adeola Hopewell, V/I Lagos');
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  late TextEditingController _nameCtrl;
+  late TextEditingController _emailCtrl;
+  late TextEditingController _phoneCtrl;
+  late TextEditingController _addressCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = ref.read(userStateProvider).value;
+    _nameCtrl = TextEditingController(text: user?.name ?? '');
+    _emailCtrl = TextEditingController(text: user?.email ?? '');
+    _phoneCtrl = TextEditingController(text: user?.phone ?? '');
+    _addressCtrl = TextEditingController(text: '');
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
+    _addressCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +62,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // Avatar
             Stack(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 50,
-                  backgroundImage:
-                      NetworkImage('https://i.pravatar.cc/150?img=1'),
+                  backgroundImage: NetworkImage(ref.watch(userStateProvider).value?.avatarUrl ??
+                      'https://i.pravatar.cc/150?u=${ref.watch(userStateProvider).value?.id ?? 0}'),
                 ),
                 Positioned(
                   bottom: 0,

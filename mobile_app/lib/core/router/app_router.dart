@@ -17,6 +17,8 @@ import '../../features/dashboard/presentation/screens/artisan_dashboard_screen.d
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/settings/presentation/screens/profile_screen.dart';
+import '../../features/settings/presentation/screens/saved_addresses_screen.dart';
+import '../../features/settings/presentation/screens/payment_methods_screen.dart';
 import '../constants/app_constants.dart';
 import 'shell_route.dart';
 
@@ -96,6 +98,22 @@ final GoRouter appRouter = GoRouter(
         conversationId: state.pathParameters['conversationId']!,
       ),
     ),
+    // ── Settings ──────────────────────────────────────────────────────
+    GoRoute(
+      path: AppRoutes.profile,
+      name: 'profile',
+      builder: (_, __) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.savedAddresses,
+      name: 'saved-addresses',
+      builder: (_, __) => const SavedAddressesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.paymentMethods,
+      name: 'payment-methods',
+      builder: (_, __) => const PaymentMethodsScreen(),
+    ),
   ],
 );
 
@@ -117,4 +135,6 @@ abstract class AppRoutes {
   static const notifications      = '/notifications';
   static const settings           = '/settings';
   static const profile            = '/profile';
+  static const savedAddresses     = '/saved-addresses';
+  static const paymentMethods     = '/payment-methods';
 }

@@ -5,11 +5,13 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userStateProvider);
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: CustomScrollView(
@@ -28,50 +30,59 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   // Brand logo wordmark at top
                   Image.asset(
-                    'assets/images/logo1.png',
+                    'assets/images/logo2.png',
                     height: 36,
                     fit: BoxFit.contain,
                     alignment: Alignment.centerLeft,
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      const CircleAvatar(
-                        radius: 34,
-                        backgroundImage:
-                            NetworkImage('https://i.pravatar.cc/100?img=1'),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('John Doe',
-                                style: AppTypography.titleLg.copyWith(
-                                    color: Colors.white)),
-                            Text('john@example.com',
-                                style: AppTypography.bodyMd.copyWith(
-                                    color: Colors.white70)),
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                              child: Text('Customer Account',
-                                  style: AppTypography.labelSm.copyWith(
-                                      color: Colors.white)),
-                            ),
-                          ],
+                  userAsync.when(
+                    data: (user) => Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 34,
+                          backgroundImage: NetworkImage(user?.avatarUrl ??
+                              'https://i.pravatar.cc/100?u=${user?.id ?? 0}'),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, color: Colors.white),
-                        onPressed: () => context.go(AppRoutes.profile),
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(user?.name ?? 'Guest User',
+                                  style: AppTypography.titleLg
+                                      .copyWith(color: Colors.white)),
+                              Text(user?.email ?? 'Sign in to sync your data',
+                                  style: AppTypography.bodyMd
+                                      .copyWith(color: Colors.white70)),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: Text(
+                                    user != null
+                                        ? '${user.role[0].toUpperCase()}${user.role.substring(1)} Account'
+                                        : 'Account Type',
+                                    style: AppTypography.labelSm
+                                        .copyWith(color: Colors.white)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined,
+                              color: Colors.white),
+                          onPressed: () => context.go(AppRoutes.profile),
+                        ),
+                      ],
+                    ),
+                    loading: () => const Center(
+                        child: CircularProgressIndicator(color: Colors.white)),
+                    error: (err, __) => Text('Error: $err'),
                   ),
                 ],
               ),
@@ -94,12 +105,12 @@ class SettingsScreen extends StatelessWidget {
                       _SettingsItem(
                         icon: Icons.location_on_outlined,
                         label: 'Saved Addresses',
-                        onTap: () {},
+                        onTap: () => context.go(AppRoutes.savedAddresses),
                       ),
                       _SettingsItem(
                         icon: Icons.payment_outlined,
                         label: 'Payment Methods',
-                        onTap: () {},
+                        onTap: () => context.go(AppRoutes.paymentMethods),
                       ),
                     ],
                   ),
@@ -150,7 +161,10 @@ class SettingsScreen extends StatelessWidget {
                   SkillLinkCard(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 14),
-                    onTap: () => context.go(AppRoutes.login),
+                    onTap: () async {
+                      await ref.read(userStateProvider.notifier).clearUser();
+                      if (context.mounted) context.go(AppRoutes.login);
+                    },
                     child: Row(children: [
                       const Icon(Icons.logout_rounded,
                           color: AppColors.error, size: 20),
