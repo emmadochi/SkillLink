@@ -11,9 +11,11 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       name: json['name'] as String,
       email: json['email'] as String,
       role: json['role'] as String,
-      phone: json['phone_number'] as String?,
+      phone: json['phone'] as String? ?? '',
       avatarUrl: json['avatar_url'] as String?,
-      isVerified: json['is_verified'] as bool? ?? false,
+      isVerified: json['is_verified'] == null
+          ? false
+          : User._boolFromInt(json['is_verified']),
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -21,7 +23,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'name': instance.name,
       'email': instance.email,
       'role': instance.role,
-      'phone_number': instance.phone,
+      'phone': instance.phone,
       'avatar_url': instance.avatarUrl,
-      'is_verified': instance.isVerified,
+      'is_verified': User._boolToInt(instance.isVerified),
     };

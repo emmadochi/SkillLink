@@ -68,10 +68,12 @@ class AuthController extends Controller {
             'data' => [
                 'token' => $token,
                 'user' => [
-                    'id' => $userId,
+                    'id' => (int)$userId,
                     'name' => $body['name'],
                     'email' => $body['email'],
-                    'role' => $role
+                    'role' => $role,
+                    'phone' => $body['phone'] ?? null,
+                    'is_verified' => 0
                 ]
             ]
         ], 201);
@@ -110,10 +112,12 @@ class AuthController extends Controller {
             'data' => [
                 'token' => $token,
                 'user' => [
-                    'id' => $user['id'],
+                    'id' => (int)$user['id'],
                     'name' => $user['name'],
                     'email' => $user['email'],
-                    'role' => $user['role']
+                    'role' => $user['role'],
+                    'phone' => $user['phone'],
+                    'is_verified' => (int)$user['is_verified']
                 ]
             ]
         ]);

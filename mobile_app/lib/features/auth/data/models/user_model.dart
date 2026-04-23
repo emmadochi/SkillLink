@@ -8,11 +8,11 @@ class User {
   final String name;
   final String email;
   final String role;
-  @JsonKey(name: 'phone_number')
+  @JsonKey(name: 'phone', defaultValue: '')
   final String? phone;
   @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
-  @JsonKey(name: 'is_verified')
+  @JsonKey(name: 'is_verified', fromJson: _boolFromInt, toJson: _boolToInt)
   final bool isVerified;
 
   User({
@@ -24,6 +24,16 @@ class User {
     this.avatarUrl,
     this.isVerified = false,
   });
+
+  static bool _boolFromInt(dynamic val) {
+    if (val is bool) return val;
+    if (val is int) return val == 1;
+    if (val is String) return val == '1';
+    return false;
+  }
+
+  static int _boolToInt(bool val) => val ? 1 : 0;
+
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
