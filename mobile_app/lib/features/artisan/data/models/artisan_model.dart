@@ -5,13 +5,17 @@ part 'artisan_model.g.dart';
 
 @JsonSerializable()
 class Artisan {
-  @JsonKey(name: 'user_id')
+  @JsonKey(name: 'user_id', fromJson: _toInt)
   final int userId;
   final String? bio;
-  @JsonKey(name: 'experience_years')
+  @JsonKey(name: 'experience_years', fromJson: _toInt)
   final int experienceYears;
-  @JsonKey(name: 'average_rating')
+  @JsonKey(name: 'average_rating', fromJson: _toDouble)
   final double rating;
+
+  static int _toInt(dynamic val) => val is String ? (int.tryParse(val) ?? 0) : (val as int? ?? 0);
+  static double _toDouble(dynamic val) => val is String ? (double.tryParse(val) ?? 0.0) : (val is int ? val.toDouble() : (val as double? ?? 0.0));
+  static bool _toBool(dynamic val) => val is bool ? val : (val == 1 || val == '1' || val == 'true');
   @JsonKey(name: 'location_name')
   final String? locationName;
   @JsonKey(name: 'business_address')
@@ -20,7 +24,7 @@ class Artisan {
   final String? guarantorName;
   @JsonKey(name: 'guarantor_phone')
   final String? guarantorPhone;
-  @JsonKey(name: 'identity_verified')
+  @JsonKey(name: 'identity_verified', fromJson: _toBool)
   final bool identityVerified;
   @JsonKey(name: 'identity_status')
   final String? identityStatus;

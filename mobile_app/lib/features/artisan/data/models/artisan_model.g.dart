@@ -7,15 +7,21 @@ part of 'artisan_model.dart';
 // **************************************************************************
 
 Artisan _$ArtisanFromJson(Map<String, dynamic> json) => Artisan(
-      userId: (json['user_id'] as num).toInt(),
+      userId: Artisan._toInt(json['user_id']),
       bio: json['bio'] as String?,
-      experienceYears: (json['experience_years'] as num?)?.toInt() ?? 0,
-      rating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
+      experienceYears: json['experience_years'] == null
+          ? 0
+          : Artisan._toInt(json['experience_years']),
+      rating: json['average_rating'] == null
+          ? 0.0
+          : Artisan._toDouble(json['average_rating']),
       locationName: json['location_name'] as String?,
       businessAddress: json['business_address'] as String?,
       guarantorName: json['guarantor_name'] as String?,
       guarantorPhone: json['guarantor_phone'] as String?,
-      identityVerified: json['identity_verified'] as bool? ?? false,
+      identityVerified: json['identity_verified'] == null
+          ? false
+          : Artisan._toBool(json['identity_verified']),
       identityStatus: json['identity_status'] as String?,
       skill: json['skill'] as String?,
       user: json['user'] == null
