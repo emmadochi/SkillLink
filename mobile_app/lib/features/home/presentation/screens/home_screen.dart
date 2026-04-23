@@ -181,61 +181,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
 
           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 110,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
-                scrollDirection: Axis.horizontal,
-                itemCount: AppConstants.serviceCategories.length,
-                itemBuilder: (context, i) {
-                  final cat = AppConstants.serviceCategories[i];
-                  final selected = _selectedCategory == cat;
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => _selectedCategory =
-                          selected ? null : cat);
-                      context.push('${AppRoutes.artisanListing}?category=$cat');
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.only(right: 14),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.primary
-                            : AppColors.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.06),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+            child: ref.watch(categoriesProvider).when(
+              data: (categories) => SizedBox(
+                height: 110,
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categories.length,
+                  itemBuilder: (context, i) {
+                    final cat = categories[i];
+                    final selected = _selectedCategory == cat.name;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => _selectedCategory = selected ? null : cat.name);
+                        context.push('${AppRoutes.artisanListing}?category=${cat.name}&categoryId=${cat.id}');
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.only(right: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: selected ? AppColors.primary : AppColors.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withOpacity(0.06),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _categoryIcons[cat.name] ?? Icons.build_outlined,
+                              size: 24,
+                              color: selected ? AppColors.onPrimary : AppColors.primary,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(cat.name,
+                                style: AppTypography.labelSm.copyWith(
+                                    color: selected ? AppColors.onPrimary : AppColors.onSurface)),
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _categoryIcons[cat] ?? Icons.build_outlined,
-                            size: 24,
-                            color:
-                                selected ? AppColors.onPrimary : AppColors.primary,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(cat,
-                              style: AppTypography.labelSm.copyWith(
-                                  color: selected
-                                      ? AppColors.onPrimary
-                                      : AppColors.onSurface)),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
+              loading: () => const SizedBox(height: 110, child: Center(child: CircularProgressIndicator())),
+              error: (err, _) => const SizedBox.shrink(),
             ),
           ),
 

@@ -65,9 +65,13 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.artisanListing,
       name: 'artisan-listing',
-      builder: (context, state) => ArtisanListingScreen(
-        category: state.uri.queryParameters['category'],
-      ),
+      builder: (context, state) {
+        final categoryIdStr = state.uri.queryParameters['categoryId'];
+        return ArtisanListingScreen(
+          category: state.uri.queryParameters['category'],
+          categoryId: categoryIdStr != null ? int.tryParse(categoryIdStr) : null,
+        );
+      },
     ),
     GoRoute(
       path: '${AppRoutes.artisanProfile}/:id',
