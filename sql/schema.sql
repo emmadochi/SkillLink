@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `artisans` (
     `user_id` INT PRIMARY KEY,
     `bio` TEXT,
+    `skill` VARCHAR(100),
     `experience_years` INT DEFAULT 0,
     `location_name` VARCHAR(255),
     `latitude` DECIMAL(10, 8),

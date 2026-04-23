@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
 import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
 import 'package:skilllink_app/features/booking/presentation/providers/booking_provider.dart';
+import 'package:skilllink_app/core/network/location_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -103,26 +104,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 24),
                   // Location pill
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.location_on_rounded,
-                            size: 14, color: AppColors.tertiaryFixed),
-                        const SizedBox(width: 6),
-                        Text('Lagos, Nigeria',
-                            style: AppTypography.labelMd.copyWith(
-                                color: Colors.white)),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.keyboard_arrow_down_rounded,
-                            size: 16, color: Colors.white70),
-                      ],
+                  GestureDetector(
+                    onTap: () => ref.read(currentLocationProvider.notifier).detectLocation(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.location_on_rounded,
+                              size: 14, color: AppColors.tertiaryFixed),
+                          const SizedBox(width: 6),
+                          ref.watch(currentLocationProvider).when(
+                                data: (loc) => Text(loc,
+                                    style: AppTypography.labelMd.copyWith(
+                                        color: Colors.white)),
+                                loading: () => const SizedBox(
+                                    width: 12,
+                                    height: 12,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2, color: Colors.white)),
+                                error: (_, __) => Text('Error detecting',
+                                    style: AppTypography.labelMd.copyWith(
+                                        color: Colors.white)),
+                              ),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.keyboard_arrow_down_rounded,
+                              size: 16, color: Colors.white70),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -246,7 +260,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SliverToBoxAdapter(
             child: SizedBox(
               height: 280,
-              child: ref.watch(artisansProvider()).when(
+              child: ref.watch(artisansProvider(query: _searchCtrl.text)).when(
                     data: (artisans) {
                       if (artisans.isEmpty) {
                         return const Center(child: Text('No artisans available'));

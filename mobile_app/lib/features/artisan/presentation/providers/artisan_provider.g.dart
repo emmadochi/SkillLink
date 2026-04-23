@@ -24,7 +24,7 @@ final artisanRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ArtisanRepositoryRef = AutoDisposeProviderRef<ArtisanRepository>;
-String _$artisansHash() => r'246750f4580afb2d5d72992000efe647df1d828a';
+String _$artisansHash() => r'26db8758fa008905fa715047423a2186cf374d50';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -60,10 +60,12 @@ class ArtisansFamily extends Family<AsyncValue<List<Artisan>>> {
   ArtisansProvider call({
     int? categoryId,
     double? minRating,
+    String? query,
   }) {
     return ArtisansProvider(
       categoryId: categoryId,
       minRating: minRating,
+      query: query,
     );
   }
 
@@ -74,6 +76,7 @@ class ArtisansFamily extends Family<AsyncValue<List<Artisan>>> {
     return call(
       categoryId: provider.categoryId,
       minRating: provider.minRating,
+      query: provider.query,
     );
   }
 
@@ -98,11 +101,13 @@ class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
   ArtisansProvider({
     int? categoryId,
     double? minRating,
+    String? query,
   }) : this._internal(
           (ref) => artisans(
             ref as ArtisansRef,
             categoryId: categoryId,
             minRating: minRating,
+            query: query,
           ),
           from: artisansProvider,
           name: r'artisansProvider',
@@ -114,6 +119,7 @@ class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
           allTransitiveDependencies: ArtisansFamily._allTransitiveDependencies,
           categoryId: categoryId,
           minRating: minRating,
+          query: query,
         );
 
   ArtisansProvider._internal(
@@ -125,10 +131,12 @@ class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
     required super.from,
     required this.categoryId,
     required this.minRating,
+    required this.query,
   }) : super.internal();
 
   final int? categoryId;
   final double? minRating;
+  final String? query;
 
   @override
   Override overrideWith(
@@ -145,6 +153,7 @@ class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
         debugGetCreateSourceHash: null,
         categoryId: categoryId,
         minRating: minRating,
+        query: query,
       ),
     );
   }
@@ -158,7 +167,8 @@ class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
   bool operator ==(Object other) {
     return other is ArtisansProvider &&
         other.categoryId == categoryId &&
-        other.minRating == minRating;
+        other.minRating == minRating &&
+        other.query == query;
   }
 
   @override
@@ -166,6 +176,7 @@ class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, categoryId.hashCode);
     hash = _SystemHash.combine(hash, minRating.hashCode);
+    hash = _SystemHash.combine(hash, query.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -179,6 +190,9 @@ mixin ArtisansRef on AutoDisposeFutureProviderRef<List<Artisan>> {
 
   /// The parameter `minRating` of this provider.
   double? get minRating;
+
+  /// The parameter `query` of this provider.
+  String? get query;
 }
 
 class _ArtisansProviderElement
@@ -189,6 +203,8 @@ class _ArtisansProviderElement
   int? get categoryId => (origin as ArtisansProvider).categoryId;
   @override
   double? get minRating => (origin as ArtisansProvider).minRating;
+  @override
+  String? get query => (origin as ArtisansProvider).query;
 }
 
 String _$artisanProfileHash() => r'8d511ab194b220d868bdbc936f4a45ca595cde6e';

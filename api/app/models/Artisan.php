@@ -36,6 +36,10 @@ class Artisan {
             $query .= " AND a.average_rating >= :min_rating";
         }
 
+        if (!empty($filters['query'])) {
+            $query .= " AND (u.name LIKE :q OR a.bio LIKE :q OR a.skill LIKE :q OR a.location_name LIKE :q)";
+        }
+
         $query .= " ORDER BY a.average_rating DESC";
         
         $stmt = $this->conn->prepare($query);
@@ -46,6 +50,11 @@ class Artisan {
         if (!empty($filters['min_rating'])) {
             $stmt->bindParam(':min_rating', $filters['min_rating']);
         }
+        if (!empty($filters['query'])) {
+            $searchTerm = '%' . $filters['query'] . '%';
+            $stmt->bindParam(':q', $searchTerm);
+        }
+
 
         $stmt->execute();
         return $stmt->fetchAll();

@@ -14,10 +14,11 @@ ArtisanRepository artisanRepository(ArtisanRepositoryRef ref) {
 }
 
 @riverpod
-Future<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRating}) {
+Future<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRating, String? query}) {
   return ref.watch(artisanRepositoryProvider).getArtisans(
     categoryId: categoryId,
     minRating: minRating,
+    query: query,
   );
 }
 

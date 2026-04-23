@@ -23,11 +23,13 @@ class ApiClient {
     return _safeParse(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
   }
 
-  Future<ApiResponse<List<Artisan>>> getArtisans({int? categoryId, double? minRating}) async {
+  Future<ApiResponse<List<Artisan>>> getArtisans({int? categoryId, double? minRating, String? query}) async {
     final response = await dio.get('/artisan', queryParameters: {
       if (categoryId != null) 'category': categoryId,
       if (minRating != null) 'rating': minRating,
+      if (query != null && query.isNotEmpty) 'q': query,
     });
+
     return _safeParse(response.data, (json) => (json as List).map((i) => Artisan.fromJson(i as Map<String, dynamic>)).toList());
   }
 
