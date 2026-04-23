@@ -9,6 +9,8 @@ import '../../features/settings/presentation/screens/settings_screen.dart';
 import 'app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/auth/presentation/providers/user_provider.dart';
 
 class AppShellRoute {
   static final route = ShellRoute(
@@ -30,6 +32,11 @@ class AppShellRoute {
         builder: (_, __) => const CustomerDashboardScreen(),
       ),
       GoRoute(
+        path: AppRoutes.artisanDashboard,
+        name: 'artisan-dashboard',
+        builder: (_, __) => const ArtisanDashboardScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.notifications,
         name: 'notifications',
         builder: (_, __) => const NotificationsScreen(),
@@ -43,33 +50,47 @@ class AppShellRoute {
   );
 }
 
-class _AppShell extends StatefulWidget {
+class _AppShell extends ConsumerStatefulWidget {
   final Widget child;
   const _AppShell({required this.child});
 
   @override
-  State<_AppShell> createState() => _AppShellState();
+  ConsumerState<_AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<_AppShell> {
+class _AppShellState extends ConsumerState<_AppShell> {
   int _selectedIndex = 0;
 
-  static const _routes = [
-    AppRoutes.home,
-    AppRoutes.customerDashboard,
-    AppRoutes.chatList,
-    AppRoutes.settings,
-  ];
+  List<String> _getRoutes(String? role) {
+    if (role == 'artisan') {
+      return [
+        AppRoutes.artisanDashboard,
+        AppRoutes.chatList,
+        AppRoutes.notifications,
+        AppRoutes.settings,
+      ];
+    }
+    return [
+      AppRoutes.home,
+      AppRoutes.customerDashboard,
+      AppRoutes.chatList,
+      AppRoutes.settings,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userRole = ref.watch(userStateProvider).value?.role;
+    final routes = _getRoutes(userRole);
+
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: _GlassBottomNav(
         selectedIndex: _selectedIndex,
+        role: userRole,
         onTap: (index) {
           setState(() => _selectedIndex = index);
-          context.go(_routes[index]);
+          context.go(routes[index]);
         },
       ),
     );
@@ -78,18 +99,33 @@ class _AppShellState extends State<_AppShell> {
 
 class _GlassBottomNav extends StatelessWidget {
   final int selectedIndex;
+  final String? role;
   final ValueChanged<int> onTap;
 
-  const _GlassBottomNav({required this.selectedIndex, required this.onTap});
+  const _GlassBottomNav({
+    required this.selectedIndex,
+    required this.role,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      _NavItem(icon: Icons.home_rounded, label: 'Home'),
-      _NavItem(icon: Icons.calendar_month_rounded, label: 'Bookings'),
-      _NavItem(icon: Icons.chat_bubble_rounded, label: 'Chat'),
-      _NavItem(icon: Icons.person_rounded, label: 'Profile'),
-    ];
+    final List<_NavItem> items;
+    if (role == 'artisan') {
+      items = [
+        _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
+        _NavItem(icon: Icons.chat_bubble_rounded, label: 'Messages'),
+        _NavItem(icon: Icons.notifications_rounded, label: 'Alerts'),
+        _NavItem(icon: Icons.person_rounded, label: 'Profile'),
+      ];
+    } else {
+      items = [
+        _NavItem(icon: Icons.home_rounded, label: 'Home'),
+        _NavItem(icon: Icons.calendar_month_rounded, label: 'Bookings'),
+        _NavItem(icon: Icons.chat_bubble_rounded, label: 'Chat'),
+        _NavItem(icon: Icons.person_rounded, label: 'Profile'),
+      ];
+    }
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
