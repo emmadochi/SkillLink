@@ -26,7 +26,7 @@ class Artisan {
         $query = "SELECT u.id, u.name, u.avatar_url, a.bio, a.skill, a.category_id, a.average_rating, a.experience_years, a.location_name
                   FROM " . $this->table . " a
                   JOIN users u ON u.id = a.user_id
-                  WHERE a.verification_status = 'approved'";
+                  WHERE a.verification_status = 'approved' AND a.is_available = 1";
         
         if (!empty($filters['category_id'])) {
             $query .= " AND a.user_id IN (SELECT artisan_id FROM artisan_categories WHERE category_id = :cat_id)";
@@ -113,13 +113,14 @@ class Artisan {
             $query = "UPDATE " . $this->table . " 
                       SET bio = :bio, skill = :skill, experience_years = :exp, 
                           location_name = :loc, latitude = :lat, longitude = :lng,
-                          business_address = :b_addr, guarantor_name = :g_name, guarantor_phone = :g_phone
+                          business_address = :b_addr, guarantor_name = :g_name, guarantor_phone = :g_phone,
+                          is_available = :avail
                       WHERE user_id = :uid";
         } else {
             $query = "INSERT INTO " . $this->table . " 
                       (user_id, bio, skill, experience_years, location_name, latitude, longitude, 
-                       business_address, guarantor_name, guarantor_phone, verification_status) 
-                      VALUES (:uid, :bio, :skill, :exp, :loc, :lat, :lng, :b_addr, :g_name, :g_phone, 'pending')";
+                       business_address, guarantor_name, guarantor_phone, verification_status, is_available) 
+                      VALUES (:uid, :bio, :skill, :exp, :loc, :lat, :lng, :b_addr, :g_name, :g_phone, 'pending', :avail)";
         }
 
         $stmt = $this->conn->prepare($query);
@@ -133,6 +134,8 @@ class Artisan {
         $stmt->bindParam(':b_addr', $data['business_address']);
         $stmt->bindParam(':g_name', $data['guarantor_name']);
         $stmt->bindParam(':g_phone', $data['guarantor_phone']);
+        $avail = isset($data['is_available']) ? (int)$data['is_available'] : 1;
+        $stmt->bindParam(':avail', $avail);
 
         return $stmt->execute();
     }

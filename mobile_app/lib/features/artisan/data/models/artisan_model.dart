@@ -30,6 +30,8 @@ class Artisan {
   final bool identityVerified;
   @JsonKey(name: 'identity_status')
   final String? identityStatus;
+  @JsonKey(name: 'is_available', fromJson: _toBool)
+  final bool isAvailable;
   final String? skill;
   final User? user; // Optional join data
   final List<PortfolioItem>? portfolio;
@@ -46,6 +48,7 @@ class Artisan {
     this.guarantorPhone,
     this.identityVerified = false,
     this.identityStatus,
+    this.isAvailable = true,
     this.skill,
     this.user,
     this.portfolio,

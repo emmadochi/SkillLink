@@ -71,7 +71,7 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
                             const SizedBox(height: 4),
                             Switch(
                               value: _isAvailable,
-                              onChanged: (v) => setState(() => _isAvailable = v),
+                              onChanged: _toggleAvailability,
                               activeColor: Colors.green.shade400,
                               trackColor: WidgetStateProperty.all(
                                   Colors.white.withOpacity(0.20)),
@@ -262,17 +262,39 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
                                     style: Theme.of(context).textTheme.labelMedium),
                               ]),
                               const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () => _updateStatus(b.id, 'completed'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0A6E3A),
-                                  foregroundColor: Colors.white,
-                                  shape: const StadiumBorder(),
-                                  elevation: 0,
-                                  minimumSize: const Size(double.infinity, 44),
+                              if (b.status == 'confirmed')
+                                ElevatedButton(
+                                  onPressed: () => _updateStatus(b.id, 'arrived'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                    shape: const StadiumBorder(),
+                                    minimumSize: const Size(double.infinity, 44),
+                                  ),
+                                  child: const Text('Mark as Arrived'),
+                                )
+                              else if (b.status == 'arrived')
+                                ElevatedButton(
+                                  onPressed: () => _updateStatus(b.id, 'in_progress'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue.shade700,
+                                    foregroundColor: Colors.white,
+                                    shape: const StadiumBorder(),
+                                    minimumSize: const Size(double.infinity, 44),
+                                  ),
+                                  child: const Text('Start Job'),
+                                )
+                              else if (b.status == 'in_progress')
+                                ElevatedButton(
+                                  onPressed: () => _updateStatus(b.id, 'completed'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF0A6E3A),
+                                    foregroundColor: Colors.white,
+                                    shape: const StadiumBorder(),
+                                    minimumSize: const Size(double.infinity, 44),
+                                  ),
+                                  child: const Text('Mark as Completed'),
                                 ),
-                                child: const Text('Mark as Completed'),
-                              ),
                             ],
                           ),
                         ),
@@ -291,6 +313,31 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
         error: (e, st) => Center(child: Text('Error loading dashboard: $e')),
       ),
     );
+  }
+
+  void _toggleAvailability(bool value) async {
+    setState(() => _isAvailable = value);
+    try {
+      final repo = ref.read(artisanRepositoryProvider);
+      await repo.updateArtisanProfile({
+        'is_available': value ? 1 : 0,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value ? 'You are now Online' : 'You are now Offline'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isAvailable = !value); // Revert on failure
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update status: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 
   void _updateStatus(int id, String status) async {

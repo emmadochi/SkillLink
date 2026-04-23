@@ -24,6 +24,9 @@ Artisan _$ArtisanFromJson(Map<String, dynamic> json) => Artisan(
           ? false
           : Artisan._toBool(json['identity_verified']),
       identityStatus: json['identity_status'] as String?,
+      isAvailable: json['is_available'] == null
+          ? true
+          : Artisan._toBool(json['is_available']),
       skill: json['skill'] as String?,
       user: json['user'] == null
           ? null
@@ -45,6 +48,7 @@ Map<String, dynamic> _$ArtisanToJson(Artisan instance) => <String, dynamic>{
       'guarantor_phone': instance.guarantorPhone,
       'identity_verified': instance.identityVerified,
       'identity_status': instance.identityStatus,
+      'is_available': instance.isAvailable,
       'skill': instance.skill,
       'user': instance.user,
       'portfolio': instance.portfolio,
