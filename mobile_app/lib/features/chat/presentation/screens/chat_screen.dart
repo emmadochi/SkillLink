@@ -1,25 +1,21 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../artisan/presentation/providers/artisan_provider.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   final String conversationId;
   const ChatScreen({super.key, required this.conversationId});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _msgCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
   final List<_Message> _messages = [
-    _Message('Hello! I saw your profile and I\'m interested in your electrical services.', false, '10:00'),
-    _Message('Hi! Thanks for reaching out. What do you need done?', true, '10:02'),
-    _Message('I have a faulty main socket and some wiring issues.', false, '10:03'),
-    _Message('No problem at all. I can come by tomorrow. What\'s your address?', true, '10:05'),
-    _Message('I\'m at 15 Adeola Hopewell, V/I Lagos.', false, '10:06'),
-    _Message('Perfect. I\'ll be there by 10am. Please make sure the fuse box is accessible.', true, '10:08'),
+    _Message('Hello! I saw your profile and I\'m interested in your services.', false, '10:00'),
   ];
 
   void _sendMessage() {
@@ -29,16 +25,22 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     _msgCtrl.clear();
     Future.delayed(const Duration(milliseconds: 100), () {
-      _scrollCtrl.animateTo(
-        _scrollCtrl.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      if (_scrollCtrl.hasClients) {
+        _scrollCtrl.animateTo(
+          _scrollCtrl.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Attempt to parse conversationId as artisanId for now
+    final artisanId = int.tryParse(widget.conversationId) ?? 1;
+    final artisanAsync = ref.watch(artisanProfileProvider(artisanId));
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -47,23 +49,27 @@ class _ChatScreenState extends State<ChatScreen> {
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Row(children: [
-          const CircleAvatar(
-            radius: 18,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/60?img=10'),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Emmanuel Okafor',
-                  style: Theme.of(context).textTheme.titleSmall),
-              Text('Online',
-                  style: AppTypography.labelSm.copyWith(
-                      color: Colors.green.shade500)),
-            ],
-          ),
-        ]),
+        title: artisanAsync.when(
+          data: (artisan) => Row(children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundImage: NetworkImage(artisan.user?.avatarUrl ?? 'https://i.pravatar.cc/60?img=10'),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(artisan.user?.name ?? 'Artisan',
+                    style: Theme.of(context).textTheme.titleSmall),
+                Text('Online',
+                    style: AppTypography.labelSm.copyWith(
+                        color: Colors.green.shade500)),
+              ],
+            ),
+          ]),
+          loading: () => const Text('Loading...'),
+          error: (_, __) => const Text('Chat'),
+        ),
         actions: [
           IconButton(icon: const Icon(Icons.call_outlined), onPressed: () {}),
           IconButton(
@@ -74,11 +80,23 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           // Messages
           Expanded(
-            child: ListView.builder(
-              controller: _scrollCtrl,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: _messages.length,
-              itemBuilder: (context, i) => _MessageBubble(msg: _messages[i]),
+            child: artisanAsync.when(
+              data: (artisan) => ListView.builder(
+                controller: _scrollCtrl,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                itemCount: _messages.length,
+                itemBuilder: (context, i) => _MessageBubble(
+                  msg: _messages[i],
+                  artisanAvatar: artisan.user?.avatarUrl,
+                ),
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => ListView.builder(
+                controller: _scrollCtrl,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                itemCount: _messages.length,
+                itemBuilder: (context, i) => _MessageBubble(msg: _messages[i]),
+              ),
             ),
           ),
 
@@ -141,12 +159,13 @@ class _Message {
   _Message(this.text, this.isArtisan, this.time);
 }
 
-class _MessageBubble extends StatelessWidget {
+class _MessageBubble extends ConsumerWidget {
   final _Message msg;
-  const _MessageBubble({required this.msg});
+  final String? artisanAvatar;
+  const _MessageBubble({required this.msg, this.artisanAvatar});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -155,9 +174,9 @@ class _MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (msg.isArtisan) ...[
-            const CircleAvatar(
+            CircleAvatar(
               radius: 14,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/40?img=10'),
+              backgroundImage: NetworkImage(artisanAvatar ?? 'https://i.pravatar.cc/40?img=10'),
             ),
             const SizedBox(width: 8),
           ],

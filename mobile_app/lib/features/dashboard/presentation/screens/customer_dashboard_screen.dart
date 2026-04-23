@@ -181,6 +181,14 @@ class CustomerDashboardScreen extends ConsumerWidget {
                                 Text(b.categoryName ?? 'Service', style: Theme.of(context).textTheme.titleSmall),
                                 Text('${b.partnerName ?? 'Artisan'} • ${_formatDate(b.createdAt ?? b.scheduledAt)}',
                                     style: Theme.of(context).textTheme.labelSmall),
+                                if (b.status == 'cancelled' && b.cancellationReason != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      'Reason: ${b.cancellationReason}',
+                                      style: AppTypography.labelSm.copyWith(color: AppColors.error),
+                                    ),
+                                  ),
                               ],
                             )),
                             Column(
