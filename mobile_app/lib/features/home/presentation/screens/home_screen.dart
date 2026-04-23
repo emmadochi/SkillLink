@@ -89,7 +89,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       // Notifications
                       IconButton(
-                        onPressed: () => context.go(AppRoutes.notifications),
+                        onPressed: () => context.push(AppRoutes.notifications),
                         icon: const Icon(Icons.notifications_outlined,
                             color: Colors.white),
                       ),
@@ -170,7 +170,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const Spacer(),
                   TextButton(
                     onPressed: () =>
-                        context.go(AppRoutes.artisanListing),
+                        context.push(AppRoutes.artisanListing),
                     child: Text('See All',
                         style: AppTypography.labelLg.copyWith(
                             color: AppColors.primary)),
@@ -195,7 +195,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onTap: () {
                       setState(() => _selectedCategory =
                           selected ? null : cat);
-                      context.go('${AppRoutes.artisanListing}?category=$cat');
+                      context.push('${AppRoutes.artisanListing}?category=$cat');
                     },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
@@ -248,7 +248,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: Theme.of(context).textTheme.titleMedium),
                 const Spacer(),
                 TextButton(
-                  onPressed: () => context.go(AppRoutes.artisanListing),
+                  onPressed: () => context.push(AppRoutes.artisanListing),
                   child: Text('See All',
                       style: AppTypography.labelLg.copyWith(
                           color: AppColors.primary)),
@@ -283,7 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               price: '₦5,000/hr',
                               location: artisan.locationName ?? 'Lagos',
                               isVerified: true,
-                              onTap: () => context.go(
+                              onTap: () => context.push(
                                   '${AppRoutes.artisanProfile}/${artisan.userId}'),
                             ),
                           );

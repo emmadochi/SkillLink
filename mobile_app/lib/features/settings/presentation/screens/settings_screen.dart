@@ -78,7 +78,7 @@ class SettingsScreen extends ConsumerWidget {
                         IconButton(
                           icon: const Icon(Icons.edit_outlined,
                               color: Colors.white),
-                          onPressed: () => context.go(AppRoutes.profile),
+                          onPressed: () => context.push(AppRoutes.profile),
                         ),
                       ],
                     ),
@@ -102,17 +102,17 @@ class SettingsScreen extends ConsumerWidget {
                       _SettingsItem(
                         icon: Icons.person_outline_rounded,
                         label: 'Edit Profile',
-                        onTap: () => context.go(AppRoutes.profile),
+                        onTap: () => context.push(AppRoutes.profile),
                       ),
                       _SettingsItem(
                         icon: Icons.location_on_outlined,
                         label: 'Saved Addresses',
-                        onTap: () => context.go(AppRoutes.savedAddresses),
+                        onTap: () => context.push(AppRoutes.savedAddresses),
                       ),
                       _SettingsItem(
                         icon: Icons.payment_outlined,
                         label: 'Payment Methods',
-                        onTap: () => context.go(AppRoutes.paymentMethods),
+                        onTap: () => context.push(AppRoutes.paymentMethods),
                       ),
                     ],
                   ),

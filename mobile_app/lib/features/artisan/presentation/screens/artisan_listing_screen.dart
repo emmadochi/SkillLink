@@ -111,7 +111,7 @@ class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
                           padding: const EdgeInsets.only(bottom: 12),
                           child: SkillLinkCard(
                             elevated: true,
-                            onTap: () => context.go(
+                            onTap: () => context.push(
                                 '${AppRoutes.artisanProfile}/${artisan.userId}'),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
