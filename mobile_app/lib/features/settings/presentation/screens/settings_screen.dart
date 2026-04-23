@@ -151,17 +151,17 @@ class SettingsScreen extends ConsumerWidget {
                       _SettingsItem(
                         icon: Icons.help_outline_rounded,
                         label: 'Help & FAQ',
-                        onTap: () {},
+                        onTap: () => context.push(AppRoutes.faq),
                       ),
                       _SettingsItem(
                         icon: Icons.privacy_tip_outlined,
                         label: 'Privacy Policy',
-                        onTap: () {},
+                        onTap: () => context.push(AppRoutes.privacyPolicy),
                       ),
                       _SettingsItem(
                         icon: Icons.info_outline_rounded,
                         label: 'About SkillLink',
-                        onTap: () {},
+                        onTap: () => context.push(AppRoutes.about),
                       ),
                     ],
                   ),

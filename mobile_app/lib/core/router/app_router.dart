@@ -19,6 +19,9 @@ import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/settings/presentation/screens/profile_screen.dart';
 import '../../features/settings/presentation/screens/saved_addresses_screen.dart';
 import '../../features/settings/presentation/screens/payment_methods_screen.dart';
+import '../../features/settings/presentation/screens/faq_screen.dart';
+import '../../features/settings/presentation/screens/privacy_policy_screen.dart';
+import '../../features/settings/presentation/screens/about_screen.dart';
 import '../../features/artisan/presentation/screens/artisan_setup_screen.dart';
 import '../constants/app_constants.dart';
 import 'shell_route.dart';
@@ -124,6 +127,21 @@ final GoRouter appRouter = GoRouter(
       name: 'payment-methods',
       builder: (_, __) => const PaymentMethodsScreen(),
     ),
+    GoRoute(
+      path: AppRoutes.faq,
+      name: 'faq',
+      builder: (_, __) => const FAQScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.privacyPolicy,
+      name: 'privacy-policy',
+      builder: (_, __) => const PrivacyPolicyScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.about,
+      name: 'about',
+      builder: (_, __) => const AboutScreen(),
+    ),
   ],
 );
 
@@ -149,4 +167,7 @@ abstract class AppRoutes {
   static const profile            = '/profile';
   static const savedAddresses     = '/saved-addresses';
   static const paymentMethods     = '/payment-methods';
+  static const faq                = '/faq';
+  static const privacyPolicy      = '/privacy-policy';
+  static const about              = '/about';
 }
