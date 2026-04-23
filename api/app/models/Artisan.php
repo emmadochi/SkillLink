@@ -55,9 +55,15 @@ class Artisan {
             $stmt->bindParam(':q', $searchTerm);
         }
 
-
         $stmt->execute();
-        return $stmt->fetchAll();
+        $artisans = $stmt->fetchAll();
+
+        return array_map(function($a) {
+            $a['average_rating'] = (float)($a['average_rating'] ?? 0.0);
+            $a['experience_years'] = (int)($a['experience_years'] ?? 0);
+            $a['identity_verified'] = (bool)($a['identity_verified'] ?? false);
+            return $a;
+        }, $artisans);
     }
 
     /**
@@ -78,6 +84,10 @@ class Artisan {
         if ($profile) {
             // Get portfolio
             $profile['portfolio'] = $this->getPortfolio($id);
+            // Cast types
+            $profile['average_rating'] = (float)($profile['average_rating'] ?? 0.0);
+            $profile['experience_years'] = (int)($profile['experience_years'] ?? 0);
+            $profile['identity_verified'] = (bool)($profile['identity_verified'] ?? false);
         }
 
         return $profile;
