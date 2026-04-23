@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 abstract class BookingRepository {
   Future<Map<String, dynamic>> createBooking(Map<String, dynamic> data);
   Future<List<Booking>> getBookingHistory();
-  Future<bool> updateBookingStatus(int id, String status);
+  Future<bool> updateBookingStatus(int id, String status, {String? reason});
 }
 
 class BookingRepositoryImpl implements BookingRepository {
@@ -46,11 +46,12 @@ class BookingRepositoryImpl implements BookingRepository {
   }
 
   @override
-  Future<bool> updateBookingStatus(int id, String status) async {
+  Future<bool> updateBookingStatus(int id, String status, {String? reason}) async {
     try {
       final response = await _apiClient.updateStatus({
         'id': id,
         'status': status,
+        if (reason != null) 'reason': reason,
       });
       return response.status == 'success';
     } on DioException catch (e) {

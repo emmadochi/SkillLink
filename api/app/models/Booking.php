@@ -50,10 +50,7 @@ class Booking {
      */
     public function getByUser($userId, $role = 'customer') {
         $field = ($role === 'customer') ? 'customer_id' : 'artisan_id';
-        $otherRole = ($role === 'customer') ? 'u_artisan' : 'u_customer';
         
-        $relJoin = ($role === 'customer') ? 'JOIN users u_artisan ON u_artisan.id = b.artisan_id' : 'JOIN users u_customer ON u_customer.id = b.customer_id';
-
         $query = "SELECT b.*, u_other.name as partner_name, u_other.avatar_url as partner_avatar, c.name as category_name
                   FROM " . $this->table . " b
                   JOIN categories c ON c.id = b.category_id ";
@@ -75,10 +72,18 @@ class Booking {
     /**
      * Update booking status.
      */
-    public function updateStatus($id, $status) {
-        $query = "UPDATE " . $this->table . " SET status = :status WHERE id = :id";
+    public function updateStatus($id, $status, $reason = null) {
+        $query = "UPDATE " . $this->table . " SET status = :status";
+        if ($reason !== null) {
+            $query .= ", cancellation_reason = :reason";
+        }
+        $query .= " WHERE id = :id";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':status', $status);
+        if ($reason !== null) {
+            $stmt->bindParam(':reason', $reason);
+        }
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
     }

@@ -187,14 +187,16 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
             error: (err, __) => Center(child: Text('Error: $err')),
           ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        height: 100,
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
+          color: AppColors.surface,
+          border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5))),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.06),
-              blurRadius: 24,
-              offset: const Offset(0, -8),
+              color: AppColors.primary.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
             ),
           ],
         ),
@@ -203,19 +205,17 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
             child: SkillLinkButton.outlined(
               label: 'Message',
               icon: const Icon(Icons.chat_bubble_outline_rounded,
-                  size: 16, color: AppColors.primary),
-              onPressed: () => context.go(
-                  '${AppRoutes.chat}/${widget.artisanId}'),
+                  size: 18, color: AppColors.primary),
+              onPressed: () => context.push('${AppRoutes.chat}/${widget.artisanId}'),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: SkillLinkButton.gradient(
               label: 'Book Now',
               icon: const Icon(Icons.calendar_month_outlined,
-                  size: 16, color: Colors.white),
-              onPressed: () => context.go(
-                  '${AppRoutes.booking}/${widget.artisanId}'),
+                  size: 18, color: Colors.white),
+              onPressed: () => context.push('${AppRoutes.booking}/${widget.artisanId}'),
             ),
           ),
         ]),

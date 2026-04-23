@@ -106,7 +106,8 @@ class BookingController extends Controller {
 
         try {
             $bookingModel = new Booking();
-            if ($bookingModel->updateStatus($body['id'], $body['status'])) {
+            $reason = $body['reason'] ?? null;
+            if ($bookingModel->updateStatus($body['id'], $body['status'], $reason)) {
                 $this->json([
                     'status' => 'success',
                     'message' => 'Status updated to ' . $body['status']

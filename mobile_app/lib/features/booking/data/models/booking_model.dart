@@ -33,6 +33,8 @@ class Booking {
   final String? partnerAvatar;
   @JsonKey(name: 'category_name')
   final String? categoryName;
+  @JsonKey(name: 'cancellation_reason')
+  final String? cancellationReason;
 
   Booking({
     required this.id,
@@ -50,6 +52,7 @@ class Booking {
     this.partnerName,
     this.partnerAvatar,
     this.categoryName,
+    this.cancellationReason,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) => _$BookingFromJson(json);

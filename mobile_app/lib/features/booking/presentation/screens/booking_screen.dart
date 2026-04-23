@@ -156,7 +156,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           
                           await repo.createBooking({
                             'artisan_id': widget.artisanId,
-                            'category_id': 2, // Default to Electrical for now
+                            'category_id': 1, // Will be dynamic in Phase 3
                             'service_description': '$_selectedService: ${_descCtrl.text}',
                             'scheduled_at': scheduledAt,
                             'price': 5000,
@@ -356,7 +356,7 @@ class _ConfirmStep extends ConsumerWidget {
                 value: artisanAsync.when(
                   data: (a) => a.user?.name ?? 'Artisan',
                   loading: () => 'Loading...',
-                  error: (_, __) => 'Error',
+                  error: (e, __) => 'Artisan Profile', // Fallback to generic name
                 )),
             _ConfirmRow(label: 'Service', value: service),
             if (date != null)

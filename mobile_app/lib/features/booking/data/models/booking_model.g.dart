@@ -22,6 +22,7 @@ Booking _$BookingFromJson(Map<String, dynamic> json) => Booking(
       partnerName: json['partner_name'] as String?,
       partnerAvatar: json['partner_avatar'] as String?,
       categoryName: json['category_name'] as String?,
+      cancellationReason: json['cancellation_reason'] as String?,
     );
 
 Map<String, dynamic> _$BookingToJson(Booking instance) => <String, dynamic>{
@@ -40,4 +41,5 @@ Map<String, dynamic> _$BookingToJson(Booking instance) => <String, dynamic>{
       'partner_name': instance.partnerName,
       'partner_avatar': instance.partnerAvatar,
       'category_name': instance.categoryName,
+      'cancellation_reason': instance.cancellationReason,
     };

@@ -294,14 +294,23 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
   }
 
   void _updateStatus(int id, String status) async {
+    String? reason;
+    if (status == 'cancelled') {
+      reason = await _showRejectionDialog();
+      if (reason == null) return; // User cancelled the dialog
+    }
+
     try {
       final repo = ref.read(bookingRepositoryProvider);
-      await repo.updateBookingStatus(id, status);
+      await repo.updateBookingStatus(id, status, reason: reason);
       // Refresh bookings
       ref.invalidate(bookingHistoryProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Booking $status successfully')),
+          SnackBar(
+            content: Text(status == 'confirmed' ? 'Job Accepted!' : 'Job Declined'),
+            backgroundColor: status == 'confirmed' ? Colors.green : Colors.orange,
+          ),
         );
       }
     } catch (e) {
@@ -311,6 +320,43 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
         );
       }
     }
+  }
+
+  Future<String?> _showRejectionDialog() async {
+    String? selectedReason;
+    final List<String> reasons = [
+      'Schedule Conflict',
+      'Outside Service Area',
+      'Price Too Low',
+      'I\'m currently unavailable',
+      'Other'
+    ];
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Decline Request'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Please select a reason for declining this job:'),
+            const SizedBox(height: 16),
+            ...reasons.map((r) => ListTile(
+              title: Text(r),
+              onTap: () => Navigator.pop(context, r),
+              dense: true,
+              trailing: const Icon(Icons.chevron_right, size: 16),
+            )),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatDate(String dateStr) {
