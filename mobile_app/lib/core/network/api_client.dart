@@ -3,6 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 import '../../features/auth/data/models/user_model.dart';
 import '../../features/artisan/data/models/artisan_model.dart';
 import '../../features/booking/data/models/booking_model.dart';
+import '../../features/settings/data/models/address_model.dart';
 
 part 'api_client.g.dart';
 
@@ -66,6 +67,21 @@ class ApiClient {
 
   Future<ApiResponse<Map<String, dynamic>>> verifyPayment(Map<String, dynamic> body) async {
     final response = await dio.post('/payment/verify', data: body);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  Future<ApiResponse<List<UserAddress>>> getAddresses() async {
+    final response = await dio.get('/address');
+    return _safeParse(response.data, (json) => (json as List).map((i) => UserAddress.fromJson(i as Map<String, dynamic>)).toList());
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> createAddress(Map<String, dynamic> body) async {
+    final response = await dio.post('/address/create', data: body);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> deleteAddress(int id) async {
+    final response = await dio.delete('/address/delete/$id');
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 

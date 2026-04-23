@@ -115,6 +115,19 @@ CREATE TABLE IF NOT EXISTS `disputes` (
     FOREIGN KEY (`raised_by`) REFERENCES `users`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 9. User Saved Addresses
+CREATE TABLE IF NOT EXISTS `user_addresses` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `label` VARCHAR(50) NOT NULL COMMENT 'e.g., Home, Work, Gym',
+    `address` TEXT NOT NULL,
+    `latitude` DECIMAL(10, 8),
+    `longitude` DECIMAL(11, 8),
+    `is_default` BOOLEAN DEFAULT FALSE,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Seed Initial Categories
 INSERT IGNORE INTO `categories` (`name`, `slug`, `icon`) VALUES
 ('Plumbing', 'plumbing', 'water_drop'),
