@@ -71,7 +71,7 @@
 <div class="premium-table-card">
     <div class="card-header">
         <h3>Recent Artisan Requests</h3>
-        <a href="/SkillLink/admin/user" class="btn-premium btn-outline">View All</a>
+        <a href="<?php echo admin_url('user'); ?>" class="btn-premium btn-outline">View All</a>
     </div>
     
     <div class="table-responsive">
@@ -126,7 +126,7 @@
                             </span>
                         </td>
                         <td style="text-align: right;">
-                            <a href="/SkillLink/admin/user/details?id=<?php echo $a['id']; ?>" class="btn-premium btn-primary btn-sm">Review</a>
+                            <a href="<?php echo admin_url('user/details?id=' . $a['id']); ?>" class="btn-premium btn-primary btn-sm">Review</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
