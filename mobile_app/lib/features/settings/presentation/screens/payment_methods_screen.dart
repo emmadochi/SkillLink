@@ -17,7 +17,7 @@ class PaymentMethodsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Saved Cards', style: AppTypography.titleMedium),
+            Text('Saved Cards', style: AppTypography.titleMd),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(20),
@@ -32,17 +32,17 @@ class PaymentMethodsScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Icon(Icons.credit_card_rounded, color: Colors.white, size: 32),
-                      Text('VISA', style: AppTypography.titleLarge.copyWith(color: Colors.white, fontStyle: FontStyle.italic)),
+                      Text('VISA', style: AppTypography.titleLg.copyWith(color: Colors.white, fontStyle: FontStyle.italic)),
                     ],
                   ),
                   const SizedBox(height: 32),
-                  Text('**** **** **** 4242', style: AppTypography.titleMedium.copyWith(color: Colors.white, letterSpacing: 2)),
+                  Text('**** **** **** 4242', style: AppTypography.titleMd.copyWith(color: Colors.white, letterSpacing: 2)),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('EXPIRES: 12/25', style: AppTypography.labelMedium.copyWith(color: Colors.white70)),
-                      Text('JOHN DOE', style: AppTypography.labelMedium.copyWith(color: Colors.white70)),
+                      Text('EXPIRES: 12/25', style: AppTypography.labelMd.copyWith(color: Colors.white70)),
+                      Text('JOHN DOE', style: AppTypography.labelMd.copyWith(color: Colors.white70)),
                     ],
                   ),
                 ],

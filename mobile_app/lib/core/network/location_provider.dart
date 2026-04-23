@@ -7,7 +7,14 @@ part 'location_provider.g.dart';
 class CurrentLocation extends _$CurrentLocation {
   @override
   Future<String> build() async {
-    return 'Lagos, Nigeria'; // Default
+    try {
+      final position = await LocationService.getCurrentPosition();
+      if (position != null) {
+        final address = await LocationService.getAddressFromLatLng(position);
+        if (address != null) return address;
+      }
+    } catch (_) {}
+    return 'Lagos, Nigeria'; // Fallback if detection fails
   }
 
   Future<void> detectLocation() async {
