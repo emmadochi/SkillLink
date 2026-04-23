@@ -5,9 +5,9 @@
  */
 
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'skilllink_db');
+define('DB_USER', 'quantu16_skilllink');
+define('DB_PASS', 'quantu16_skilllink');
+define('DB_NAME', 'quantu16_skilllink');
 
 function getDB(): mysqli {
     static $conn = null;
