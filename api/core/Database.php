@@ -4,7 +4,7 @@ namespace core;
 use PDO;
 use PDOException;
 
-require_once dirname(__DIR__) . '/config.php';
+require_once __DIR__ . '/../config.php';
 
 class Database {
     private $host = DB_HOST;
