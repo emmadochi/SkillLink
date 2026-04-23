@@ -1,6 +1,8 @@
 <?php
 namespace core;
 
+use core\Auth;
+
 class Controller {
     
     /**
@@ -29,5 +31,31 @@ class Controller {
     protected function getBody() {
         $json = file_get_contents('php://input');
         return json_decode($json, true);
+    }
+
+    /**
+     * Get POST data from body or $_POST
+     */
+    protected function getPostData() {
+        $body = $this->getBody();
+        return $body ? $body : $_POST;
+    }
+
+    /**
+     * Ensure the user is authenticated.
+     */
+    protected function requireAuth() {
+        $token = Auth::getBearerToken();
+        if (!$token || !Auth::verifyToken($token)) {
+            $this->error('Unauthorized: Valid token required', 401);
+        }
+    }
+
+    /**
+     * Get the currently logged-in user data from token.
+     */
+    protected function getCurrentUser() {
+        $token = Auth::getBearerToken();
+        return Auth::verifyToken($token);
     }
 }

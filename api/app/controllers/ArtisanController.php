@@ -55,6 +55,8 @@ class ArtisanController extends Controller {
         } catch (\Exception $e) {
             $this->error('Error loading profile: ' . $e->getMessage(), 500);
         }
+    }
+
     public function update() {
         $this->requireAuth();
         $user = $this->getCurrentUser();
