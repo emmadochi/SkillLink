@@ -31,7 +31,7 @@ class UserController extends BaseController {
         $artisan = $userModel->getArtisanById((int)$id);
 
         if (!$artisan) {
-            $this->redirect('/SkillLink/admin/users');
+            $this->redirect('user?tab=artisans');
         }
 
         $artisan['portfolio'] = $userModel->getArtisanPortfolio((int)$id);
@@ -55,7 +55,7 @@ class UserController extends BaseController {
             // Success
         }
         
-        $this->redirect('/SkillLink/admin/user/details?id=' . $id);
+        $this->redirect('user/details?id=' . $id);
     }
 
     public function reject() {
@@ -69,6 +69,6 @@ class UserController extends BaseController {
             // Success
         }
         
-        $this->redirect('/SkillLink/admin/user/details?id=' . $id);
+        $this->redirect('user/details?id=' . $id);
     }
 }
