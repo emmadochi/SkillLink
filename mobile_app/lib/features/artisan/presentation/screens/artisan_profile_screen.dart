@@ -101,8 +101,9 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                                     style: AppTypography.headlineSm.copyWith(
                                         color: Colors.white)),
                                 const SizedBox(width: 8),
-                                const Icon(Icons.verified,
-                                    size: 18, color: AppColors.tertiaryFixed),
+                                if (artisan.identityVerified || artisan.identityStatus == 'approved')
+                                  const Icon(Icons.verified,
+                                      size: 18, color: AppColors.tertiaryFixed),
                               ]),
                               const SizedBox(height: 4),
                               Text('${artisan.bio ?? artisan.skill ?? 'Professional Artisan'} • ${artisan.experienceYears} yrs experience',
@@ -175,7 +176,7 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                     controller: _tabController,
                     children: [
                       _AboutTab(artisan: artisan),
-                      _PortfolioTab(),
+                      _PortfolioTab(portfolio: artisan.portfolio ?? []),
                       _ReviewsTab(),
                     ],
                   ),
@@ -260,27 +261,101 @@ class _AboutTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        Text('Bio', style: Theme.of(context).textTheme.titleSmall),
+        Text('Bio', style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Text(
           artisan.bio ?? 'No bio available.',
           style: AppTypography.bodyMd.copyWith(height: 1.6),
         ),
-        const SizedBox(height: 20),
-        Text('Location', style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 12),
-        Chip(
-          label: Text(artisan.locationName ?? 'Lagos, Nigeria'),
-          avatar: const Icon(Icons.location_on_outlined, size: 14),
-        ),
+        const SizedBox(height: 24),
+        Text('Service Location', style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Row(children: [
+          const Icon(Icons.location_on_outlined, size: 16, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Text(artisan.locationName ?? 'Lagos, Nigeria', style: AppTypography.bodyMedium),
+        ]),
+        if (artisan.businessAddress != null && artisan.businessAddress!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text('Business Address', style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(artisan.businessAddress!, style: AppTypography.bodyMedium),
+        ],
+        const SizedBox(height: 24),
+        _SecurityCard(artisan: artisan),
       ],
     );
   }
 }
 
-class _PortfolioTab extends StatelessWidget {
+class _SecurityCard extends StatelessWidget {
+  final Artisan artisan;
+  const _SecurityCard({required this.artisan});
+
   @override
   Widget build(BuildContext context) {
+    final bool isVerified = artisan.identityVerified || artisan.identityStatus == 'approved';
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isVerified ? Colors.blue.shade50 : Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isVerified ? Colors.blue.shade200 : Colors.orange.shade200,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(
+              isVerified ? Icons.verified_user_rounded : Icons.gpp_maybe_rounded,
+              color: isVerified ? Colors.blue.shade700 : Colors.orange.shade700,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              isVerified ? 'Identity Verified' : 'Identity Verification Pending',
+              style: AppTypography.labelLarge.copyWith(
+                color: isVerified ? Colors.blue.shade900 : Colors.orange.shade900,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ]),
+          const SizedBox(height: 8),
+          Text(
+            isVerified 
+              ? 'This artisan has provided a valid government-issued ID and has been cleared for professional service.'
+              : 'This artisan is currently undergoing identity verification. Exercise caution and verify details manually.',
+            style: AppTypography.bodySmall.copyWith(
+              color: isVerified ? Colors.blue.shade800 : Colors.orange.shade800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PortfolioTab extends StatelessWidget {
+  final List<PortfolioItem> portfolio;
+  const _PortfolioTab({required this.portfolio});
+
+  @override
+  Widget build(BuildContext context) {
+    if (portfolio.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.collections_outlined, size: 48, color: AppColors.outlineVariant),
+            const SizedBox(height: 16),
+            Text('No portfolio items yet', style: AppTypography.bodyMedium),
+          ],
+        ),
+      );
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -289,14 +364,14 @@ class _PortfolioTab extends StatelessWidget {
         mainAxisSpacing: 12,
         childAspectRatio: 0.9,
       ),
-      itemCount: 6,
+      itemCount: portfolio.length,
       itemBuilder: (context, i) => ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Image.network(
-          'https://picsum.photos/200/220?random=${i + 20}',
+          portfolio[i].imageUrl,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) =>
-              Container(color: AppColors.surfaceContainerLow),
+              Container(color: AppColors.surfaceContainerLow, child: const Icon(Icons.broken_image_outlined)),
         ),
       ),
     );
@@ -325,8 +400,8 @@ class _ReviewsTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Customer ${i + 1}',
-                      style: Theme.of(context).textTheme.titleSmall),
-                  Text('3 days ago', style: Theme.of(context).textTheme.labelSmall),
+                      style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.bold)),
+                  Text('3 days ago', style: AppTypography.labelSmall),
                 ],
               )),
               Row(children: List.generate(5, (j) => Icon(

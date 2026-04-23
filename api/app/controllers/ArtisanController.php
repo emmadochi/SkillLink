@@ -83,4 +83,55 @@ class ArtisanController extends Controller {
             $this->error('Error updating profile: ' . $e->getMessage(), 500);
         }
     }
+
+    public function verify() {
+        $this->requireAuth();
+        $user = $this->getCurrentUser();
+
+        if ($user['role'] !== 'artisan') {
+            $this->error('Access denied', 403);
+        }
+
+        $data = $this->getPostData();
+        $data['artisan_id'] = $user['id'];
+
+        try {
+            $artisanModel = new Artisan();
+            if ($artisanModel->submitVerification($data)) {
+                $this->json([
+                    'status' => 'success',
+                    'message' => 'Verification documents submitted'
+                ]);
+            } else {
+                $this->error('Failed to submit verification');
+            }
+        } catch (\Exception $e) {
+            $this->error('Error submitting verification: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function portfolio() {
+        $this->requireAuth();
+        $user = $this->getCurrentUser();
+
+        if ($user['role'] !== 'artisan') {
+            $this->error('Access denied', 403);
+        }
+
+        $data = $this->getPostData();
+        
+        try {
+            $artisanModel = new Artisan();
+            if ($artisanModel->addPortfolioItem($user['id'], $data['image_url'], $data['description'] ?? "")) {
+                $this->json([
+                    'status' => 'success',
+                    'message' => 'Portfolio item added'
+                ]);
+            } else {
+                $this->error('Failed to add portfolio item');
+            }
+        } catch (\Exception $e) {
+            $this->error('Error adding portfolio: ' . $e->getMessage(), 500);
+        }
+    }
 }

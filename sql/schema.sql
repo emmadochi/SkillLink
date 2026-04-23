@@ -34,13 +34,42 @@ CREATE TABLE IF NOT EXISTS `artisans` (
     `skill` VARCHAR(100),
     `experience_years` INT DEFAULT 0,
     `location_name` VARCHAR(255),
+    `business_address` TEXT,
+    `guarantor_name` VARCHAR(100),
+    `guarantor_phone` VARCHAR(20),
     `latitude` DECIMAL(10, 8),
     `longitude` DECIMAL(11, 8),
     `verification_status` ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    `identity_verified` BOOLEAN DEFAULT FALSE,
     `average_rating` DECIMAL(3, 2) DEFAULT 0.00,
     `total_reviews` INT DEFAULT 0,
     `is_available` BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 3.1 Artisan Verifications (Security/Tracking)
+CREATE TABLE IF NOT EXISTS `artisan_verifications` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `artisan_id` INT NOT NULL,
+    `id_type` ENUM('national_id', 'drivers_license', 'voters_card', 'passport') NOT NULL,
+    `id_number` VARCHAR(50) NOT NULL,
+    `id_image_front` VARCHAR(255),
+    `id_image_back` VARCHAR(255),
+    `status` ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    `admin_notes` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`artisan_id`) REFERENCES `artisans`(`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 3.2 Artisan Portfolio (Skill Showcase)
+CREATE TABLE IF NOT EXISTS `artisan_portfolios` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `artisan_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`artisan_id`) REFERENCES `artisans`(`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 4. Artisan Skills (Many-to-Many Bridge)
