@@ -22,7 +22,11 @@ class AuthRepositoryImpl implements AuthRepository {
         throw response.message ?? 'Signup failed';
       }
     } on DioException catch (e) {
-      throw e.response?.data['error'] ?? 'Network error';
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Network error';
+      }
+      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
       rethrow;
     }
@@ -41,7 +45,11 @@ class AuthRepositoryImpl implements AuthRepository {
         throw response.message ?? 'Login failed';
       }
     } on DioException catch (e) {
-      throw e.response?.data['error'] ?? 'Invalid credentials';
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Invalid credentials';
+      }
+      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
       rethrow;
     }

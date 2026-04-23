@@ -15,12 +15,12 @@ class ApiClient {
 
   Future<ApiResponse<AuthData>> signup(Map<String, dynamic> body) async {
     final response = await dio.post('/auth/signup', data: body);
-    return ApiResponse.fromJson(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
+    return _safeParse(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
   }
 
   Future<ApiResponse<AuthData>> login(Map<String, dynamic> body) async {
     final response = await dio.post('/auth/login', data: body);
-    return ApiResponse.fromJson(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
+    return _safeParse(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
   }
 
   Future<ApiResponse<List<Artisan>>> getArtisans({int? categoryId, double? minRating}) async {
@@ -28,42 +28,60 @@ class ApiClient {
       if (categoryId != null) 'category': categoryId,
       if (minRating != null) 'rating': minRating,
     });
-    return ApiResponse.fromJson(response.data, (json) => (json as List).map((i) => Artisan.fromJson(i as Map<String, dynamic>)).toList());
+    return _safeParse(response.data, (json) => (json as List).map((i) => Artisan.fromJson(i as Map<String, dynamic>)).toList());
   }
 
   Future<ApiResponse<Artisan>> getArtisanProfile(int id) async {
     final response = await dio.get('/artisan/profile/$id');
-    return ApiResponse.fromJson(response.data, (json) => Artisan.fromJson(json as Map<String, dynamic>));
+    return _safeParse(response.data, (json) => Artisan.fromJson(json as Map<String, dynamic>));
   }
 
   Future<ApiResponse<List<Map<String, dynamic>>>> getCategories() async {
     final response = await dio.get('/category');
-    return ApiResponse.fromJson(response.data, (json) => List<Map<String, dynamic>>.from(json as List));
+    return _safeParse(response.data, (json) => List<Map<String, dynamic>>.from(json as List));
   }
 
   Future<ApiResponse<Map<String, dynamic>>> createBooking(Map<String, dynamic> body) async {
     final response = await dio.post('/booking/create', data: body);
-    return ApiResponse.fromJson(response.data, (json) => json as Map<String, dynamic>);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
+
 
   Future<ApiResponse<List<Booking>>> getBookingHistory() async {
     final response = await dio.get('/booking/history');
-    return ApiResponse.fromJson(response.data, (json) => (json as List).map((i) => Booking.fromJson(i as Map<String, dynamic>)).toList());
+    return _safeParse(response.data, (json) => (json as List).map((i) => Booking.fromJson(i as Map<String, dynamic>)).toList());
   }
 
   Future<ApiResponse<Map<String, dynamic>>> updateStatus(Map<String, dynamic> body) async {
     final response = await dio.post('/booking/updateStatus', data: body);
-    return ApiResponse.fromJson(response.data, (json) => json as Map<String, dynamic>);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> initializePayment(Map<String, dynamic> body) async {
     final response = await dio.post('/payment/initialize', data: body);
-    return ApiResponse.fromJson(response.data, (json) => json as Map<String, dynamic>);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> verifyPayment(Map<String, dynamic> body) async {
     final response = await dio.post('/payment/verify', data: body);
-    return ApiResponse.fromJson(response.data, (json) => json as Map<String, dynamic>);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  ApiResponse<T> _safeParse<T>(dynamic data, T Function(Object? json) fromJsonT) {
+    if (data is Map<String, dynamic>) {
+      try {
+        return ApiResponse.fromJson(data, fromJsonT);
+      } catch (e) {
+        return ApiResponse<T>(
+          status: 'error',
+          message: 'Failed to parse server response.',
+        );
+      }
+    }
+    return ApiResponse<T>(
+      status: 'error',
+      message: 'Invalid server response format.',
+    );
   }
 }
 
