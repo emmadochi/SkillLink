@@ -28,4 +28,15 @@ class Category {
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    /**
+     * Get sub-services for a specific category.
+     */
+    public function getServicesByCategoryId($categoryId) {
+        $query = "SELECT * FROM category_services WHERE category_id = :cid ORDER BY service_name ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':cid', $categoryId);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }

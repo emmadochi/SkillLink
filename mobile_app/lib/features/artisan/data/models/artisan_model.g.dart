@@ -12,6 +12,7 @@ Artisan _$ArtisanFromJson(Map<String, dynamic> json) => Artisan(
       experienceYears: json['experience_years'] == null
           ? 0
           : Artisan._toInt(json['experience_years']),
+      categoryId: Artisan._toInt(json['category_id']),
       rating: json['average_rating'] == null
           ? 0.0
           : Artisan._toDouble(json['average_rating']),
@@ -36,6 +37,7 @@ Map<String, dynamic> _$ArtisanToJson(Artisan instance) => <String, dynamic>{
       'user_id': instance.userId,
       'bio': instance.bio,
       'experience_years': instance.experienceYears,
+      'category_id': instance.categoryId,
       'average_rating': instance.rating,
       'location_name': instance.locationName,
       'business_address': instance.businessAddress,

@@ -10,6 +10,8 @@ class Artisan {
   final String? bio;
   @JsonKey(name: 'experience_years', fromJson: _toInt)
   final int experienceYears;
+  @JsonKey(name: 'category_id', fromJson: _toInt)
+  final int? categoryId;
   @JsonKey(name: 'average_rating', fromJson: _toDouble)
   final double rating;
 
@@ -36,6 +38,7 @@ class Artisan {
     required this.userId,
     this.bio,
     this.experienceYears = 0,
+    this.categoryId,
     this.rating = 0.0,
     this.locationName,
     this.businessAddress,

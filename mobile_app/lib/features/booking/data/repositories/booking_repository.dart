@@ -6,6 +6,7 @@ abstract class BookingRepository {
   Future<Map<String, dynamic>> createBooking(Map<String, dynamic> data);
   Future<List<Booking>> getBookingHistory();
   Future<bool> updateBookingStatus(int id, String status, {String? reason});
+  Future<List<Map<String, dynamic>>> getCategoryServices(int categoryId);
 }
 
 class BookingRepositoryImpl implements BookingRepository {
@@ -58,6 +59,20 @@ class BookingRepositoryImpl implements BookingRepository {
       throw e.response?.data['error'] ?? 'Update failed';
     } catch (e) {
       rethrow;
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getCategoryServices(int categoryId) async {
+    try {
+      final response = await _apiClient.getCategoryServices(categoryId);
+      if (response.status == 'success' && response.data != null) {
+        return response.data!;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
   }
 }

@@ -23,7 +23,7 @@ class Artisan {
      * Search artisans by category, location, and rating.
      */
     public function search($filters = []) {
-        $query = "SELECT u.id, u.name, u.avatar_url, a.bio, a.skill, a.average_rating, a.experience_years, a.location_name
+        $query = "SELECT u.id, u.name, u.avatar_url, a.bio, a.skill, a.category_id, a.average_rating, a.experience_years, a.location_name
                   FROM " . $this->table . " a
                   JOIN users u ON u.id = a.user_id
                   WHERE a.verification_status = 'approved'";

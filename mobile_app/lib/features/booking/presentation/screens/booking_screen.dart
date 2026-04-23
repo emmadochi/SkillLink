@@ -91,11 +91,20 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: _step == 0
-                  ? _ServiceStep(
-                      services: _services,
-                      selected: _selectedService,
-                      onSelect: (s) => setState(() => _selectedService = s),
-                    )
+                  ? ref.watch(artisanProfileProvider(int.parse(widget.artisanId))).when(
+                        data: (artisan) => ref.watch(categoryServicesProvider(artisan.categoryId ?? 1)).when(
+                              data: (services) => _ServiceStep(
+                                services: services.map((s) => s['service_name'] as String).toList(),
+                                icons: services.map((s) => s['icon_name'] as String).toList(),
+                                selected: _selectedService,
+                                onSelect: (s) => setState(() => _selectedService = s),
+                              ),
+                              loading: () => const Center(child: CircularProgressIndicator()),
+                              error: (e, __) => Center(child: Text('Error loading services: $e')),
+                            ),
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (e, __) => Center(child: Text('Error: $e')),
+                      )
                   : _step == 1
                       ? _DateTimeStep(
                           selectedDate: _selectedDate,
@@ -153,10 +162,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           
                           String formattedTime = '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}:00';
                           String scheduledAt = '${_selectedDate!.toIso8601String().split('T')[0]} $formattedTime';
+                          final artisan = ref.read(artisanProfileProvider(int.parse(widget.artisanId))).value;
                           
                           await repo.createBooking({
                             'artisan_id': widget.artisanId,
-                            'category_id': 1, // Will be dynamic in Phase 3
+                            'category_id': artisan?.categoryId ?? 1,
                             'service_description': '$_selectedService: ${_descCtrl.text}',
                             'scheduled_at': scheduledAt,
                             'price': 5000,
@@ -194,14 +204,33 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
 class _ServiceStep extends StatelessWidget {
   final List<String> services;
+  final List<String> icons;
   final String selected;
   final ValueChanged<String> onSelect;
 
   const _ServiceStep({
     required this.services,
+    required this.icons,
     required this.selected,
     required this.onSelect,
   });
+
+  IconData _getIcon(String name) {
+    switch (name) {
+      case 'bolt_outlined': return Icons.bolt_outlined;
+      case 'build_circle_outlined': return Icons.build_circle_outlined;
+      case 'videocam_outlined': return Icons.videocam_outlined;
+      case 'wb_sunny_outlined': return Icons.wb_sunny_outlined;
+      case 'water_drop_outlined': return Icons.water_drop_outlined;
+      case 'bathtub_outlined': return Icons.bathtub_outlined;
+      case 'plumbing_outlined': return Icons.plumbing_outlined;
+      case 'chair_outlined': return Icons.chair_outlined;
+      case 'door_front_outlined': return Icons.door_front_outlined;
+      case 'kitchen_outlined': return Icons.kitchen_outlined;
+      case 'house_siding_outlined': return Icons.house_siding_outlined;
+      default: return Icons.handyman_outlined;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +242,11 @@ class _ServiceStep extends StatelessWidget {
         Text('What do you need help with?',
             style: AppTypography.bodyMd.copyWith(color: AppColors.outline)),
         const SizedBox(height: 24),
-        ...services.map((s) {
+        if (services.isEmpty)
+          const Center(child: Text('No specific services listed for this category.')),
+        ...List.generate(services.length, (i) {
+          final s = services[i];
+          final iconName = icons[i];
           final sel = selected == s;
           return GestureDetector(
             onTap: () => onSelect(s),
@@ -229,7 +262,7 @@ class _ServiceStep extends StatelessWidget {
                     : null,
               ),
               child: Row(children: [
-                Icon(Icons.bolt_outlined,
+                Icon(_getIcon(iconName),
                     color: sel ? AppColors.primary : AppColors.outline),
                 const SizedBox(width: 14),
                 Expanded(child: Text(s, style: Theme.of(context).textTheme.titleSmall)),

@@ -44,6 +44,11 @@ class ApiClient {
     return _safeParse(response.data, (json) => List<Map<String, dynamic>>.from(json as List));
   }
 
+  Future<ApiResponse<List<Map<String, dynamic>>>> getCategoryServices(int id) async {
+    final response = await dio.get('/category/services', queryParameters: {'id': id});
+    return _safeParse(response.data, (json) => List<Map<String, dynamic>>.from(json as List));
+  }
+
   Future<ApiResponse<Map<String, dynamic>>> createBooking(Map<String, dynamic> body) async {
     final response = await dio.post('/booking/create', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);

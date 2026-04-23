@@ -17,3 +17,8 @@ BookingRepository bookingRepository(BookingRepositoryRef ref) {
 Future<List<Booking>> bookingHistory(BookingHistoryRef ref) {
   return ref.watch(bookingRepositoryProvider).getBookingHistory();
 }
+
+@riverpod
+Future<List<Map<String, dynamic>>> categoryServices(CategoryServicesRef ref, int categoryId) {
+  return ref.watch(bookingRepositoryProvider).getCategoryServices(categoryId);
+}
