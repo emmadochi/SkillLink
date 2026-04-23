@@ -45,6 +45,12 @@ try {
                     }
                 }
             }
+
+            if ($table === 'artisan_verifications') {
+                $stmt = $conn->query("DESCRIBE artisan_verifications");
+                $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                echo "  [INFO] Columns found: " . implode(', ', $columns) . "\n";
+            }
         } else {
             echo "[MISSING] Table '$table' does not exist!\n";
         }
