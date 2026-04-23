@@ -1,6 +1,6 @@
 <!-- Artisan Verification Portal -->
 <div class="mb-5 animate-fade-in">
-    <a href="/SkillLink/admin/user?tab=artisans" class="btn-premium btn-outline btn-sm">
+    <a href="<?php echo admin_url('user?tab=artisans'); ?>" class="btn-premium btn-outline btn-sm">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
         Back to Artisan Directory
     </a>
@@ -85,7 +85,7 @@
         <!-- Decision Actions -->
         <div class="flex-row gap-3" style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
             <?php if ($artisan['status'] !== 'approved'): ?>
-            <form action="/SkillLink/admin/user/approve" method="POST">
+            <form action="<?php echo admin_url('user/approve'); ?>" method="POST">
                 <input type="hidden" name="id" value="<?php echo $artisan['id']; ?>">
                 <button type="submit" class="btn-premium btn-primary" style="padding: 0.875rem 2rem; background: var(--success);">
                     Approve Application
@@ -94,7 +94,7 @@
             <?php endif; ?>
 
             <?php if ($artisan['status'] !== 'rejected'): ?>
-            <form action="/SkillLink/admin/user/reject" method="POST">
+            <form action="<?php echo admin_url('user/reject'); ?>" method="POST">
                 <input type="hidden" name="id" value="<?php echo $artisan['id']; ?>">
                 <button type="submit" class="btn-premium btn-outline" style="padding: 0.875rem 2rem; color: var(--danger); border-color: var(--danger);">
                     Reject Application

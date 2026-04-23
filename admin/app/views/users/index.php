@@ -119,7 +119,7 @@
                             </span>
                         </td>
                         <td style="text-align: right;">
-                             <a href="/SkillLink/admin/user/details?id=<?php echo $a['id']; ?>" class="btn-premium btn-primary btn-sm">
+                             <a href="<?php echo admin_url('user/details?id=' . $a['id']); ?>" class="btn-premium btn-primary btn-sm">
                                 <?php echo $a['status'] === 'pending' ? 'Verify Application' : 'Manage'; ?>
                              </a>
                         </td>
