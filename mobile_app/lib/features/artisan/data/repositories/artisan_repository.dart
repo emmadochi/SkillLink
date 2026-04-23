@@ -25,7 +25,11 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
         throw response.message ?? 'Failed to fetch artisans';
       }
     } on DioException catch (e) {
-      throw e.response?.data['error'] ?? 'Network error';
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Network error';
+      }
+      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
       rethrow;
     }
@@ -41,7 +45,11 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
         throw response.message ?? 'Profile not found';
       }
     } on DioException catch (e) {
-      throw e.response?.data['error'] ?? 'Network error';
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Network error';
+      }
+      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
       rethrow;
     }

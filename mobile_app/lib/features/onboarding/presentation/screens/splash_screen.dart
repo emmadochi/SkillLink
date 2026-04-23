@@ -1,18 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../auth/presentation/providers/user_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnim;
@@ -33,9 +37,33 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Timer(const Duration(milliseconds: AppConstants.splashDuration), () {
-      if (mounted) context.go(AppRoutes.onboarding);
-    });
+    _handleNavigation();
+  }
+
+  Future<void> _handleNavigation() async {
+    await Future.delayed(const Duration(milliseconds: AppConstants.splashDuration));
+    if (!mounted) return;
+
+    final storage = const FlutterSecureStorage();
+    final token = await storage.read(key: AppConstants.keyToken);
+    
+    if (token != null) {
+      // Check if user data is also present in storage
+      final user = await ref.read(userStateProvider.future);
+      if (user != null) {
+        context.go(AppRoutes.home);
+        return;
+      }
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final isOnboarded = prefs.getBool(AppConstants.keyOnboarded) ?? false;
+
+    if (isOnboarded) {
+      context.go(AppRoutes.login);
+    } else {
+      context.go(AppRoutes.onboarding);
+    }
   }
 
   @override
@@ -57,19 +85,10 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Full wordmark (logo1.png) — white-tinted via ColorFiltered
-                  ColorFiltered(
-                    colorFilter: const ColorFilter.matrix([
-                      1, 0, 0, 0, 0,
-                      0, 1, 0, 0, 0,
-                      0, 0, 1, 0, 0,
-                      0, 0, 0, 1, 0,
-                    ]),
-                    child: Image.asset(
-                      'assets/images/logo1.png',
-                      width: 220,
-                      fit: BoxFit.contain,
-                    ),
+                  Image.asset(
+                    'assets/images/logo1.png',
+                    width: 220,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 12),
                   Text(

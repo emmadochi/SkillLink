@@ -11,6 +11,12 @@ class Category {
     public function __construct() {
         $database = new Database();
         $this->conn = $database->getConnection();
+        if (!$this->conn) {
+            header('Content-Type: application/json');
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
+            exit;
+        }
     }
 
     /**

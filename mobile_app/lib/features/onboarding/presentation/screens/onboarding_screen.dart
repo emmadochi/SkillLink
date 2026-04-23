@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
@@ -98,7 +100,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Row(
                       children: [
                         TextButton(
-                          onPressed: () => context.go(AppRoutes.login),
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setBool(AppConstants.keyOnboarded, true);
+                            if (mounted) context.go(AppRoutes.login);
+                          },
                           child: Text('Skip',
                               style: AppTypography.labelLg.copyWith(
                                 color: AppColors.onPrimary.withOpacity(0.70),
@@ -122,13 +128,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         SkillLinkButton.gradient(
                           label: 'Get Started',
                           width: double.infinity,
-                          onPressed: () => context.go(AppRoutes.signup),
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setBool(AppConstants.keyOnboarded, true);
+                            if (mounted) context.go(AppRoutes.signup);
+                          },
                         ),
                         const SizedBox(height: 16),
                         SkillLinkButton.outlined(
                           label: 'I already have an account',
                           width: double.infinity,
-                          onPressed: () => context.go(AppRoutes.login),
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setBool(AppConstants.keyOnboarded, true);
+                            if (mounted) context.go(AppRoutes.login);
+                          },
                         ),
                       ],
                     ),

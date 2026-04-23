@@ -7,7 +7,10 @@ import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:skilllink_app/features/auth/presentation/providers/auth_repository_provider.dart';
+import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
+import 'package:skilllink_app/core/constants/app_constants.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -41,13 +44,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     try {
       final repository = ref.read(authRepositoryProvider);
-      await repository.signup({
+      final authData = await repository.signup({
         'name': _nameCtrl.text.trim(),
         'email': _emailCtrl.text.trim(),
         'phone': _phoneCtrl.text.trim(),
         'password': _passwordCtrl.text,
         'role': _role,
       });
+
+      // Save token to secure storage
+      const storage = FlutterSecureStorage();
+      await storage.write(key: AppConstants.keyToken, value: authData.token);
+      
+      // Update User Provider
+      await ref.read(userStateProvider.notifier).setUser(authData.user);
 
       if (mounted) {
         setState(() => _isLoading = false);
