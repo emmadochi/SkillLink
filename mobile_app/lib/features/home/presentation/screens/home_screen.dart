@@ -273,7 +273,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             padding: const EdgeInsets.only(right: 16),
                             child: SkillLinkArtisanCard(
                               name: artisan.user?.name ?? 'Artisan',
-                              craft: artisan.bio ?? artisan.skill ?? 'Professional Artisan',
+                              craft: artisan.skill ?? artisan.bio ?? 'Professional Artisan',
                               imageUrl: artisan.user?.avatarUrl ??
                                   'https://i.pravatar.cc/200?u=${artisan.userId}',
                               rating: artisan.rating.toDouble(),

@@ -168,7 +168,7 @@ class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
                                               color: AppColors.primary),
                                         ]),
                                         const SizedBox(height: 3),
-                                        Text(artisan.bio ?? artisan.skill ?? 'Professional Artisan',
+                                        Text(artisan.skill ?? artisan.bio ?? 'Professional Artisan',
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: Theme.of(context)
