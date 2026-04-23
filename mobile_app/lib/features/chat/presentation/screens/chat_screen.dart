@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -18,6 +20,24 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _msgCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      final partnerId = int.tryParse(widget.conversationId) ?? 1;
+      ref.invalidate(conversationProvider(partnerId));
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    _msgCtrl.dispose();
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
 
   void _sendMessage() async {
     final text = _msgCtrl.text.trim();
@@ -45,7 +65,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final partnerId = int.tryParse(widget.conversationId) ?? 1;
     final artisanAsync = ref.watch(artisanProfileProvider(partnerId));
     final messagesAsync = ref.watch(conversationProvider(partnerId));
-    final user = ref.watch(authRepositoryProvider).currentUser;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
