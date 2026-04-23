@@ -29,7 +29,7 @@ class ArtisanController extends Controller {
                 'status' => 'success',
                 'data' => $artisans
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->error('Failed to search artisans: ' . $e->getMessage(), 500);
         }
     }
@@ -52,7 +52,7 @@ class ArtisanController extends Controller {
                 'status' => 'success',
                 'data' => $profile
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->error('Error loading profile: ' . $e->getMessage(), 500);
         }
     }
@@ -79,7 +79,7 @@ class ArtisanController extends Controller {
             } else {
                 $this->error('Failed to update artisan profile');
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->error('Error updating profile: ' . $e->getMessage(), 500);
         }
     }
@@ -105,7 +105,7 @@ class ArtisanController extends Controller {
             } else {
                 $this->error('Failed to submit verification');
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->error('Error submitting verification: ' . $e->getMessage(), 500);
         }
     }
@@ -130,7 +130,7 @@ class ArtisanController extends Controller {
             } else {
                 $this->error('Failed to add portfolio item');
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->error('Error adding portfolio: ' . $e->getMessage(), 500);
         }
     }
