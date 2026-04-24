@@ -176,12 +176,11 @@ class _ConversationProviderElement
   int get partnerId => (origin as ConversationProvider).partnerId;
 }
 
-String _$chatHistoryHash() => r'5f6b4a87aa86c1966cc0eb2664cdc38ce03069ae';
+String _$chatHistoryHash() => r'1f9a2ca02c6fcf1f05cbd18f87622c01da5a8f20';
 
 /// See also [chatHistory].
 @ProviderFor(chatHistory)
-final chatHistoryProvider =
-    AutoDisposeFutureProvider<List<ChatConversation>>.internal(
+final chatHistoryProvider = FutureProvider<List<ChatConversation>>.internal(
   chatHistory,
   name: r'chatHistoryProvider',
   debugGetCreateSourceHash:
@@ -192,6 +191,6 @@ final chatHistoryProvider =
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef ChatHistoryRef = AutoDisposeFutureProviderRef<List<ChatConversation>>;
+typedef ChatHistoryRef = FutureProviderRef<List<ChatConversation>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

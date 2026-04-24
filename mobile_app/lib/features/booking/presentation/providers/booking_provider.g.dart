@@ -24,12 +24,11 @@ final bookingRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef BookingRepositoryRef = AutoDisposeProviderRef<BookingRepository>;
-String _$bookingHistoryHash() => r'f727ee33e7f413458ef0c3f91ae2b1ddd999e535';
+String _$bookingHistoryHash() => r'4cff763b9641cc4086d1480451da00fc2d0fa7b8';
 
 /// See also [bookingHistory].
 @ProviderFor(bookingHistory)
-final bookingHistoryProvider =
-    AutoDisposeFutureProvider<List<Booking>>.internal(
+final bookingHistoryProvider = FutureProvider<List<Booking>>.internal(
   bookingHistory,
   name: r'bookingHistoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -41,8 +40,8 @@ final bookingHistoryProvider =
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef BookingHistoryRef = AutoDisposeFutureProviderRef<List<Booking>>;
-String _$categoryServicesHash() => r'6308ac3a6f848ccd98570840f6485b97529bbee2';
+typedef BookingHistoryRef = FutureProviderRef<List<Booking>>;
+String _$categoryServicesHash() => r'21f2bebb7b5c0486cc5a162fe65a214e6b7c0781';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -110,7 +109,7 @@ class CategoryServicesFamily
 
 /// See also [categoryServices].
 class CategoryServicesProvider
-    extends AutoDisposeFutureProvider<List<Map<String, dynamic>>> {
+    extends FutureProvider<List<Map<String, dynamic>>> {
   /// See also [categoryServices].
   CategoryServicesProvider(
     int categoryId,
@@ -163,7 +162,7 @@ class CategoryServicesProvider
   }
 
   @override
-  AutoDisposeFutureProviderElement<List<Map<String, dynamic>>> createElement() {
+  FutureProviderElement<List<Map<String, dynamic>>> createElement() {
     return _CategoryServicesProviderElement(this);
   }
 
@@ -183,14 +182,13 @@ class CategoryServicesProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin CategoryServicesRef
-    on AutoDisposeFutureProviderRef<List<Map<String, dynamic>>> {
+mixin CategoryServicesRef on FutureProviderRef<List<Map<String, dynamic>>> {
   /// The parameter `categoryId` of this provider.
   int get categoryId;
 }
 
 class _CategoryServicesProviderElement
-    extends AutoDisposeFutureProviderElement<List<Map<String, dynamic>>>
+    extends FutureProviderElement<List<Map<String, dynamic>>>
     with CategoryServicesRef {
   _CategoryServicesProviderElement(super.provider);
 

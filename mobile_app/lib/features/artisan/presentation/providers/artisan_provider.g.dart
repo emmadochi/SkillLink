@@ -24,7 +24,7 @@ final artisanRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ArtisanRepositoryRef = AutoDisposeProviderRef<ArtisanRepository>;
-String _$artisansHash() => r'26db8758fa008905fa715047423a2186cf374d50';
+String _$artisansHash() => r'e031da39f03c8d38059b0878dc6a0e1bb0103e95';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -96,7 +96,7 @@ class ArtisansFamily extends Family<AsyncValue<List<Artisan>>> {
 }
 
 /// See also [artisans].
-class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
+class ArtisansProvider extends FutureProvider<List<Artisan>> {
   /// See also [artisans].
   ArtisansProvider({
     int? categoryId,
@@ -159,7 +159,7 @@ class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
   }
 
   @override
-  AutoDisposeFutureProviderElement<List<Artisan>> createElement() {
+  FutureProviderElement<List<Artisan>> createElement() {
     return _ArtisansProviderElement(this);
   }
 
@@ -184,7 +184,7 @@ class ArtisansProvider extends AutoDisposeFutureProvider<List<Artisan>> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin ArtisansRef on AutoDisposeFutureProviderRef<List<Artisan>> {
+mixin ArtisansRef on FutureProviderRef<List<Artisan>> {
   /// The parameter `categoryId` of this provider.
   int? get categoryId;
 
@@ -195,8 +195,8 @@ mixin ArtisansRef on AutoDisposeFutureProviderRef<List<Artisan>> {
   String? get query;
 }
 
-class _ArtisansProviderElement
-    extends AutoDisposeFutureProviderElement<List<Artisan>> with ArtisansRef {
+class _ArtisansProviderElement extends FutureProviderElement<List<Artisan>>
+    with ArtisansRef {
   _ArtisansProviderElement(super.provider);
 
   @override
@@ -207,7 +207,7 @@ class _ArtisansProviderElement
   String? get query => (origin as ArtisansProvider).query;
 }
 
-String _$artisanProfileHash() => r'8d511ab194b220d868bdbc936f4a45ca595cde6e';
+String _$artisanProfileHash() => r'cd01d36c615fbed149c80633c95ab3aa352886a8';
 
 /// See also [artisanProfile].
 @ProviderFor(artisanProfile)
@@ -252,7 +252,7 @@ class ArtisanProfileFamily extends Family<AsyncValue<Artisan>> {
 }
 
 /// See also [artisanProfile].
-class ArtisanProfileProvider extends AutoDisposeFutureProvider<Artisan> {
+class ArtisanProfileProvider extends FutureProvider<Artisan> {
   /// See also [artisanProfile].
   ArtisanProfileProvider(
     int id,
@@ -304,7 +304,7 @@ class ArtisanProfileProvider extends AutoDisposeFutureProvider<Artisan> {
   }
 
   @override
-  AutoDisposeFutureProviderElement<Artisan> createElement() {
+  FutureProviderElement<Artisan> createElement() {
     return _ArtisanProfileProviderElement(this);
   }
 
@@ -324,13 +324,13 @@ class ArtisanProfileProvider extends AutoDisposeFutureProvider<Artisan> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin ArtisanProfileRef on AutoDisposeFutureProviderRef<Artisan> {
+mixin ArtisanProfileRef on FutureProviderRef<Artisan> {
   /// The parameter `id` of this provider.
   int get id;
 }
 
-class _ArtisanProfileProviderElement
-    extends AutoDisposeFutureProviderElement<Artisan> with ArtisanProfileRef {
+class _ArtisanProfileProviderElement extends FutureProviderElement<Artisan>
+    with ArtisanProfileRef {
   _ArtisanProfileProviderElement(super.provider);
 
   @override

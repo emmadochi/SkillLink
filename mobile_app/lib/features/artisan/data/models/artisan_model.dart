@@ -35,7 +35,8 @@ class Artisan {
   final String? skill;
   @JsonKey(name: 'hourly_rate', fromJson: _toDouble)
   final double hourlyRate;
-  final User? user; // Optional join data
+  @JsonKey(name: 'user')
+  final ArtisanMiniUser? user; // Use specialized mini-user to avoid full profile mapping
   final List<PortfolioItem>? portfolio;
 
   Artisan({
@@ -60,6 +61,19 @@ class Artisan {
   factory Artisan.fromJson(Map<String, dynamic> json) => _$ArtisanFromJson(json);
 
   Map<String, dynamic> toJson() => _$ArtisanToJson(this);
+}
+
+@JsonSerializable()
+class ArtisanMiniUser {
+  final int id;
+  final String name;
+  @JsonKey(name: 'avatar_url')
+  final String? avatarUrl;
+
+  ArtisanMiniUser({required this.id, required this.name, this.avatarUrl});
+
+  factory ArtisanMiniUser.fromJson(Map<String, dynamic> json) => _$ArtisanMiniUserFromJson(json);
+  Map<String, dynamic> toJson() => _$ArtisanMiniUserToJson(this);
 }
 
 @JsonSerializable()
