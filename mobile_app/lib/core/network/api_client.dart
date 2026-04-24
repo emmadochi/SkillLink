@@ -111,6 +111,16 @@ class ApiClient {
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
+  Future<ApiResponse<Map<String, dynamic>>> toggleSaveArtisan(int artisanId) async {
+    final response = await dio.post('/artisan/toggle-save', data: {'artisan_id': artisanId});
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  Future<ApiResponse<List<Artisan>>> getSavedArtisans() async {
+    final response = await dio.get('/artisan/saved');
+    return _safeParse(response.data, (json) => (json as List).map((i) => Artisan.fromJson(i as Map<String, dynamic>)).toList());
+  }
+
   Future<ApiResponse<Map<String, dynamic>>> sendMessage(Map<String, dynamic> body) async {
     final response = await dio.post('/chat/send', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);

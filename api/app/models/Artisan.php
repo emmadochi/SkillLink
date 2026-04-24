@@ -80,7 +80,7 @@ class Artisan {
     /**
      * Get artisan full profile details.
      */
-    public function getProfile($id) {
+    public function getProfile($id, $currentUserId = null) {
         $query = "SELECT u.id as user_id, u.name, u.email, u.phone, u.avatar_url, a.*,
                   (SELECT status FROM artisan_verifications WHERE artisan_id = a.user_id ORDER BY created_at DESC LIMIT 1) as identity_status
                   FROM " . $this->table . " a
@@ -104,6 +104,16 @@ class Artisan {
             $profile['portfolio'] = $this->getPortfolio($id);
             // Get reviews
             $profile['reviews'] = $this->getReviews($id);
+            // Check if saved
+            $profile['is_saved'] = false;
+            if ($currentUserId) {
+                $sQuery = "SELECT 1 FROM saved_artisans WHERE user_id = :cuid AND artisan_id = :aid";
+                $sStmt = $this->conn->prepare($sQuery);
+                $sStmt->bindParam(':cuid', $currentUserId);
+                $sStmt->bindParam(':aid', $id);
+                $sStmt->execute();
+                $profile['is_saved'] = $sStmt->fetch() ? true : false;
+            }
             // Cast types
             $profile['average_rating'] = (float)($profile['average_rating'] ?? 0.0);
             $profile['experience_years'] = (int)($profile['experience_years'] ?? 0);

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../shared/widgets/skilllink_button.dart';
 import '../providers/booking_provider.dart';
 import '../models/booking_model.dart';
 
@@ -131,6 +132,16 @@ class BookingDetailScreen extends ConsumerWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: SkillLinkButton.outlined(
+                label: 'Rebook this Artisan',
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                onPressed: () => context.push('${AppRoutes.booking}/${booking.artisanId}'),
               ),
             ),
           ],

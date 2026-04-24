@@ -55,10 +55,16 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                   actions: [
                     IconButton(
                       icon: Icon(
-                        _isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+                        artisan.isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
                         color: Colors.white,
                       ),
-                      onPressed: () => setState(() => _isSaved = !_isSaved),
+                      onPressed: () async {
+                        final success = await ref.read(artisanRepositoryProvider).toggleSaveArtisan(artisan.userId);
+                        if (success) {
+                          ref.invalidate(artisanProfileProvider(artisan.userId));
+                          ref.invalidate(savedArtisansProvider);
+                        }
+                      },
                     ),
                     IconButton(
                       icon: const Icon(Icons.share_outlined, color: Colors.white),

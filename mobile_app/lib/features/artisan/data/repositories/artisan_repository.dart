@@ -6,6 +6,8 @@ abstract class ArtisanRepository {
   Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query});
   Future<Artisan> getArtisanProfile(int id);
   Future<bool> updateArtisanProfile(Map<String, dynamic> data);
+  Future<bool> toggleSaveArtisan(int id);
+  Future<List<Artisan>> getSavedArtisans();
 }
 
 class ArtisanRepositoryImpl implements ArtisanRepository {
@@ -71,6 +73,29 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
       throw 'Server error';
     } catch (e) {
       rethrow;
+    }
+  }
+
+  @override
+  Future<bool> toggleSaveArtisan(int id) async {
+    try {
+      final response = await _apiClient.toggleSaveArtisan(id);
+      return response.status == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<List<Artisan>> getSavedArtisans() async {
+    try {
+      final response = await _apiClient.getSavedArtisans();
+      if (response.status == 'success' && response.data != null) {
+        return response.data!;
+      }
+      return [];
+    } catch (e) {
+      return [];
     }
   }
 }

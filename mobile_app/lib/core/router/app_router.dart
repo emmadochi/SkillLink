@@ -23,6 +23,7 @@ import '../../features/settings/presentation/screens/faq_screen.dart';
 import '../../features/settings/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/about_screen.dart';
 import '../../features/artisan/presentation/screens/artisan_setup_screen.dart';
+import '../../features/artisan/presentation/screens/saved_artisans_screen.dart';
 import '../../features/artisan/presentation/screens/review_submit_screen.dart';
 import '../../features/booking/presentation/screens/booking_detail_screen.dart';
 import '../constants/app_constants.dart';
@@ -157,6 +158,11 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
     GoRoute(
+      path: AppRoutes.savedArtisans,
+      name: 'saved-artisans',
+      builder: (_, __) => const SavedArtisansScreen(),
+    ),
+    GoRoute(
       path: AppRoutes.about,
       name: 'about',
       builder: (_, __) => const AboutScreen(),
@@ -174,6 +180,7 @@ abstract class AppRoutes {
   static const artisanListing     = '/artisans';
   static const artisanProfile      = '/artisan-profile';
   static const artisanProfileSetup = '/artisan-setup';
+  static const savedArtisans       = '/saved-artisans';
   static const booking             = '/booking';
   static const bookingDetail      = '/booking-detail';
   static const bookingConfirmation= '/booking-success';

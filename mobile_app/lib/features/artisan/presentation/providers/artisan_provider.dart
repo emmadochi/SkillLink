@@ -26,3 +26,8 @@ Future<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRat
 Future<Artisan> artisanProfile(ArtisanProfileRef ref, int id) {
   return ref.watch(artisanRepositoryProvider).getArtisanProfile(id);
 }
+
+@Riverpod(keepAlive: true)
+Future<List<Artisan>> savedArtisans(SavedArtisansRef ref) {
+  return ref.watch(artisanRepositoryProvider).getSavedArtisans();
+}

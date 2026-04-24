@@ -40,6 +40,8 @@ class Artisan {
   final ArtisanMiniUser? user; // Use specialized mini-user to avoid full profile mapping
   final List<PortfolioItem>? portfolio;
   final List<Review>? reviews;
+  @JsonKey(name: 'is_saved')
+  final bool isSaved;
 
   Artisan({
     required this.userId,
@@ -59,6 +61,7 @@ class Artisan {
     this.user,
     this.portfolio,
     this.reviews,
+    this.isSaved = false,
   });
 
   factory Artisan.fromJson(Map<String, dynamic> json) => _$ArtisanFromJson(json);

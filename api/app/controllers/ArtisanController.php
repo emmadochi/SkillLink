@@ -45,8 +45,11 @@ class ArtisanController extends Controller {
         if (!$id) $this->error('Artisan ID required');
 
         try {
+            $user = $this->getCurrentUser(false); // Get user if available, don't force auth
+            $currentUserId = $user ? $user['id'] : null;
+
             $artisanModel = new Artisan();
-            $profile = $artisanModel->getProfile($id);
+            $profile = $artisanModel->getProfile($id, $currentUserId);
 
             if (!$profile) {
                 $this->error('Artisan not found', 404);
@@ -164,6 +167,82 @@ class ArtisanController extends Controller {
             ]);
         } catch (\Throwable $e) {
             $this->error('Error loading reviews: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function toggleSave() {
+        $this->requireAuth();
+        $user = $this->getCurrentUser();
+        $data = $this->getPostData();
+
+        if (!isset($data['artisan_id'])) {
+            $this->error('Artisan ID required');
+        }
+
+        $artisanId = $data['artisan_id'];
+
+        try {
+            $db = (new \core\Database())->getConnection();
+            
+            // Check if already saved
+            $stmt = $db->prepare("SELECT 1 FROM saved_artisans WHERE user_id = :uid AND artisan_id = :aid");
+            $stmt->bindParam(':uid', $user['id']);
+            $stmt->bindParam(':aid', $artisanId);
+            $stmt->execute();
+            $isSaved = $stmt->fetch();
+
+            if ($isSaved) {
+                // Unsave
+                $stmt = $db->prepare("DELETE FROM saved_artisans WHERE user_id = :uid AND artisan_id = :aid");
+                $stmt->bindParam(':uid', $user['id']);
+                $stmt->bindParam(':aid', $artisanId);
+                $stmt->execute();
+                $saved = false;
+            } else {
+                // Save
+                $stmt = $db->prepare("INSERT INTO saved_artisans (user_id, artisan_id) VALUES (:uid, :aid)");
+                $stmt->bindParam(':uid', $user['id']);
+                $stmt->bindParam(':aid', $artisanId);
+                $stmt->execute();
+                $saved = true;
+            }
+
+            $this->json([
+                'status' => 'success',
+                'saved' => $saved,
+                'message' => $saved ? 'Artisan saved' : 'Artisan removed from saved'
+            ]);
+        } catch (\Throwable $e) {
+            $this->error('Error toggling save: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function getSavedArtisans() {
+        $this->requireAuth();
+        $user = $this->getCurrentUser();
+
+        try {
+            $artisanModel = new Artisan();
+            $db = (new \core\Database())->getConnection();
+            
+            $query = "SELECT u.id as user_id, u.name, u.avatar_url, a.bio, a.skill, a.average_rating, a.location_name
+                      FROM saved_artisans s
+                      JOIN artisans a ON a.user_id = s.artisan_id
+                      JOIN users u ON u.id = a.user_id
+                      WHERE s.user_id = :uid
+                      ORDER BY s.created_at DESC";
+            
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':uid', $user['id']);
+            $stmt->execute();
+            $artisans = $stmt->fetchAll();
+
+            $this->json([
+                'status' => 'success',
+                'data' => $artisans
+            ]);
+        } catch (\Throwable $e) {
+            $this->error('Error loading saved artisans: ' . $e->getMessage(), 500);
         }
     }
 }
