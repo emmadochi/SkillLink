@@ -42,18 +42,20 @@ spl_autoload_register(function ($class) {
 
 // Route requested URI
 $request_uri = $_SERVER['REQUEST_URI'];
-$script_name = $_SERVER['SCRIPT_NAME']; // e.g., /SkillLink/api/index.php
-$base_dir = dirname($script_name); // e.g., /SkillLink/api
-$base_path = rtrim($base_dir, '/') . '/v1/';
+$script_name = $_SERVER['SCRIPT_NAME']; 
+$base_dir = dirname($script_name); 
+$base_path = rtrim($base_dir, '/') . '/v1';
 
-$path = str_replace($base_path, '', $request_uri);
-$path = explode('?', $path)[0]; // Remove query strings
+// Get the path after /v1
+$path = parse_url($request_uri, PHP_URL_PATH);
+$path = str_replace($base_path, '', $path);
 $path = trim($path, '/');
 
 // Dispatcher
 $parts = explode('/', $path);
 $controller_name = !empty($parts[0]) ? ucfirst($parts[0]) . 'Controller' : null;
 $method = $parts[1] ?? 'index';
+if ($method === "") $method = 'index';
 
 if (!$controller_name) {
     header('Content-Type: application/json');
