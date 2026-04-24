@@ -254,6 +254,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
               child: Row(children: [
+                const Icon(Icons.auto_awesome_rounded, size: 20, color: Color(0xFFFFB84D)),
+                const SizedBox(width: 8),
                 Text('Featured Artisans',
                     style: Theme.of(context).textTheme.titleMedium),
                 const Spacer(),
@@ -269,7 +271,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 280,
+              height: 310,
               child: ref.watch(artisansProvider(query: _searchCtrl.text)).when(
                     data: (artisans) {
                       if (artisans.isEmpty) {
@@ -331,56 +333,92 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     delegate: SliverChildBuilderDelegate(
                       (context, i) {
                         final booking = bookings[i];
+                        final statusColor = _getStatusColor(booking.status);
+                        
                         return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
                           child: SkillLinkCard(
-                            padding: const EdgeInsets.all(16),
-                            onTap: () {},
-                            child: Row(children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: AppColors.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(14),
+                            padding: const EdgeInsets.all(12),
+                            onTap: () => context.push('${AppRoutes.bookingDetail}/${booking.id}'),
+                            child: Row(
+                              children: [
+                                // Artisan Avatar or Category Icon
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    width: 54,
+                                    height: 54,
+                                    color: AppColors.surfaceContainerHigh,
+                                    child: booking.partnerAvatar != null
+                                        ? Image.network(
+                                            booking.partnerAvatar!.startsWith('http') 
+                                              ? booking.partnerAvatar! 
+                                              : 'http://localhost/SkillLink/api/public/${booking.partnerAvatar}',
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) => const Icon(Icons.person, color: AppColors.outline),
+                                          )
+                                        : const Icon(Icons.handyman_rounded, color: AppColors.primary),
+                                  ),
                                 ),
-                                child: const Icon(Icons.bolt_outlined,
-                                    color: AppColors.primary),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        booking.partnerName ?? 'Artisan',
+                                        style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.w700),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        booking.categoryName ?? 'Service',
+                                        style: AppTypography.labelSm.copyWith(color: AppColors.outline),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.calendar_today_rounded, size: 10, color: AppColors.outline.withOpacity(0.6)),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            _formatDate(booking.scheduledAt),
+                                            style: TextStyle(fontSize: 10, color: AppColors.outline.withOpacity(0.6)),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(booking.serviceDescription ?? 'Service',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall),
-                                    const SizedBox(height: 3),
-                                    Text('Status: ${booking.status}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium),
+                                    Text(
+                                      '₦${NumberFormat('#,###').format(booking.price)}',
+                                      style: AppTypography.titleSm.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: statusColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(100),
+                                      ),
+                                      child: Text(
+                                        booking.status.toUpperCase(),
+                                        style: TextStyle(
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w800,
+                                          color: statusColor,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: booking.status == 'completed'
-                                      ? const Color(0xFFD6FFE8)
-                                      : const Color(0xFFFFF4D6),
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                child: Text(booking.status,
-                                    style: AppTypography.labelSm.copyWith(
-                                        color: booking.status == 'completed'
-                                            ? const Color(0xFF0A6E3A)
-                                            : const Color(0xFF856404))),
-                              ),
-                            ]),
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -402,4 +440,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
      ),
     );
   }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed': return const Color(0xFF0A6E3A);
+      case 'confirmed': return AppColors.primary;
+      case 'pending': return const Color(0xFF856404);
+      case 'cancelled': return AppColors.error;
+      default: return AppColors.outline;
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMM d, h:mm a').format(date);
+    } catch (e) {
+      return dateStr;
+    }
+  }
+}
 }
