@@ -11,7 +11,14 @@ import '../../../auth/presentation/providers/auth_repository_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String conversationId;
-  const ChatScreen({super.key, required this.conversationId});
+  final String? partnerName;
+  final String? partnerAvatar;
+  const ChatScreen({
+    super.key, 
+    required this.conversationId,
+    this.partnerName,
+    this.partnerAvatar,
+  });
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -75,25 +82,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: artisanAsync.when(
-          data: (artisan) => Row(children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage(artisan.user?.avatarUrl ?? 'https://i.pravatar.cc/60?img=10'),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(artisan.user?.name ?? 'Artisan',
-                    style: Theme.of(context).textTheme.titleSmall),
-                Text('Online',
-                    style: AppTypography.labelSm.copyWith(
-                        color: Colors.green.shade500)),
-              ],
-            ),
-          ]),
-          loading: () => const Text('Loading...'),
-          error: (_, __) => const Text('Chat'),
+          data: (artisan) => _buildHeader(
+            artisan.user?.name ?? widget.partnerName ?? 'User',
+            artisan.user?.avatarUrl ?? widget.partnerAvatar,
+          ),
+          loading: () => widget.partnerName != null 
+              ? _buildHeader(widget.partnerName!, widget.partnerAvatar)
+              : const Text('Loading...'),
+          error: (_, __) => _buildHeader(widget.partnerName ?? 'Chat', widget.partnerAvatar),
         ),
       ),
       body: Column(
@@ -117,7 +113,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       text: msg.message,
                       isPartner: isPartner,
                       time: _formatTime(msg.createdAt),
-                      partnerAvatar: isPartner ? artisanAsync.value?.user?.avatarUrl : null,
+                      partnerAvatar: isPartner 
+                          ? (artisanAsync.value?.user?.avatarUrl ?? widget.partnerAvatar) 
+                          : null,
                     );
                   },
                 );
@@ -169,6 +167,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildHeader(String name, String? avatar) {
+    return Row(children: [
+      CircleAvatar(
+        radius: 18,
+        backgroundImage: NetworkImage(avatar ?? 'https://i.pravatar.cc/60?u=${widget.conversationId}'),
+      ),
+      const SizedBox(width: 10),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(name, style: Theme.of(context).textTheme.titleSmall),
+          Text('Online',
+              style: AppTypography.labelSm.copyWith(
+                  color: Colors.green.shade500)),
+        ],
+      ),
+    ]);
   }
 
   String _formatTime(String dateStr) {

@@ -109,6 +109,8 @@ final GoRouter appRouter = GoRouter(
       name: 'chat',
       builder: (context, state) => ChatScreen(
         conversationId: state.pathParameters['conversationId']!,
+        partnerName: state.uri.queryParameters['name'],
+        partnerAvatar: state.uri.queryParameters['avatar'],
       ),
     ),
     // ── Settings ──────────────────────────────────────────────────────

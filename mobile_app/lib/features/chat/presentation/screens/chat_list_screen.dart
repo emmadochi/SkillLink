@@ -49,7 +49,12 @@ class ChatListScreen extends ConsumerWidget {
             separatorBuilder: (_, __) => const SizedBox(height: 4),
             itemBuilder: (context, i) => _ChatTile(
               chat: chats[i],
-              onTap: () => context.push('${AppRoutes.chat}/${chats[i].partnerId}'),
+              onTap: () {
+                final chat = chats[i];
+                context.push(
+                  '${AppRoutes.chat}/${chat.partnerId}?name=${Uri.encodeComponent(chat.partnerName)}&avatar=${Uri.encodeComponent(chat.partnerAvatar ?? '')}',
+                );
+              },
             ),
           );
         },

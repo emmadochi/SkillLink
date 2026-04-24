@@ -206,7 +206,13 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
               label: 'Message',
               icon: const Icon(Icons.chat_bubble_outline_rounded,
                   size: 18, color: AppColors.primary),
-              onPressed: () => context.push('${AppRoutes.chat}/${widget.artisanId}'),
+              onPressed: () {
+                artisanAsync.whenData((artisan) {
+                  final name = Uri.encodeComponent(artisan.user?.name ?? 'Artisan');
+                  final avatar = Uri.encodeComponent(artisan.user?.avatarUrl ?? '');
+                  context.push('${AppRoutes.chat}/${widget.artisanId}?name=$name&avatar=$avatar');
+                });
+              },
             ),
           ),
           const SizedBox(width: 16),
