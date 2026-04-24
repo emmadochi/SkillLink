@@ -36,20 +36,23 @@ class Message {
     }
 
     public function getChatList($userId) {
-        $query = "SELECT DISTINCT 
-                    CASE WHEN sender_id = :uid THEN receiver_id ELSE sender_id END as partner_id,
-                    u.name as partner_name, u.avatar_url as partner_avatar,
-                    (SELECT message FROM messages m2 
-                     WHERE (m2.sender_id = :uid AND m2.receiver_id = partner_id) 
-                     OR (m2.sender_id = partner_id AND m2.receiver_id = :uid) 
-                     ORDER BY m2.created_at DESC LIMIT 1) as last_message,
-                    (SELECT created_at FROM messages m3 
-                     WHERE (m3.sender_id = :uid AND m3.receiver_id = partner_id) 
-                     OR (m3.sender_id = partner_id AND m3.receiver_id = :uid) 
-                     ORDER BY m3.created_at DESC LIMIT 1) as last_time
-                  FROM " . $this->table . " m
-                  JOIN users u ON u.id = (CASE WHEN sender_id = :uid THEN receiver_id ELSE sender_id END)
-                  WHERE sender_id = :uid OR receiver_id = :uid";
+        $query = "SELECT 
+                    t.partner_id,
+                    u.name as partner_name, 
+                    u.avatar_url as partner_avatar,
+                    m.message as last_message,
+                    m.created_at as last_time
+                  FROM (
+                      SELECT 
+                          CASE WHEN sender_id = :uid THEN receiver_id ELSE sender_id END as partner_id,
+                          MAX(id) as last_msg_id
+                      FROM " . $this->table . "
+                      WHERE sender_id = :uid OR receiver_id = :uid
+                      GROUP BY partner_id
+                  ) t
+                  JOIN users u ON u.id = t.partner_id
+                  JOIN " . $this->table . " m ON m.id = t.last_msg_id
+                  ORDER BY m.created_at DESC";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':uid', $userId);
