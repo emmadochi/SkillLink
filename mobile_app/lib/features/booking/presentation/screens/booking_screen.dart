@@ -92,7 +92,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: _step == 0
-                  ? ref.watch(artisanProfileProvider(int.parse(widget.artisanId))).when(
+                  ? (int.tryParse(widget.artisanId) != null 
+                      ? ref.watch(artisanProfileProvider(int.parse(widget.artisanId))).when(
                         data: (artisan) => ref.watch(categoryServicesProvider(artisan.categoryId ?? 1)).when(
                               data: (services) => _ServiceStep(
                                 services: services.map((s) => s['service_name'] as String).toList(),
@@ -106,6 +107,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         loading: () => const Center(child: CircularProgressIndicator()),
                         error: (e, __) => Center(child: Text('Error: $e')),
                       )
+                      : const Center(child: Text('Invalid Artisan ID')))
                   : _step == 1
                       ? _DateTimeStep(
                           selectedDate: _selectedDate,
