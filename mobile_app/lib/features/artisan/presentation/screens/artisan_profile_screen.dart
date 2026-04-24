@@ -9,6 +9,7 @@ import '../../../../shared/widgets/skilllink_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
 import 'package:skilllink_app/features/artisan/data/models/artisan_model.dart';
+import 'package:skilllink_app/features/artisan/data/models/review_model.dart';
 
 class ArtisanProfileScreen extends ConsumerStatefulWidget {
   final String artisanId;
@@ -114,7 +115,7 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                                 const Icon(Icons.star_rounded,
                                     size: 16, color: Color(0xFFFFB84D)),
                                 const SizedBox(width: 4),
-                                Text('${artisan.rating} (0 reviews)',
+                                Text('${artisan.rating} (${artisan.reviews?.length ?? 0} reviews)',
                                     style: AppTypography.labelLg.copyWith(
                                         color: Colors.white70)),
                                 const Spacer(),
@@ -177,7 +178,7 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                     children: [
                       _AboutTab(artisan: artisan),
                       _PortfolioTab(portfolio: artisan.portfolio ?? []),
-                      _ReviewsTab(),
+                      _ReviewsTab(reviews: artisan.reviews ?? []),
                     ],
                   ),
                 ),
@@ -384,45 +385,78 @@ class _PortfolioTab extends StatelessWidget {
 }
 
 class _ReviewsTab extends StatelessWidget {
+  final List<Review> reviews;
+  const _ReviewsTab({required this.reviews});
+
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(20),
-      itemCount: 5,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, i) => SkillLinkCard(
-        padding: const EdgeInsets.all(16),
+    if (reviews.isEmpty) {
+      return Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/60?img=${i + 30}'),
-              ),
-              const SizedBox(width: 10),
-              Expanded(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Customer ${i + 1}',
-                      style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
-                  Text('3 days ago', style: AppTypography.labelSm),
-                ],
-              )),
-              Row(children: List.generate(5, (j) => Icon(
-                Icons.star_rounded,
-                size: 14,
-                color: j < 5 - (i % 2) ? const Color(0xFFFFB84D) : AppColors.outlineVariant,
-              ))),
-            ]),
-            const SizedBox(height: 10),
-            Text(
-              'Excellent work! Very professional, arrived on time, and cleaned up after the job. Highly recommended!',
-              style: AppTypography.bodyMd.copyWith(height: 1.5),
-            ),
+            Icon(Icons.rate_review_outlined, size: 48, color: AppColors.outlineVariant),
+            const SizedBox(height: 16),
+            Text('No reviews yet', style: AppTypography.bodyMd),
           ],
         ),
-      ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(20),
+      itemCount: reviews.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, i) {
+        final review = reviews[i];
+        return SkillLinkCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundImage: NetworkImage(
+                    review.customerAvatar ?? 'https://i.pravatar.cc/60?u=${review.customerId}'
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(review.customerName ?? 'Customer',
+                        style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
+                    if (review.createdAt != null)
+                      Text(_formatTime(review.createdAt!), style: AppTypography.labelSm),
+                  ],
+                )),
+                Row(children: List.generate(5, (j) => Icon(
+                  Icons.star_rounded,
+                  size: 14,
+                  color: j < review.rating ? const Color(0xFFFFB84D) : AppColors.outlineVariant,
+                ))),
+              ]),
+              if (review.comment != null && review.comment!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  review.comment!,
+                  style: AppTypography.bodyMd.copyWith(height: 1.5),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  String _formatTime(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMM d, yyyy').format(date);
+    } catch (e) {
+      return dateStr;
+    }
   }
 }

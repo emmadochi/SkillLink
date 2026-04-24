@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../../auth/data/models/user_model.dart';
+import 'review_model.dart';
 
 part 'artisan_model.g.dart';
 
@@ -38,6 +39,7 @@ class Artisan {
   @JsonKey(name: 'user')
   final ArtisanMiniUser? user; // Use specialized mini-user to avoid full profile mapping
   final List<PortfolioItem>? portfolio;
+  final List<Review>? reviews;
 
   Artisan({
     required this.userId,
@@ -56,6 +58,7 @@ class Artisan {
     this.hourlyRate = 0.0,
     this.user,
     this.portfolio,
+    this.reviews,
   });
 
   factory Artisan.fromJson(Map<String, dynamic> json) => _$ArtisanFromJson(json);

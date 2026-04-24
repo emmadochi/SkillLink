@@ -91,6 +91,8 @@ class Booking {
         }
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
+    }
+
     /**
      * Update negotiation state.
      */

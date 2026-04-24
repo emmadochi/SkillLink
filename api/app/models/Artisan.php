@@ -102,6 +102,8 @@ class Artisan {
             ];
             // Get portfolio
             $profile['portfolio'] = $this->getPortfolio($id);
+            // Get reviews
+            $profile['reviews'] = $this->getReviews($id);
             // Cast types
             $profile['average_rating'] = (float)($profile['average_rating'] ?? 0.0);
             $profile['experience_years'] = (int)($profile['experience_years'] ?? 0);
@@ -110,6 +112,18 @@ class Artisan {
         }
 
         return $profile;
+    }
+
+    public function getReviews($artisan_id) {
+        $query = "SELECT r.*, u.name as customer_name, u.avatar_url as customer_avatar 
+                  FROM reviews r
+                  JOIN users u ON u.id = r.customer_id
+                  WHERE r.artisan_id = :aid 
+                  ORDER BY r.created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':aid', $artisan_id);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
     public function getPortfolio($artisan_id) {

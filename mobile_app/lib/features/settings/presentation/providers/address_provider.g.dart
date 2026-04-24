@@ -24,12 +24,12 @@ final addressRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AddressRepositoryRef = AutoDisposeProviderRef<AddressRepository>;
-String _$userAddressesHash() => r'ff8cb6d39fa71f8559bd6d9d5031d785f17a5f95';
+String _$userAddressesHash() => r'985091ad21f144c1237a237716e04b6c6c274aea';
 
 /// See also [UserAddresses].
 @ProviderFor(UserAddresses)
 final userAddressesProvider =
-    AutoDisposeAsyncNotifierProvider<UserAddresses, List<UserAddress>>.internal(
+    AsyncNotifierProvider<UserAddresses, List<UserAddress>>.internal(
   UserAddresses.new,
   name: r'userAddressesProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -39,6 +39,6 @@ final userAddressesProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$UserAddresses = AutoDisposeAsyncNotifier<List<UserAddress>>;
+typedef _$UserAddresses = AsyncNotifier<List<UserAddress>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

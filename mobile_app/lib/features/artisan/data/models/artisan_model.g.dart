@@ -37,6 +37,9 @@ Artisan _$ArtisanFromJson(Map<String, dynamic> json) => Artisan(
       portfolio: (json['portfolio'] as List<dynamic>?)
           ?.map((e) => PortfolioItem.fromJson(e as Map<String, dynamic>))
           .toList(),
+      reviews: (json['reviews'] as List<dynamic>?)
+          ?.map((e) => Review.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ArtisanToJson(Artisan instance) => <String, dynamic>{
@@ -56,6 +59,7 @@ Map<String, dynamic> _$ArtisanToJson(Artisan instance) => <String, dynamic>{
       'hourly_rate': instance.hourlyRate,
       'user': instance.user,
       'portfolio': instance.portfolio,
+      'reviews': instance.reviews,
     };
 
 ArtisanMiniUser _$ArtisanMiniUserFromJson(Map<String, dynamic> json) =>

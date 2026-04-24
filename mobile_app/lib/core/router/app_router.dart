@@ -23,6 +23,8 @@ import '../../features/settings/presentation/screens/faq_screen.dart';
 import '../../features/settings/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/about_screen.dart';
 import '../../features/artisan/presentation/screens/artisan_setup_screen.dart';
+import '../../features/artisan/presentation/screens/review_submit_screen.dart';
+import '../../features/booking/presentation/screens/booking_detail_screen.dart';
 import '../constants/app_constants.dart';
 import 'shell_route.dart';
 
@@ -138,6 +140,21 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.privacyPolicy,
       name: 'privacy-policy',
       builder: (_, __) => const PrivacyPolicyScreen(),
+    ),
+    GoRoute(
+      path: '${AppRoutes.bookingDetail}/:id',
+      name: 'booking-detail',
+      builder: (context, state) => BookingDetailScreen(
+        bookingId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
+      path: '${AppRoutes.bookingDetail}/review/:bookingId',
+      name: 'review-submit',
+      builder: (context, state) => ReviewSubmitScreen(
+        bookingId: state.pathParameters['bookingId']!,
+        artisanName: state.uri.queryParameters['name'] ?? 'Artisan',
+      ),
     ),
     GoRoute(
       path: AppRoutes.about,

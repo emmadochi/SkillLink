@@ -138,4 +138,32 @@ class ArtisanController extends Controller {
             $this->error('Error adding portfolio: ' . $e->getMessage(), 500);
         }
     }
+
+    public function reviews($id = null) {
+        if (!$id) {
+            $id = $_GET['id'] ?? null;
+        }
+        if (!$id) $this->error('Artisan ID required');
+
+        try {
+            $db = (new \core\Database())->getConnection();
+            $query = "SELECT r.*, u.name as customer_name, u.avatar_url as customer_avatar 
+                      FROM reviews r
+                      JOIN users u ON u.id = r.customer_id
+                      WHERE r.artisan_id = :id
+                      ORDER BY r.created_at DESC";
+            
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            $reviews = $stmt->fetchAll();
+
+            $this->json([
+                'status' => 'success',
+                'data' => $reviews
+            ]);
+        } catch (\Throwable $e) {
+            $this->error('Error loading reviews: ' . $e->getMessage(), 500);
+        }
+    }
 }

@@ -23,7 +23,7 @@ final chatRepositoryProvider = AutoDisposeProvider<ChatRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ChatRepositoryRef = AutoDisposeProviderRef<ChatRepository>;
-String _$conversationHash() => r'edd1f654da339f8b679df474ec40befdcc1f98ae';
+String _$conversationHash() => r'd84440bba0c150eeb2c86b85a58add9525e38427';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -89,8 +89,7 @@ class ConversationFamily extends Family<AsyncValue<List<ChatMessage>>> {
 }
 
 /// See also [conversation].
-class ConversationProvider
-    extends AutoDisposeFutureProvider<List<ChatMessage>> {
+class ConversationProvider extends FutureProvider<List<ChatMessage>> {
   /// See also [conversation].
   ConversationProvider(
     int partnerId,
@@ -142,7 +141,7 @@ class ConversationProvider
   }
 
   @override
-  AutoDisposeFutureProviderElement<List<ChatMessage>> createElement() {
+  FutureProviderElement<List<ChatMessage>> createElement() {
     return _ConversationProviderElement(this);
   }
 
@@ -162,14 +161,13 @@ class ConversationProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin ConversationRef on AutoDisposeFutureProviderRef<List<ChatMessage>> {
+mixin ConversationRef on FutureProviderRef<List<ChatMessage>> {
   /// The parameter `partnerId` of this provider.
   int get partnerId;
 }
 
 class _ConversationProviderElement
-    extends AutoDisposeFutureProviderElement<List<ChatMessage>>
-    with ConversationRef {
+    extends FutureProviderElement<List<ChatMessage>> with ConversationRef {
   _ConversationProviderElement(super.provider);
 
   @override
