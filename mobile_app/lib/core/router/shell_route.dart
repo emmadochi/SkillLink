@@ -19,7 +19,7 @@ class AppShellRoute {
       return _AppShell(navigationShell: navigationShell);
     },
     branches: [
-      // Home Branch
+      // 0: Home
       StatefulShellBranch(
         routes: [
           GoRoute(
@@ -29,7 +29,7 @@ class AppShellRoute {
           ),
         ],
       ),
-      // Dashboard/Bookings Branch
+      // 1: Customer Dashboard
       StatefulShellBranch(
         routes: [
           GoRoute(
@@ -37,6 +37,11 @@ class AppShellRoute {
             name: 'customer-dashboard',
             builder: (_, __) => const CustomerDashboardScreen(),
           ),
+        ],
+      ),
+      // 2: Artisan Dashboard
+      StatefulShellBranch(
+        routes: [
           GoRoute(
             path: AppRoutes.artisanDashboard,
             name: 'artisan-dashboard',
@@ -44,7 +49,7 @@ class AppShellRoute {
           ),
         ],
       ),
-      // Chat Branch
+      // 3: Chat List
       StatefulShellBranch(
         routes: [
           GoRoute(
@@ -54,7 +59,17 @@ class AppShellRoute {
           ),
         ],
       ),
-      // Settings/Profile Branch
+      // 4: Notifications
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.notifications,
+            name: 'notifications',
+            builder: (_, __) => const NotificationsScreen(),
+          ),
+        ],
+      ),
+      // 5: Settings
       StatefulShellBranch(
         routes: [
           GoRoute(
@@ -72,19 +87,31 @@ class _AppShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
   const _AppShell({required this.navigationShell});
 
+  List<int> _getBranchIndices(String? role) {
+    if (role == 'artisan') {
+      return [2, 3, 4, 5]; // Artisan: Dashboard, Chat, Alerts, Profile
+    }
+    return [0, 1, 3, 5]; // Customer: Home, Bookings, Chat, Profile
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userRole = ref.watch(userStateProvider).value?.role;
+    final branchIndices = _getBranchIndices(userRole);
+    
+    // Find the current selected index in the filtered list
+    int selectedIndex = branchIndices.indexOf(navigationShell.currentIndex);
+    if (selectedIndex == -1) selectedIndex = 0;
 
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: _GlassBottomNav(
-        selectedIndex: navigationShell.currentIndex,
+        selectedIndex: selectedIndex,
         role: userRole,
         onTap: (index) {
           navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
+            branchIndices[index],
+            initialLocation: branchIndices[index] == navigationShell.currentIndex,
           );
         },
       ),

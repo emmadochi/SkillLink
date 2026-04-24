@@ -14,6 +14,7 @@ class Message {
     }
 
     public function send($senderId, $receiverId, $message) {
+        if (!$this->conn) return false;
         $query = "INSERT INTO " . $this->table . " (sender_id, receiver_id, message) VALUES (:sid, :rid, :msg)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':sid', $senderId);
@@ -23,6 +24,7 @@ class Message {
     }
 
     public function getConversation($user1, $user2) {
+        if (!$this->conn) return [];
         $query = "SELECT * FROM " . $this->table . " 
                   WHERE (sender_id = :u1 AND receiver_id = :u2) 
                   OR (sender_id = :u2 AND receiver_id = :u1) 

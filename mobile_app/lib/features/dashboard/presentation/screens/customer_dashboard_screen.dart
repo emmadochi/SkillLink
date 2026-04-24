@@ -135,8 +135,8 @@ class CustomerDashboardScreen extends ConsumerWidget {
                                   child: Column(
                                     children: [
                                       Text(
-                                        'Artisan countered with ₦${b.counterPrice}',
-                                        style: AppTypography.titleSmall.copyWith(color: AppColors.primary),
+                                        'Artisan Suggested Price: ₦${b.counterPrice}',
+                                        style: AppTypography.titleSm.copyWith(color: AppColors.primary),
                                       ),
                                       const SizedBox(height: 12),
                                       Row(children: [

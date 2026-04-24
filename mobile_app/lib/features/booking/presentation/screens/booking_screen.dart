@@ -142,6 +142,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           date: _selectedDate,
                           time: _selectedTime,
                           desc: _descCtrl.text,
+                          offerCtrl: _offerCtrl,
                         ),
             ),
           ),
@@ -413,7 +414,7 @@ class _ConfirmStep extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         Text('Negotiating a price may help you get a better deal, but the artisan must accept it.',
-            style: AppTypography.bodySmall.copyWith(color: AppColors.outline)),
+            style: AppTypography.bodySm.copyWith(color: AppColors.outline)),
         const SizedBox(height: 16),
         SkillLinkCard(
           backgroundColor: AppColors.tertiaryFixed.withOpacity(0.30),
