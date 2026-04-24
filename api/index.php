@@ -43,12 +43,12 @@ spl_autoload_register(function ($class) {
 // Route requested URI
 $request_uri = $_SERVER['REQUEST_URI'];
 $script_name = $_SERVER['SCRIPT_NAME']; 
-$base_dir = dirname($script_name); 
-$base_path = rtrim($base_dir, '/') . '/v1';
+$base_path = '/api/v1';
 
-// Get the path after /v1
-$path = parse_url($request_uri, PHP_URL_PATH);
-$path = str_replace($base_path, '', $path);
+// Get the path after /v1 accurately
+$full_path = parse_url($request_uri, PHP_URL_PATH);
+$path_segments = explode($base_path, $full_path);
+$path = end($path_segments);
 $path = trim($path, '/');
 
 // Dispatcher
