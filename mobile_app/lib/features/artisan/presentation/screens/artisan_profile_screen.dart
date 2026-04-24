@@ -207,8 +207,9 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
               icon: const Icon(Icons.chat_bubble_outline_rounded,
                   size: 18, color: AppColors.primary),
               onPressed: () {
-                final name = Uri.encodeComponent(artisan.user?.name ?? 'Artisan');
-                final avatar = Uri.encodeComponent(artisan.user?.avatarUrl ?? '');
+                final artisan = ref.read(artisanProfileProvider(int.parse(widget.artisanId))).value;
+                final name = Uri.encodeComponent(artisan?.user?.name ?? 'Artisan');
+                final avatar = Uri.encodeComponent(artisan?.user?.avatarUrl ?? '');
                 context.push('${AppRoutes.chat}/${widget.artisanId}?name=$name&avatar=$avatar');
               },
             ),
