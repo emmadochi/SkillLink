@@ -16,10 +16,17 @@ echo "<h3>1. Testing Autoloader Logic...</h3>";
 
 spl_autoload_register(function ($class) {
     $classPath = str_replace('\\', '/', $class);
-    $appFile = APP_PATH . '/' . $classPath . '.php';
-    echo "Attempting to load: <code>$class</code> from <code>$appFile</code>... ";
-    if (file_exists($appFile)) {
-        require_once $appFile;
+    
+    // Check if it's a Core class or an App class
+    if (strpos($class, 'core\\') === 0) {
+        $file = CORE_PATH . '/' . str_replace('core/', '', $classPath) . '.php';
+    } else {
+        $file = APP_PATH . '/' . $classPath . '.php';
+    }
+
+    echo "Attempting to load: <code>$class</code> from <code>$file</code>... ";
+    if (file_exists($file)) {
+        require_once $file;
         echo "<span style='color:green'>SUCCESS</span><br>";
     } else {
         echo "<span style='color:red'>FAILED (File not found)</span><br>";
