@@ -60,17 +60,21 @@ class Artisan {
         $artisans = $stmt->fetchAll();
 
         return array_map(function($a) {
-            $res = $a;
+            $res = [];
+            foreach ($a as $key => $value) {
+                $res[$key] = is_string($value) ? mb_convert_encoding($value, 'UTF-8', 'UTF-8') : $value;
+            }
+            
             $res['user'] = [
-                'id' => $a['user_id'],
-                'name' => $a['name'],
-                'avatar_url' => $a['avatar_url']
+                'id' => (int)($a['user_id'] ?? 0),
+                'name' => mb_convert_encoding($a['name'] ?? 'Artisan', 'UTF-8', 'UTF-8'),
+                'avatar_url' => $a['avatar_url'] ?? ''
             ];
             $res['average_rating'] = (float)($a['average_rating'] ?? 0.0);
             $res['experience_years'] = (int)($a['experience_years'] ?? 0);
             $res['hourly_rate'] = (float)($a['hourly_rate'] ?? 0.0);
             return $res;
-        }, $artisans);
+        }, $artisans ?: []);
     }
 
     /**
