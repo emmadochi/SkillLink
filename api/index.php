@@ -6,6 +6,7 @@
 
 error_reporting(0);
 ini_set('display_errors', 0);
+ob_start(); // Start output buffering to catch stray warnings
 
 // Basic CORS headers
 header("Access-Control-Allow-Origin: *");
