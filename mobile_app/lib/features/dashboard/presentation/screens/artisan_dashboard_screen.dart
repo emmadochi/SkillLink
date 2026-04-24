@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../../../booking/presentation/providers/booking_provider.dart';
+import '../../../artisan/presentation/providers/artisan_provider.dart';
 
 class ArtisanDashboardScreen extends ConsumerStatefulWidget {
   const ArtisanDashboardScreen({super.key});

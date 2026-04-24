@@ -47,15 +47,15 @@ class FAQScreen extends StatelessWidget {
           const SizedBox(height: 32),
           SkillLinkCard(
             padding: const EdgeInsets.all(20),
-            color: AppColors.primary.withOpacity(0.05),
+            backgroundColor: AppColors.primary.withOpacity(0.05),
             child: Column(
               children: [
                 const Icon(Icons.support_agent_rounded, color: AppColors.primary, size: 32),
                 const SizedBox(height: 12),
-                Text('Still need help?', style: AppTypography.titleMedium),
+                Text('Still need help?', style: AppTypography.titleMd),
                 const SizedBox(height: 4),
                 Text('Our support team is available 24/7', 
-                    style: AppTypography.bodySmall, textAlign: TextAlign.center),
+                    style: AppTypography.bodySm, textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {},
@@ -99,7 +99,7 @@ class _FAQItemState extends State<_FAQItem> {
             Row(
               children: [
                 Expanded(
-                  child: Text(widget.question, style: AppTypography.titleSmall),
+                  child: Text(widget.question, style: AppTypography.titleSm),
                 ),
                 Icon(
                   _expanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
@@ -112,7 +112,7 @@ class _FAQItemState extends State<_FAQItem> {
               const Divider(height: 1),
               const SizedBox(height: 12),
               Text(widget.answer, 
-                  style: AppTypography.bodyMedium.copyWith(color: AppColors.onSurfaceVariant)),
+                  style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
             ],
           ],
         ),

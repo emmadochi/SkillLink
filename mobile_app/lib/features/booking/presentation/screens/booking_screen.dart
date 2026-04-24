@@ -225,7 +225,7 @@ class _ServiceStep extends StatelessWidget {
       case 'bathtub_outlined': return Icons.bathtub_outlined;
       case 'plumbing_outlined': return Icons.plumbing_outlined;
       case 'chair_outlined': return Icons.chair_outlined;
-      case 'door_front_outlined': return Icons.door_front_outlined;
+      case 'door_front_outlined': return Icons.home_outlined;
       case 'kitchen_outlined': return Icons.kitchen_outlined;
       case 'house_siding_outlined': return Icons.house_siding_outlined;
       default: return Icons.handyman_outlined;

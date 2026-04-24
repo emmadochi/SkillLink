@@ -7,7 +7,7 @@ import '../../../../shared/widgets/skilllink_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../auth/presentation/providers/auth_repository_provider.dart';
+import '../../../auth/presentation/providers/auth_repository_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});

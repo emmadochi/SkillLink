@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 abstract class ArtisanRepository {
   Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query});
   Future<Artisan> getArtisanProfile(int id);
+  Future<bool> updateArtisanProfile(Map<String, dynamic> data);
 }
 
 class ArtisanRepositoryImpl implements ArtisanRepository {
@@ -52,6 +53,22 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
         throw responseData['error'] ?? responseData['message'] ?? 'Network error';
       }
       throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> updateArtisanProfile(Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.updateArtisanProfile(data);
+      return response.status == 'success';
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Update error';
+      }
+      throw 'Server error';
     } catch (e) {
       rethrow;
     }

@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../artisan/presentation/providers/artisan_provider.dart';
-import '../presentation/providers/chat_provider.dart';
-import '../data/models/chat_model.dart';
-import '../../auth/presentation/providers/auth_repository_provider.dart';
+import '../../../artisan/presentation/providers/artisan_provider.dart';
+import '../providers/chat_provider.dart';
+import '../../data/models/chat_model.dart';
+import '../../../auth/presentation/providers/auth_repository_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String conversationId;

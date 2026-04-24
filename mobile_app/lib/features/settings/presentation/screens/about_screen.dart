@@ -35,9 +35,9 @@ class AboutScreen extends StatelessWidget {
               child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 50),
             ),
             const SizedBox(height: 24),
-            Text('SkillLink Africa', style: AppTypography.headlineMedium),
+            Text('SkillLink Africa', style: AppTypography.headlineMd),
             Text('Version 1.0.4 (Production)', 
-                style: AppTypography.bodySmall.copyWith(color: AppColors.outline)),
+                style: AppTypography.bodySm.copyWith(color: AppColors.outline)),
             
             const SizedBox(height: 48),
             Padding(
@@ -46,13 +46,13 @@ class AboutScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Empowering Artisans, Building Dreams',
-                    style: AppTypography.titleLarge,
+                    style: AppTypography.titleLg,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'SkillLink is Africa\'s premier platform connecting high-quality, verified artisans with customers who value excellence. We believe in creating economic opportunities while delivering superior service across the continent.',
-                    style: AppTypography.bodyLarge.copyWith(
+                    style: AppTypography.bodyLg.copyWith(
                       color: AppColors.onSurfaceVariant,
                       height: 1.6,
                     ),
@@ -85,7 +85,7 @@ class AboutScreen extends StatelessWidget {
             
             const SizedBox(height: 48),
             Text('Made with ❤️ in Lagos, Nigeria', 
-                style: AppTypography.labelMedium.copyWith(color: AppColors.outline)),
+                style: AppTypography.labelMd.copyWith(color: AppColors.outline)),
             const SizedBox(height: 48),
           ],
         ),
@@ -119,8 +119,8 @@ class _AboutTile extends StatelessWidget {
         ),
         child: Icon(icon, color: AppColors.primary, size: 20),
       ),
-      title: Text(title, style: AppTypography.titleSmall),
-      subtitle: Text(subtitle, style: AppTypography.bodySmall),
+      title: Text(title, style: AppTypography.titleSm),
+      subtitle: Text(subtitle, style: AppTypography.bodySm),
       onTap: onTap,
     );
   }

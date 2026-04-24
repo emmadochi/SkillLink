@@ -18,10 +18,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Privacy Policy', style: AppTypography.headlineSmall),
+            Text('Privacy Policy', style: AppTypography.headlineSm),
             const SizedBox(height: 8),
             Text('Last Updated: April 2026', 
-                style: AppTypography.bodySmall.copyWith(color: AppColors.outline)),
+                style: AppTypography.bodySm.copyWith(color: AppColors.outline)),
             const SizedBox(height: 24),
             
             _PolicySection(
@@ -48,7 +48,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             const SizedBox(height: 40),
             Center(
               child: Text('© 2026 SkillLink Africa. All Rights Reserved.', 
-                  style: AppTypography.labelSmall.copyWith(color: AppColors.outline)),
+                  style: AppTypography.labelSm.copyWith(color: AppColors.outline)),
             ),
             const SizedBox(height: 24),
           ],
@@ -70,10 +70,10 @@ class _PolicySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTypography.titleMedium.copyWith(color: AppColors.primary)),
+          Text(title, style: AppTypography.titleMd.copyWith(color: AppColors.primary)),
           const SizedBox(height: 12),
           Text(content, 
-              style: AppTypography.bodyMedium.copyWith(height: 1.6, color: AppColors.onSurfaceVariant)),
+              style: AppTypography.bodyMd.copyWith(height: 1.6, color: AppColors.onSurfaceVariant)),
         ],
       ),
     );
