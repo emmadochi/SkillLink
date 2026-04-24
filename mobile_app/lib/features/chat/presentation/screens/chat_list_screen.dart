@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,11 +9,32 @@ import '../../../../core/router/app_router.dart';
 import '../providers/chat_provider.dart';
 import '../../data/models/chat_model.dart';
 
-class ChatListScreen extends ConsumerWidget {
+class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends ConsumerState<ChatListScreen> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      ref.invalidate(chatHistoryProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final historyAsync = ref.watch(chatHistoryProvider);
 
     return Scaffold(
