@@ -72,6 +72,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final partnerId = int.tryParse(widget.conversationId) ?? 1;
     final artisanAsync = ref.watch(artisanProfileProvider(partnerId));
     final messagesAsync = ref.watch(conversationProvider(partnerId));
+    
+    // Listen for new messages to scroll to bottom safely
+    ref.listen(conversationProvider(partnerId), (previous, next) {
+      if (next.hasValue && (previous?.value?.length ?? 0) < (next.value?.length ?? 0)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollCtrl.hasClients) {
+            _scrollCtrl.animateTo(
+              _scrollCtrl.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -97,13 +112,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Expanded(
             child: messagesAsync.when(
               data: (messages) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_scrollCtrl.hasClients) {
-                    _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
-                  }
-                });
                 return ListView.builder(
                   controller: _scrollCtrl,
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   itemCount: messages.length,
                   itemBuilder: (context, i) {
@@ -121,7 +132,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, __) => Center(child: Text('Error: $e')),
+              error: (e, __) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Text('Error loading messages: $e', 
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyMd.copyWith(color: AppColors.error)),
+                ),
+              ),
             ),
           ),
 
