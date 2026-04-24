@@ -23,13 +23,13 @@ class Artisan {
      * Search artisans by category, location, and rating.
      */
     public function search($filters = []) {
-        $query = "SELECT u.id, u.name, u.avatar_url, a.bio, a.skill, a.category_id, a.average_rating, a.experience_years, a.location_name
+        $query = "SELECT u.id as user_id, u.name, u.avatar_url, a.bio, a.skill, a.category_id, a.average_rating, a.experience_years, a.location_name, a.hourly_rate
                   FROM " . $this->table . " a
                   JOIN users u ON u.id = a.user_id
                   WHERE a.verification_status = 'approved' AND a.is_available = 1";
         
         if (!empty($filters['category_id'])) {
-            $query .= " AND a.user_id IN (SELECT artisan_id FROM artisan_categories WHERE category_id = :cat_id)";
+            $query .= " AND a.category_id = :cat_id";
         }
 
         if (!empty($filters['min_rating'])) {
@@ -59,10 +59,16 @@ class Artisan {
         $artisans = $stmt->fetchAll();
 
         return array_map(function($a) {
-            $a['average_rating'] = (float)($a['average_rating'] ?? 0.0);
-            $a['experience_years'] = (int)($a['experience_years'] ?? 0);
-            $a['identity_verified'] = (bool)($a['identity_verified'] ?? false);
-            return $a;
+            $res = $a;
+            $res['user'] = [
+                'id' => $a['user_id'],
+                'name' => $a['name'],
+                'avatar_url' => $a['avatar_url']
+            ];
+            $res['average_rating'] = (float)($a['average_rating'] ?? 0.0);
+            $res['experience_years'] = (int)($a['experience_years'] ?? 0);
+            $res['hourly_rate'] = (float)($a['hourly_rate'] ?? 0.0);
+            return $res;
         }, $artisans);
     }
 
@@ -70,7 +76,7 @@ class Artisan {
      * Get artisan full profile details.
      */
     public function getProfile($id) {
-        $query = "SELECT u.id, u.name, u.email, u.phone, u.avatar_url, a.*,
+        $query = "SELECT u.id as user_id, u.name, u.email, u.phone, u.avatar_url, a.*,
                   (SELECT status FROM artisan_verifications WHERE artisan_id = a.user_id ORDER BY created_at DESC LIMIT 1) as identity_status
                   FROM " . $this->table . " a
                   JOIN users u ON u.id = a.user_id
@@ -82,11 +88,19 @@ class Artisan {
         $profile = $stmt->fetch();
 
         if ($profile) {
+            $profile['user'] = [
+                'id' => $profile['user_id'],
+                'name' => $profile['name'],
+                'email' => $profile['email'],
+                'phone' => $profile['phone'],
+                'avatar_url' => $profile['avatar_url']
+            ];
             // Get portfolio
             $profile['portfolio'] = $this->getPortfolio($id);
             // Cast types
             $profile['average_rating'] = (float)($profile['average_rating'] ?? 0.0);
             $profile['experience_years'] = (int)($profile['experience_years'] ?? 0);
+            $profile['hourly_rate'] = (float)($profile['hourly_rate'] ?? 0.0);
             $profile['identity_verified'] = (bool)($profile['identity_verified'] ?? false);
         }
 
@@ -114,13 +128,13 @@ class Artisan {
                       SET bio = :bio, skill = :skill, experience_years = :exp, 
                           location_name = :loc, latitude = :lat, longitude = :lng,
                           business_address = :b_addr, guarantor_name = :g_name, guarantor_phone = :g_phone,
-                          is_available = :avail
+                          is_available = :avail, hourly_rate = :rate
                       WHERE user_id = :uid";
         } else {
             $query = "INSERT INTO " . $this->table . " 
                       (user_id, bio, skill, experience_years, location_name, latitude, longitude, 
-                       business_address, guarantor_name, guarantor_phone, verification_status, is_available) 
-                      VALUES (:uid, :bio, :skill, :exp, :loc, :lat, :lng, :b_addr, :g_name, :g_phone, 'pending', :avail)";
+                       business_address, guarantor_name, guarantor_phone, verification_status, is_available, hourly_rate) 
+                      VALUES (:uid, :bio, :skill, :exp, :loc, :lat, :lng, :b_addr, :g_name, :g_phone, 'pending', :avail, :rate)";
         }
 
         $stmt = $this->conn->prepare($query);
@@ -136,6 +150,8 @@ class Artisan {
         $stmt->bindParam(':g_phone', $data['guarantor_phone']);
         $avail = isset($data['is_available']) ? (int)$data['is_available'] : 1;
         $stmt->bindParam(':avail', $avail);
+        $rate = isset($data['hourly_rate']) ? (float)$data['hourly_rate'] : 0.0;
+        $stmt->bindParam(':rate', $rate);
 
         return $stmt->execute();
     }

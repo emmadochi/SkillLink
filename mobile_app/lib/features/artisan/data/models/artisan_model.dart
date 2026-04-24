@@ -33,6 +33,8 @@ class Artisan {
   @JsonKey(name: 'is_available', fromJson: _toBool)
   final bool isAvailable;
   final String? skill;
+  @JsonKey(name: 'hourly_rate', fromJson: _toDouble)
+  final double hourlyRate;
   final User? user; // Optional join data
   final List<PortfolioItem>? portfolio;
 
@@ -50,6 +52,7 @@ class Artisan {
     this.identityStatus,
     this.isAvailable = true,
     this.skill,
+    this.hourlyRate = 0.0,
     this.user,
     this.portfolio,
   });

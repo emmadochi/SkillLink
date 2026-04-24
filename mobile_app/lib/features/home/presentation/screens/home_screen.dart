@@ -274,10 +274,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: SkillLinkArtisanCard(
                               name: artisan.user?.name ?? 'Artisan',
                               craft: artisan.skill ?? artisan.bio ?? 'Professional Artisan',
-                              imageUrl: artisan.user?.avatarUrl ??
-                                  'https://i.pravatar.cc/200?u=${artisan.userId}',
+                              imageUrl: artisan.user?.avatarUrl != null 
+                                  ? (artisan.user!.avatarUrl!.startsWith('http') ? artisan.user!.avatarUrl! : 'http://localhost/SkillLink/api/public/${artisan.user!.avatarUrl}')
+                                  : 'https://i.pravatar.cc/200?u=${artisan.userId}',
                               rating: artisan.rating.toDouble(),
-                              price: '₦5,000/hr',
+                              price: '₦${NumberFormat('#,###').format(artisan.hourlyRate)}/hr',
                               location: artisan.locationName ?? 'Lagos',
                               isVerified: true,
                               onTap: () => context.push(

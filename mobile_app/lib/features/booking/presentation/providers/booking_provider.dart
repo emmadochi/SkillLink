@@ -13,12 +13,12 @@ BookingRepository bookingRepository(BookingRepositoryRef ref) {
   return BookingRepositoryImpl(apiClient);
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<List<Booking>> bookingHistory(BookingHistoryRef ref) {
   return ref.watch(bookingRepositoryProvider).getBookingHistory();
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<List<Map<String, dynamic>>> categoryServices(CategoryServicesRef ref, int categoryId) {
   return ref.watch(bookingRepositoryProvider).getCategoryServices(categoryId);
 }

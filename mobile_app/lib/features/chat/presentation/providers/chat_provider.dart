@@ -18,7 +18,7 @@ Future<List<ChatMessage>> conversation(ConversationRef ref, int partnerId) {
   return ref.watch(chatRepositoryProvider).getConversation(partnerId);
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<List<ChatConversation>> chatHistory(ChatHistoryRef ref) {
   return ref.watch(chatRepositoryProvider).getChatHistory();
 }

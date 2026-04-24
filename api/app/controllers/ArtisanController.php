@@ -38,6 +38,10 @@ class ArtisanController extends Controller {
      * GET /api/v1/artisan/profile/{id}
      */
     public function profile($id = null) {
+        if (!$id) {
+            $id = $_GET['id'] ?? null;
+        }
+        
         if (!$id) $this->error('Artisan ID required');
 
         try {

@@ -5,7 +5,7 @@ import '../../data/models/category_model.dart';
 
 part 'category_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<List<Category>> categories(CategoriesRef ref) async {
   final dio = ref.watch(dioProvider);
   final client = ApiClient(dio);

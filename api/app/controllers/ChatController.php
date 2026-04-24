@@ -31,6 +31,11 @@ class ChatController extends Controller {
         $this->requireAuth();
         $user = $this->getCurrentUser();
 
+        // If not passed via path, check query string
+        if (!$partnerId) {
+            $partnerId = $_GET['partner_id'] ?? null;
+        }
+
         if (!$partnerId) $this->error('Partner ID required');
 
         try {

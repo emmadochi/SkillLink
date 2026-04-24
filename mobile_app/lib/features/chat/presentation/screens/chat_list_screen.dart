@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
+import '../providers/chat_provider.dart';
+import '../../data/models/chat_model.dart';
 
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final historyAsync = ref.watch(chatHistoryProvider);
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: Text('Messages',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontFamily: 'PlusJakartaSans',
                   color: AppColors.onSurface,
                 )),
         actions: [
@@ -24,61 +29,58 @@ class ChatListScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        itemCount: 8,
-        separatorBuilder: (_, __) => const SizedBox(height: 4),
-        itemBuilder: (context, i) => _ChatTile(
-          index: i,
-          onTap: () => context.go('${AppRoutes.chat}/${i + 1}'),
-        ),
+      body: historyAsync.when(
+        data: (chats) {
+          if (chats.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.outline.withOpacity(0.5)),
+                  const SizedBox(height: 16),
+                  Text('No messages yet', style: AppTypography.bodyLg.copyWith(color: AppColors.outline)),
+                ],
+              ),
+            );
+          }
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            itemCount: chats.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 4),
+            itemBuilder: (context, i) => _ChatTile(
+              chat: chats[i],
+              onTap: () => context.push('${AppRoutes.chat}/${chats[i].partnerId}'),
+            ),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, __) => Center(child: Text('Error: $e')),
       ),
     );
   }
 }
 
 class _ChatTile extends StatelessWidget {
-  final int index;
+  final ChatConversation chat;
   final VoidCallback onTap;
 
-  const _ChatTile({required this.index, required this.onTap});
+  const _ChatTile({required this.chat, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final hasUnread = index % 3 == 0;
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+      child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: hasUnread
-              ? AppColors.primary.withOpacity(0.04)
-              : AppColors.surfaceContainerLowest,
+          color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Row(children: [
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 26,
-                backgroundImage: NetworkImage(
-                    'https://i.pravatar.cc/80?img=${index + 5}'),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade500,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                ),
-              ),
-            ],
+          CircleAvatar(
+            radius: 26,
+            backgroundImage: NetworkImage(
+                chat.partnerAvatar ?? 'https://i.pravatar.cc/80?u=${chat.partnerId}'),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -86,54 +88,34 @@ class _ChatTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(children: [
-                  Text('Emmanuel O.',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: hasUnread
-                                ? FontWeight.w700
-                                : FontWeight.w600,
-                          )),
+                  Text(chat.partnerName,
+                      style: Theme.of(context).textTheme.titleSmall),
                   const Spacer(),
-                  Text('10:3${index}',
+                  Text(_formatTime(chat.lastTime),
                       style: Theme.of(context).textTheme.labelSmall),
                 ]),
                 const SizedBox(height: 4),
-                Row(children: [
-                  Expanded(
-                    child: Text(
-                      'I\'ll be there by 10am. Please make sure the fuse box is accessible.',
-                      style: AppTypography.bodyMd.copyWith(
-                        color: hasUnread
-                            ? AppColors.onSurface
-                            : AppColors.outline,
-                        fontWeight: hasUnread
-                            ? FontWeight.w500
-                            : FontWeight.w400,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (hasUnread)
-                    Container(
-                      margin: const EdgeInsets.only(left: 8),
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text('2',
-                            style: AppTypography.labelSm.copyWith(
-                                color: Colors.white, fontSize: 10)),
-                      ),
-                    ),
-                ]),
+                Text(
+                  chat.lastMessage ?? 'No messages',
+                  style: AppTypography.bodyMd.copyWith(color: AppColors.outline),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
         ]),
       ),
     );
+  }
+
+  String _formatTime(String? timeStr) {
+    if (timeStr == null) return '';
+    try {
+      final date = DateTime.parse(timeStr);
+      return DateFormat('h:mm a').format(date);
+    } catch (e) {
+      return timeStr;
+    }
   }
 }

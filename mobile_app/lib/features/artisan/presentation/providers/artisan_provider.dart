@@ -13,7 +13,7 @@ ArtisanRepository artisanRepository(ArtisanRepositoryRef ref) {
   return ArtisanRepositoryImpl(apiClient);
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRating, String? query}) {
   return ref.watch(artisanRepositoryProvider).getArtisans(
     categoryId: categoryId,
@@ -22,7 +22,7 @@ Future<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRat
   );
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<Artisan> artisanProfile(ArtisanProfileRef ref, int id) {
   return ref.watch(artisanRepositoryProvider).getArtisanProfile(id);
 }
