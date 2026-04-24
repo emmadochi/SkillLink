@@ -34,8 +34,12 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
             if (b.status == 'completed') totalEarnings += b.artisanPayout;
           }
 
-          return CustomScrollView(
-            slivers: [
+          return RefreshIndicator(
+            onRefresh: () => ref.refresh(bookingHistoryProvider.future),
+            edgeOffset: MediaQuery.of(context).padding.top + 20,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
               // Header
               SliverToBoxAdapter(
                 child: Container(
@@ -338,8 +342,9 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
 
               const SliverToBoxAdapter(child: SizedBox(height: 32)),
             ],
-          );
-        },
+          ),
+        );
+      },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error loading dashboard: $e')),
       ),

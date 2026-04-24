@@ -3,7 +3,7 @@ import '../utils/location_service.dart';
 
 part 'location_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class CurrentLocation extends _$CurrentLocation {
   @override
   Future<ArtisanLocation> build() async {

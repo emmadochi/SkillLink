@@ -14,84 +14,78 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/presentation/providers/user_provider.dart';
 
 class AppShellRoute {
-  static final route = ShellRoute(
-    builder: (context, state, child) => _AppShell(child: child),
-    routes: [
-      GoRoute(
-        path: AppRoutes.home,
-        name: 'home',
-        builder: (_, __) => const HomeScreen(),
+  static final route = StatefulShellRoute.indexedStack(
+    builder: (context, state, navigationShell) {
+      return _AppShell(navigationShell: navigationShell);
+    },
+    branches: [
+      // Home Branch
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            name: 'home',
+            builder: (_, __) => const HomeScreen(),
+          ),
+        ],
       ),
-      GoRoute(
-        path: AppRoutes.chatList,
-        name: 'chat-list',
-        builder: (_, __) => const ChatListScreen(),
+      // Dashboard/Bookings Branch
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.customerDashboard,
+            name: 'customer-dashboard',
+            builder: (_, __) => const CustomerDashboardScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.artisanDashboard,
+            name: 'artisan-dashboard',
+            builder: (_, __) => const ArtisanDashboardScreen(),
+          ),
+        ],
       ),
-      GoRoute(
-        path: AppRoutes.customerDashboard,
-        name: 'customer-dashboard',
-        builder: (_, __) => const CustomerDashboardScreen(),
+      // Chat Branch
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.chatList,
+            name: 'chat-list',
+            builder: (_, __) => const ChatListScreen(),
+          ),
+        ],
       ),
-      GoRoute(
-        path: AppRoutes.artisanDashboard,
-        name: 'artisan-dashboard',
-        builder: (_, __) => const ArtisanDashboardScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.notifications,
-        name: 'notifications',
-        builder: (_, __) => const NotificationsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.settings,
-        name: 'settings',
-        builder: (_, __) => const SettingsScreen(),
+      // Settings/Profile Branch
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.settings,
+            name: 'settings',
+            builder: (_, __) => const SettingsScreen(),
+          ),
+        ],
       ),
     ],
   );
 }
 
-class _AppShell extends ConsumerStatefulWidget {
-  final Widget child;
-  const _AppShell({required this.child});
+class _AppShell extends ConsumerWidget {
+  final StatefulNavigationShell navigationShell;
+  const _AppShell({required this.navigationShell});
 
   @override
-  ConsumerState<_AppShell> createState() => _AppShellState();
-}
-
-class _AppShellState extends ConsumerState<_AppShell> {
-  int _selectedIndex = 0;
-
-  List<String> _getRoutes(String? role) {
-    if (role == 'artisan') {
-      return [
-        AppRoutes.artisanDashboard,
-        AppRoutes.chatList,
-        AppRoutes.notifications,
-        AppRoutes.settings,
-      ];
-    }
-    return [
-      AppRoutes.home,
-      AppRoutes.customerDashboard,
-      AppRoutes.chatList,
-      AppRoutes.settings,
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final userRole = ref.watch(userStateProvider).value?.role;
-    final routes = _getRoutes(userRole);
 
     return Scaffold(
-      body: widget.child,
+      body: navigationShell,
       bottomNavigationBar: _GlassBottomNav(
-        selectedIndex: _selectedIndex,
+        selectedIndex: navigationShell.currentIndex,
         role: userRole,
         onTap: (index) {
-          setState(() => _selectedIndex = index);
-          context.go(routes[index]);
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
         },
       ),
     );

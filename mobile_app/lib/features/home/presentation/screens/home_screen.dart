@@ -43,8 +43,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: CustomScrollView(
-        slivers: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(categoriesProvider);
+          ref.invalidate(artisansProvider);
+          ref.invalidate(bookingHistoryProvider);
+          // Wait for the main data to reload
+          await ref.read(categoriesProvider.future);
+          await ref.read(artisansProvider(query: _searchCtrl.text).future);
+        },
+        edgeOffset: MediaQuery.of(context).padding.top + 20,
+        color: AppColors.primary,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
           // ── Hero Header ──────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Container(
@@ -387,6 +399,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),
+     ),
     );
   }
 }

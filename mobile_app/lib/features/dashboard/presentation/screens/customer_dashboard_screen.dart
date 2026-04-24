@@ -23,8 +23,12 @@ class CustomerDashboardScreen extends ConsumerWidget {
           final activeBookings = bookings.where((b) => b.status != 'completed' && b.status != 'cancelled').toList();
           final pastBookings = bookings.where((b) => b.status == 'completed' || b.status == 'cancelled').toList();
 
-          return CustomScrollView(
-            slivers: [
+          return RefreshIndicator(
+            onRefresh: () => ref.refresh(bookingHistoryProvider.future),
+            edgeOffset: MediaQuery.of(context).padding.top + 20,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
               // Header
               SliverToBoxAdapter(
                 child: Container(
@@ -256,8 +260,9 @@ class CustomerDashboardScreen extends ConsumerWidget {
 
               const SliverToBoxAdapter(child: SizedBox(height: 32)),
             ],
-          );
-        },
+          ),
+        );
+      },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error loading dashboard: $e')),
       ),

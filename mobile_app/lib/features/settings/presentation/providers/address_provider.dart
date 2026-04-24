@@ -13,7 +13,7 @@ AddressRepository addressRepository(AddressRepositoryRef ref) {
   return AddressRepositoryImpl(apiClient);
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class UserAddresses extends _$UserAddresses {
   @override
   Future<List<UserAddress>> build() {

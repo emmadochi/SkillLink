@@ -13,7 +13,7 @@ ChatRepository chatRepository(ChatRepositoryRef ref) {
   return ChatRepositoryImpl(apiClient);
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<List<ChatMessage>> conversation(ConversationRef ref, int partnerId) {
   return ref.watch(chatRepositoryProvider).getConversation(partnerId);
 }

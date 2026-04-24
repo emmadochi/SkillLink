@@ -6,7 +6,7 @@ import 'dart:convert';
 
 part 'user_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class UserState extends _$UserState {
   @override
   FutureOr<User?> build() async {

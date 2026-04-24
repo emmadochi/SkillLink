@@ -29,37 +29,46 @@ class ChatListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: historyAsync.when(
-        data: (chats) {
-          if (chats.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.outline.withOpacity(0.5)),
-                  const SizedBox(height: 16),
-                  Text('No messages yet', style: AppTypography.bodyLg.copyWith(color: AppColors.outline)),
-                ],
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(chatHistoryProvider.future),
+        child: historyAsync.when(
+          data: (chats) {
+            if (chats.isEmpty) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.outline.withOpacity(0.5)),
+                      const SizedBox(height: 16),
+                      Text('No messages yet', style: AppTypography.bodyLg.copyWith(color: AppColors.outline)),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              itemCount: chats.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 4),
+              itemBuilder: (context, i) => _ChatTile(
+                chat: chats[i],
+                onTap: () {
+                  final chat = chats[i];
+                  context.push(
+                    '${AppRoutes.chat}/${chat.partnerId}?name=${Uri.encodeComponent(chat.partnerName)}&avatar=${Uri.encodeComponent(chat.partnerAvatar ?? '')}',
+                  );
+                },
               ),
             );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            itemCount: chats.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 4),
-            itemBuilder: (context, i) => _ChatTile(
-              chat: chats[i],
-              onTap: () {
-                final chat = chats[i];
-                context.push(
-                  '${AppRoutes.chat}/${chat.partnerId}?name=${Uri.encodeComponent(chat.partnerName)}&avatar=${Uri.encodeComponent(chat.partnerAvatar ?? '')}',
-                );
-              },
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, __) => Center(child: Text('Error: $e')),
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, __) => Center(child: Text('Error: $e')),
+        ),
       ),
     );
   }
