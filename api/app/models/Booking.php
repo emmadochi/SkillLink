@@ -23,9 +23,12 @@ class Booking {
      * Create a new booking request.
      */
     public function create($data) {
+        $offerPrice = isset($data['offer_price']) ? floatval($data['offer_price']) : null;
+        $status = $offerPrice ? 'pending_artisan' : 'none';
+        
         $query = "INSERT INTO " . $this->table . " 
-                  (booking_number, customer_id, artisan_id, category_id, service_description, scheduled_at, price, platform_fee, artisan_payout) 
-                  VALUES (:bno, :cid, :aid, :catid, :desc, :sch, :pr, :fee, :po)";
+                  (booking_number, customer_id, artisan_id, category_id, service_description, scheduled_at, price, offer_price, negotiation_status, platform_fee, artisan_payout) 
+                  VALUES (:bno, :cid, :aid, :catid, :desc, :sch, :pr, :opr, :nstat, :fee, :po)";
         
         $stmt = $this->conn->prepare($query);
         
@@ -36,6 +39,8 @@ class Booking {
         $stmt->bindParam(':desc', $data['service_description']);
         $stmt->bindParam(':sch', $data['scheduled_at']);
         $stmt->bindParam(':pr', $data['price']);
+        $stmt->bindParam(':opr', $offerPrice);
+        $stmt->bindParam(':nstat', $status);
         $stmt->bindParam(':fee', $data['platform_fee']);
         $stmt->bindParam(':po', $data['artisan_payout']);
 
@@ -86,5 +91,35 @@ class Booking {
         }
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
+    /**
+     * Update negotiation state.
+     */
+    public function updateNegotiation($id, $price, $status) {
+        $query = "UPDATE " . $this->table . " SET 
+                  negotiation_status = :status, 
+                  counter_price = :price ";
+        
+        // If accepted, update the final price and recalculate fees
+        if ($status === 'accepted') {
+            $fee = $price * 0.10;
+            $payout = $price - $fee;
+            $query .= ", price = :price, platform_fee = $fee, artisan_payout = $payout, is_negotiated = 1, status = 'confirmed' ";
+        }
+
+        $query .= " WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':price', $price);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
+
+    public function getById($id) {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch();
     }
 }

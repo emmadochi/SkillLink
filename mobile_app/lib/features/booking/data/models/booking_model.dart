@@ -27,6 +27,17 @@ class Booking {
   @JsonKey(name: 'created_at')
   final String? createdAt;
 
+  @JsonKey(name: 'offer_price', fromJson: _toDouble)
+  final double? offerPrice;
+  @JsonKey(name: 'counter_price', fromJson: _toDouble)
+  final double? counterPrice;
+  @JsonKey(name: 'negotiation_status')
+  final String? negotiationStatus;
+  @JsonKey(name: 'is_negotiated', fromJson: _toBool)
+  final bool isNegotiated;
+
+  static bool _toBool(dynamic val) => val == 1 || val == true || val == '1';
+
   static double _toDouble(dynamic val) => val is String ? (double.tryParse(val) ?? 0.0) : (val is int ? val.toDouble() : (val as double? ?? 0.0));
   static int _toInt(dynamic val) => val is String ? (int.tryParse(val) ?? 0) : (val as int? ?? 0);
 
@@ -57,6 +68,10 @@ class Booking {
     this.partnerAvatar,
     this.categoryName,
     this.cancellationReason,
+    this.offerPrice,
+    this.counterPrice,
+    this.negotiationStatus,
+    this.isNegotiated = false,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) => _$BookingFromJson(json);

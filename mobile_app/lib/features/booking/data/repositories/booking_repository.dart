@@ -6,6 +6,7 @@ abstract class BookingRepository {
   Future<Map<String, dynamic>> createBooking(Map<String, dynamic> data);
   Future<List<Booking>> getBookingHistory();
   Future<bool> updateBookingStatus(int id, String status, {String? reason});
+  Future<bool> negotiateBooking(int id, double price, String status);
   Future<List<Map<String, dynamic>>> getCategoryServices(int categoryId);
 }
 
@@ -57,6 +58,22 @@ class BookingRepositoryImpl implements BookingRepository {
       return response.status == 'success';
     } on DioException catch (e) {
       throw e.response?.data['error'] ?? 'Update failed';
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> negotiateBooking(int id, double price, String status) async {
+    try {
+      final response = await _apiClient.negotiate({
+        'id': id,
+        'price': price,
+        'status': status,
+      });
+      return response.status == 'success';
+    } on DioException catch (e) {
+      throw e.response?.data['error'] ?? 'Negotiation failed';
     } catch (e) {
       rethrow;
     }

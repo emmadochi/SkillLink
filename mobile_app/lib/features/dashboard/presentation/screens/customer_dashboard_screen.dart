@@ -119,7 +119,52 @@ class CustomerDashboardScreen extends ConsumerWidget {
                               ]),
                               const SizedBox(height: 14),
                               // Service progress tracker
-                              _ServiceProgressTracker(step: _getStatusStep(b.status)),
+                              if (b.negotiationStatus == 'pending_customer') ...[
+                                const SizedBox(height: 16),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Artisan countered with ₦${b.counterPrice}',
+                                        style: AppTypography.titleSmall.copyWith(color: AppColors.primary),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(children: [
+                                        Expanded(
+                                          child: OutlinedButton(
+                                            onPressed: () => _handleNegotiation(context, ref, b.id, b.price, 'rejected'),
+                                            style: OutlinedButton.styleFrom(
+                                              side: const BorderSide(color: AppColors.error),
+                                              shape: const StadiumBorder(),
+                                            ),
+                                            child: Text('Reject', style: AppTypography.labelMd.copyWith(color: AppColors.error)),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: ElevatedButton(
+                                            onPressed: () => _handleNegotiation(context, ref, b.id, b.counterPrice ?? b.price, 'accepted'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primary,
+                                              foregroundColor: Colors.white,
+                                              shape: const StadiumBorder(),
+                                            ),
+                                            child: Text('Accept', style: AppTypography.labelMd.copyWith(color: Colors.white)),
+                                          ),
+                                        ),
+                                      ]),
+                                    ],
+                                  ),
+                                ),
+                              ] else ...[
+                                _ServiceProgressTracker(step: _getStatusStep(b.status)),
+                              ],
                             ],
                           ),
                         ),
@@ -226,7 +271,29 @@ class CustomerDashboardScreen extends ConsumerWidget {
     if (status == 'arrived') return 'Arrived';
     if (status == 'completed') return 'Completed';
     if (status == 'cancelled') return 'Cancelled';
-    return 'Pending';
+    return status;
+  }
+
+  void _handleNegotiation(BuildContext context, WidgetRef ref, int bookingId, double price, String status) async {
+    try {
+      final repo = ref.read(bookingRepositoryProvider);
+      await repo.negotiateBooking(bookingId, price, status);
+      ref.invalidate(bookingHistoryProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(status == 'accepted' ? 'Price Accepted! Job Confirmed.' : 'Offer Rejected.'),
+            backgroundColor: status == 'accepted' ? Colors.green : Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 
   int _getStatusStep(String status) {

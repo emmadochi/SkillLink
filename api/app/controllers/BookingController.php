@@ -41,6 +41,7 @@ class BookingController extends Controller {
                 'service_description' => $body['service_description'] ?? '',
                 'scheduled_at' => $body['scheduled_at'],
                 'price' => $price,
+                'offer_price' => $body['offer_price'] ?? null,
                 'platform_fee' => $fee,
                 'artisan_payout' => $payout
             ]);
@@ -60,6 +61,39 @@ class BookingController extends Controller {
 
         } catch (\Exception $e) {
             $this->error('Booking error: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/booking/negotiate
+     */
+    public function negotiate() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Method not allowed', 405);
+        }
+
+        $tokenData = Auth::verifyToken(Auth::getBearerToken());
+        if (!$tokenData) $this->error('Unauthorized', 401);
+
+        $body = $this->getBody();
+        if (empty($body['id']) || empty($body['status'])) {
+            $this->error('Booking ID and status required');
+        }
+
+        try {
+            $bookingModel = new Booking();
+            $price = floatval($body['price'] ?? 0);
+            
+            if ($bookingModel->updateNegotiation($body['id'], $price, $body['status'])) {
+                $this->json([
+                    'status' => 'success',
+                    'message' => 'Negotiation updated to ' . $body['status']
+                ]);
+            } else {
+                $this->error('Failed to update negotiation', 500);
+            }
+        } catch (\Exception $e) {
+            $this->error('Negotiation error: ' . $e->getMessage(), 500);
         }
     }
 

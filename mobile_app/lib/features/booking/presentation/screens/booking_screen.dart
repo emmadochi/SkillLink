@@ -23,6 +23,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   final _descCtrl = TextEditingController();
+  final _offerCtrl = TextEditingController();
   String _selectedService = '';
   int _step = 0; // 0: service, 1: date/time, 2: confirm
   bool _isLoading = false;
@@ -169,7 +170,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             'category_id': artisan?.categoryId ?? 1,
                             'service_description': '$_selectedService: ${_descCtrl.text}',
                             'scheduled_at': scheduledAt,
-                            'price': 5000,
+                            'price': artisan?.hourlyRate ?? 5000,
+                            'offer_price': double.tryParse(_offerCtrl.text),
                           });
                           if (mounted) {
                             context.go(AppRoutes.bookingConfirmation);
@@ -361,6 +363,7 @@ class _ConfirmStep extends ConsumerWidget {
   final DateTime? date;
   final TimeOfDay? time;
   final String desc;
+  final TextEditingController offerCtrl;
 
   const _ConfirmStep({
     required this.artisanId,
@@ -368,6 +371,7 @@ class _ConfirmStep extends ConsumerWidget {
     this.date,
     this.time,
     required this.desc,
+    required this.offerCtrl,
   });
 
   @override
@@ -396,9 +400,20 @@ class _ConfirmStep extends ConsumerWidget {
               _ConfirmRow(label: 'Date', value: '${date!.day}/${date!.month}/${date!.year}'),
             if (time != null)
               _ConfirmRow(label: 'Time', value: time!.format(context)),
-            _ConfirmRow(label: 'Rate', value: '₦5,000/hr'),
+            _ConfirmRow(label: 'Rate', value: '₦${artisanAsync.value?.hourlyRate ?? 5000}/hr'),
           ]),
         ),
+        const SizedBox(height: 24),
+        SkillLinkInput(
+          label: 'Suggest Your Price (Optional)',
+          hint: 'E.g. 4500',
+          controller: offerCtrl,
+          keyboardType: TextInputType.number,
+          prefixIcon: const Icon(Icons.payments_outlined, color: AppColors.primary),
+        ),
+        const SizedBox(height: 8),
+        Text('Negotiating a price may help you get a better deal, but the artisan must accept it.',
+            style: AppTypography.bodySmall.copyWith(color: AppColors.outline)),
         const SizedBox(height: 16),
         SkillLinkCard(
           backgroundColor: AppColors.tertiaryFixed.withOpacity(0.30),

@@ -168,37 +168,67 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
                                 Text(b.serviceDescription!, style: AppTypography.bodySm.copyWith(color: AppColors.outline)),
                               ],
                               const SizedBox(height: 14),
-                              Row(children: [
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: () => _updateStatus(b.id, 'cancelled'),
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(color: AppColors.outline),
-                                      shape: const StadiumBorder(),
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
-                                    ),
-                                    child: Text('Decline',
-                                        style: AppTypography.labelLg.copyWith(
-                                            color: AppColors.outline)),
+                              if (b.status == 'pending' && b.negotiationStatus == 'pending_customer')
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () => _updateStatus(b.id, 'confirmed'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      shape: const StadiumBorder(),
-                                      elevation: 0,
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
+                                  child: Center(
+                                    child: Text(
+                                      'Waiting for Customer response...',
+                                      style: AppTypography.labelMd.copyWith(color: AppColors.primary),
                                     ),
-                                    child: Text('Accept',
-                                        style: AppTypography.labelLg.copyWith(
-                                            color: Colors.white)),
                                   ),
-                                ),
-                              ]),
+                                )
+                              else if (b.status == 'pending')
+                                Row(children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () => _updateStatus(b.id, 'cancelled'),
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(color: AppColors.outline),
+                                        shape: const StadiumBorder(),
+                                        padding: const EdgeInsets.symmetric(vertical: 10),
+                                      ),
+                                      child: Text('Decline',
+                                          style: AppTypography.labelMd.copyWith(
+                                              color: AppColors.outline)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () => _showCounterDialog(b),
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(color: AppColors.primary),
+                                        shape: const StadiumBorder(),
+                                        padding: const EdgeInsets.symmetric(vertical: 10),
+                                      ),
+                                      child: Text('Counter',
+                                          style: AppTypography.labelMd.copyWith(
+                                              color: AppColors.primary)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () => _updateStatus(b.id, 'confirmed'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        foregroundColor: Colors.white,
+                                        shape: const StadiumBorder(),
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(vertical: 10),
+                                      ),
+                                      child: Text('Accept',
+                                          style: AppTypography.labelMd.copyWith(
+                                              color: Colors.white)),
+                                    ),
+                                  ),
+                                ]),
                             ],
                           ),
                         ),
@@ -405,6 +435,69 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
         ],
       ),
     );
+  }
+
+  Future<void> _showCounterDialog(b) async {
+    final ctrl = TextEditingController(text: b.price.toStringAsFixed(0));
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Counter Offer'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Original Price: ₦${b.price}'),
+            if (b.offerPrice != null) ...[
+              const SizedBox(height: 4),
+              Text('Customer Offered: ₦${b.offerPrice}', 
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+            ],
+            const SizedBox(height: 16),
+            TextField(
+              controller: ctrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Your New Price',
+                prefixText: '₦ ',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              final price = double.tryParse(ctrl.text);
+              if (price != null) {
+                Navigator.pop(context);
+                _submitCounterOffer(b.id, price);
+              }
+            },
+            child: const Text('Send Offer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _submitCounterOffer(int id, double price) async {
+    try {
+      final repo = ref.read(bookingRepositoryProvider);
+      await repo.negotiateBooking(id, price, 'pending_customer');
+      ref.invalidate(bookingHistoryProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Counter offer sent!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send offer: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 
   String _formatDate(String dateStr) {

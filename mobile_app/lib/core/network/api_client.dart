@@ -66,6 +66,11 @@ class ApiClient {
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
+  Future<ApiResponse<Map<String, dynamic>>> negotiate(Map<String, dynamic> body) async {
+    final response = await dio.post('/booking/negotiate', data: body);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
   Future<ApiResponse<Map<String, dynamic>>> initializePayment(Map<String, dynamic> body) async {
     final response = await dio.post('/payment/initialize', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
