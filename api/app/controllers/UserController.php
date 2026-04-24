@@ -34,7 +34,7 @@ class UserController extends Controller {
         }
 
         $file = $_FILES['avatar'];
-        $uploadDir = __DIR__ . '/../../../public/uploads/avatars/';
+        $uploadDir = __DIR__ . '/../../public/uploads/avatars/';
         
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);

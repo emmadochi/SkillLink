@@ -56,6 +56,12 @@ $controller_name = !empty($parts[0]) ? ucfirst($parts[0]) . 'Controller' : null;
 $method = $parts[1] ?? 'index';
 if ($method === "") $method = 'index';
 
+// Convert kebab-case (e.g. upload-avatar) to camelCase (e.g. uploadAvatar)
+if (strpos($method, '-') !== false) {
+    $parts_method = explode('-', $method);
+    $method = $parts_method[0] . implode('', array_map('ucfirst', array_slice($parts_method, 1)));
+}
+
 if (!$controller_name) {
     header('Content-Type: application/json');
     echo json_encode(['status' => 'ok', 'version' => '1.0.0', 'message' => 'SkillLink API is live.']);
