@@ -18,13 +18,17 @@ class Booking {
   @JsonKey(name: 'scheduled_at')
   final String scheduledAt;
   final String status;
+  @JsonKey(fromJson: _toDouble)
   final double price;
-  @JsonKey(name: 'platform_fee')
+  @JsonKey(name: 'platform_fee', fromJson: _toDouble)
   final double platformFee;
-  @JsonKey(name: 'artisan_payout')
+  @JsonKey(name: 'artisan_payout', fromJson: _toDouble)
   final double artisanPayout;
   @JsonKey(name: 'created_at')
   final String? createdAt;
+
+  static double _toDouble(dynamic val) => val is String ? (double.tryParse(val) ?? 0.0) : (val is int ? val.toDouble() : (val as double? ?? 0.0));
+  static int _toInt(dynamic val) => val is String ? (int.tryParse(val) ?? 0) : (val as int? ?? 0);
 
   // Joined fields from backend
   @JsonKey(name: 'partner_name')
