@@ -22,21 +22,19 @@ define('ROOT_PATH', __DIR__);
 define('APP_PATH', ROOT_PATH . '/app');
 define('CORE_PATH', ROOT_PATH . '/core');
 
-// Simple Autoloader
+// Universal Autoloader
 spl_autoload_register(function ($class) {
-    // Convert namespace to path
     $classPath = str_replace('\\', '/', $class);
     
-    // Check in CORE_PATH first, then APP_PATH
-    $coreFile = CORE_PATH . '/' . basename($classPath) . '.php';
-    if (file_exists($coreFile)) {
-        require_once $coreFile;
-        return;
+    // Check if it's a Core class or an App class
+    if (strpos($class, 'core\\') === 0) {
+        $file = CORE_PATH . '/' . str_replace('core/', '', $classPath) . '.php';
+    } else {
+        $file = APP_PATH . '/' . $classPath . '.php';
     }
 
-    $appFile = APP_PATH . '/' . $classPath . '.php';
-    if (file_exists($appFile)) {
-        require_once $appFile;
+    if (file_exists($file)) {
+        require_once $file;
     }
 });
 
