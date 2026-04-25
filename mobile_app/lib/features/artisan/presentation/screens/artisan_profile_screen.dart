@@ -226,17 +226,9 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
             ),
           ),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 12,
-          bottom: MediaQuery.of(context).padding.bottom > 0 
-              ? MediaQuery.of(context).padding.bottom + 8 
-              : 20,
-        ),
+        height: 100 + MediaQuery.of(context).padding.bottom,
         decoration: BoxDecoration(
           color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5))),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -244,30 +236,36 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
               offset: const Offset(0, -4),
             ),
           ],
+          border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5))),
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: SkillLinkButton.outlined(
-                label: 'Message',
-                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20, color: AppColors.primary),
-                onPressed: () {
-                  final artisan = ref.read(artisanProfileProvider(artisanId)).value;
-                  final name = Uri.encodeComponent(artisan?.user?.name ?? 'Artisan');
-                  final avatar = Uri.encodeComponent(artisan?.user?.avatarUrl ?? '');
-                  context.push('${AppRoutes.chat}/${widget.artisanId}?name=$name&avatar=$avatar');
-                },
-              ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SkillLinkButton.outlined(
+                    label: 'Message',
+                    icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20, color: AppColors.primary),
+                    onPressed: () {
+                      final artisan = ref.read(artisanProfileProvider(artisanId)).value;
+                      final name = Uri.encodeComponent(artisan?.user?.name ?? 'Artisan');
+                      final avatar = Uri.encodeComponent(artisan?.user?.avatarUrl ?? '');
+                      context.push('${AppRoutes.chat}/${widget.artisanId}?name=$name&avatar=$avatar');
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SkillLinkButton.gradient(
+                    label: 'Book Now',
+                    icon: const Icon(Icons.calendar_month_outlined, size: 20, color: Colors.white),
+                    onPressed: () => context.push('${AppRoutes.booking}/${widget.artisanId}'),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SkillLinkButton.gradient(
-                label: 'Book Now',
-                icon: const Icon(Icons.calendar_month_outlined, size: 20, color: Colors.white),
-                onPressed: () => context.push('${AppRoutes.booking}/${widget.artisanId}'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -308,32 +306,36 @@ class _AboutTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      children: [
-        Text('Bio', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Text(
-          artisan.bio ?? 'No bio available.',
-          style: AppTypography.bodyMd.copyWith(height: 1.6),
-        ),
-        const SizedBox(height: 24),
-        Text('Service Location', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Row(children: [
-          const Icon(Icons.location_on_outlined, size: 16, color: AppColors.primary),
-          const SizedBox(width: 8),
-          Text(artisan.locationName ?? 'Lagos, Nigeria', style: AppTypography.bodyMd),
-        ]),
-        if (artisan.businessAddress != null && artisan.businessAddress!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Text('Business Address', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Bio', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text(artisan.businessAddress!, style: AppTypography.bodyMd),
+          Text(
+            artisan.bio ?? 'No bio available.',
+            style: AppTypography.bodyMd.copyWith(height: 1.6),
+          ),
+          const SizedBox(height: 24),
+          Text('Service Location', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Row(children: [
+            const Icon(Icons.location_on_outlined, size: 16, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text(artisan.locationName ?? 'Lagos, Nigeria', style: AppTypography.bodyMd),
+          ]),
+          if (artisan.businessAddress != null && artisan.businessAddress!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text('Business Address', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(artisan.businessAddress!, style: AppTypography.bodyMd),
+          ],
+          const SizedBox(height: 24),
+          _SecurityCard(artisan: artisan),
+          const SizedBox(height: 40), // Extra space for bottom bar
         ],
-        const SizedBox(height: 24),
-        _SecurityCard(artisan: artisan),
-      ],
+      ),
     );
   }
 }
