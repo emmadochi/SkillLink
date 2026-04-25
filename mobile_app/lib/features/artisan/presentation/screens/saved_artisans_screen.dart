@@ -7,6 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../providers/artisan_provider.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class SavedArtisansScreen extends ConsumerWidget {
   const SavedArtisansScreen({super.key});
@@ -52,7 +53,7 @@ class SavedArtisansScreen extends ConsumerWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(
-                        artisan.user?.avatarUrl ?? 'https://i.pravatar.cc/100?u=${artisan.userId}',
+                        UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
                         width: 64,
                         height: 64,
                         fit: BoxFit.cover,

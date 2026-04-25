@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
 import 'package:skilllink_app/features/artisan/data/models/artisan_model.dart';
 import 'package:skilllink_app/features/artisan/data/models/review_model.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class ArtisanProfileScreen extends ConsumerStatefulWidget {
   final String artisanId;
@@ -86,7 +87,7 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                       children: [
                         // Portrait
                         Image.network(
-                          artisan.user?.avatarUrl ?? 'https://i.pravatar.cc/400?u=${artisan.userId}',
+                          UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
                               color: AppColors.primaryContainer),
@@ -199,51 +200,78 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                 ),
               ],
             ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, __) => Center(child: Text('Error: $err')),
-          ),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5))),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.04),
-                blurRadius: 16,
-                offset: const Offset(0, -4),
+            loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+            error: (err, __) => Scaffold(
+              appBar: AppBar(title: const Text('Error')),
+              body: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline_rounded, size: 64, color: AppColors.error),
+                      const SizedBox(height: 16),
+                      Text('Failed to load profile', style: AppTypography.titleLg),
+                      const SizedBox(height: 8),
+                      Text(err.toString(), textAlign: TextAlign.center, style: AppTypography.bodyMd.copyWith(color: AppColors.outline)),
+                      const SizedBox(height: 24),
+                      SkillLinkButton(
+                        label: 'Retry',
+                        onPressed: () => ref.invalidate(artisanProfileProvider(artisanId)),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ],
-          ),
-        child: Row(children: [
-          Expanded(
-            child: SkillLinkButton.outlined(
-              label: 'Message',
-              icon: const Icon(Icons.chat_bubble_outline_rounded,
-                  size: 18, color: AppColors.primary),
-              onPressed: () {
-                final artisan = ref.read(artisanProfileProvider(int.parse(widget.artisanId))).value;
-                final name = Uri.encodeComponent(artisan?.user?.name ?? 'Artisan');
-                final avatar = Uri.encodeComponent(artisan?.user?.avatarUrl ?? '');
-                context.push('${AppRoutes.chat}/${widget.artisanId}?name=$name&avatar=$avatar');
-              },
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: SkillLinkButton.gradient(
-              label: 'Book Now',
-              icon: const Icon(Icons.calendar_month_outlined,
-                  size: 18, color: Colors.white),
-              onPressed: () => context.push('${AppRoutes.booking}/${widget.artisanId}'),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 12,
+          bottom: MediaQuery.of(context).padding.bottom > 0 
+              ? MediaQuery.of(context).padding.bottom + 8 
+              : 20,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5))),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -4),
             ),
-          ),
-        ]),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: SkillLinkButton.outlined(
+                label: 'Message',
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20, color: AppColors.primary),
+                onPressed: () {
+                  final artisan = ref.read(artisanProfileProvider(artisanId)).value;
+                  final name = Uri.encodeComponent(artisan?.user?.name ?? 'Artisan');
+                  final avatar = Uri.encodeComponent(artisan?.user?.avatarUrl ?? '');
+                  context.push('${AppRoutes.chat}/${widget.artisanId}?name=$name&avatar=$avatar');
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SkillLinkButton.gradient(
+                label: 'Book Now',
+                icon: const Icon(Icons.calendar_month_outlined, size: 20, color: Colors.white),
+                onPressed: () => context.push('${AppRoutes.booking}/${widget.artisanId}'),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 class _StatChip extends StatelessWidget {
@@ -434,7 +462,7 @@ class _ReviewsTab extends StatelessWidget {
                 CircleAvatar(
                   radius: 18,
                   backgroundImage: NetworkImage(
-                    review.customerAvatar ?? 'https://i.pravatar.cc/60?u=${review.customerId}'
+                    UrlUtils.resolveImageUrl(review.customerAvatar)
                   ),
                 ),
                 const SizedBox(width: 10),

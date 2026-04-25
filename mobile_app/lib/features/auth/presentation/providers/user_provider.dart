@@ -16,6 +16,7 @@ class UserState extends _$UserState {
     final email = await storage.read(key: 'user_email');
     final role = await storage.read(key: AppConstants.keyUserRole);
     final phone = await storage.read(key: 'user_phone');
+    final avatarUrl = await storage.read(key: 'user_avatar');
     final isVerifiedStr = await storage.read(key: 'user_is_verified');
 
     if (userId != null && name != null) {
@@ -25,6 +26,7 @@ class UserState extends _$UserState {
         email: email ?? '',
         role: role ?? 'customer',
         phone: phone,
+        avatarUrl: avatarUrl,
         isVerified: isVerifiedStr == '1',
       );
     }
@@ -38,6 +40,7 @@ class UserState extends _$UserState {
     await storage.write(key: 'user_email', value: user.email);
     await storage.write(key: AppConstants.keyUserRole, value: user.role);
     await storage.write(key: 'user_phone', value: user.phone ?? '');
+    await storage.write(key: 'user_avatar', value: user.avatarUrl ?? '');
     await storage.write(key: 'user_is_verified', value: user.isVerified ? '1' : '0');
     state = AsyncData(user);
   }
@@ -49,6 +52,7 @@ class UserState extends _$UserState {
     await storage.delete(key: 'user_email');
     await storage.delete(key: AppConstants.keyUserRole);
     await storage.delete(key: 'user_phone');
+    await storage.delete(key: 'user_avatar');
     await storage.delete(key: 'user_is_verified');
     await storage.delete(key: AppConstants.keyToken);
     state = const AsyncData(null);

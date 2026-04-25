@@ -47,6 +47,16 @@ class BookingController extends Controller {
             ]);
 
             if ($id) {
+                // Notify Artisan
+                $notifModel = new \models\Notification();
+                $notifModel->create([
+                    'user_id' => $body['artisan_id'],
+                    'type' => 'booking',
+                    'title' => 'New Booking Request',
+                    'message' => 'You have a new booking request for ' . $body['scheduled_at'],
+                    'related_id' => $id
+                ]);
+
                 $this->json([
                     'status' => 'success',
                     'message' => 'Booking request sent successfully',
@@ -144,6 +154,20 @@ class BookingController extends Controller {
             $role = $tokenData['role'] ?? 'customer';
             
             if ($bookingModel->updateStatus($body['id'], $body['status'], $tokenData['id'], $role, $reason)) {
+                // Notify the other party
+                $booking = $bookingModel->getById($body['id']);
+                if ($booking) {
+                    $recipientId = ($role === 'artisan') ? $booking['customer_id'] : $booking['artisan_id'];
+                    $notifModel = new \models\Notification();
+                    $notifModel->create([
+                        'user_id' => $recipientId,
+                        'type' => 'booking',
+                        'title' => 'Booking ' . ucfirst($body['status']),
+                        'message' => 'Your booking ' . $booking['booking_number'] . ' has been ' . $body['status'],
+                        'related_id' => $body['id']
+                    ]);
+                }
+
                 $this->json([
                     'status' => 'success',
                     'message' => 'Status updated to ' . $body['status']

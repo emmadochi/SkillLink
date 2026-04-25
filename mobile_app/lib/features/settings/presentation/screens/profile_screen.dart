@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../auth/presentation/providers/auth_repository_provider.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -109,9 +110,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     radius: 50,
                     backgroundColor: AppColors.surfaceContainerLow,
                     backgroundImage: user?.avatarUrl != null 
-                        ? NetworkImage(user!.avatarUrl!.startsWith('http') ? user.avatarUrl! : 'http://localhost/SkillLink/api/public/${user.avatarUrl}') 
+                        ? NetworkImage(UrlUtils.resolveImageUrl(user!.avatarUrl)) 
                         : null,
-                    child: user?.avatarUrl == null 
+                    child: user?.avatarUrl == null || user!.avatarUrl!.isEmpty
                         ? const Icon(Icons.person, size: 50, color: AppColors.outline)
                         : null,
                   ),

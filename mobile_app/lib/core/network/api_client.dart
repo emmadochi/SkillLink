@@ -6,6 +6,7 @@ import '../../features/artisan/data/models/review_model.dart';
 import '../../features/booking/data/models/booking_model.dart';
 import '../../features/settings/data/models/address_model.dart';
 import '../../features/chat/data/models/chat_model.dart';
+import '../../features/notifications/data/models/notification_model.dart';
 
 part 'api_client.g.dart';
 
@@ -145,6 +146,16 @@ class ApiClient {
   Future<ApiResponse<List<ChatConversation>>> getChatHistory() async {
     final response = await dio.get('chat/history');
     return _safeParse(response.data, (json) => (json as List).map((i) => ChatConversation.fromJson(i as Map<String, dynamic>)).toList());
+  }
+
+  Future<ApiResponse<List<NotificationModel>>> getNotifications() async {
+    final response = await dio.get('notification');
+    return _safeParse(response.data, (json) => (json as List).map((i) => NotificationModel.fromJson(i as Map<String, dynamic>)).toList());
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> markNotificationsRead({int? id}) async {
+    final response = await dio.post('notification/mark-read', data: {'id': id});
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> uploadAvatar(String filePath) async {

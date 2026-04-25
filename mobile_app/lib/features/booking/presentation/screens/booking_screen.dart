@@ -102,10 +102,34 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                 onSelect: (s) => setState(() => _selectedService = s),
                               ),
                               loading: () => const Center(child: CircularProgressIndicator()),
-                              error: (e, __) => Center(child: Text('Error loading services: $e')),
+                              error: (e, __) => Center(
+                                 child: Column(
+                                   mainAxisAlignment: MainAxisAlignment.center,
+                                   children: [
+                                     const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
+                                     const SizedBox(height: 12),
+                                     Text('Failed to load services', style: AppTypography.titleMd),
+                                     Text('Please try again later', style: AppTypography.bodySm),
+                                   ],
+                                 ),
+                               ),
                             ),
                         loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (e, __) => Center(child: Text('Error: $e')),
+                        error: (e, __) => Center(
+                           child: Column(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
+                               const SizedBox(height: 12),
+                               Text('Failed to load artisan profile', style: AppTypography.titleMd),
+                               const SizedBox(height: 8),
+                               SkillLinkButton(
+                                 label: 'Retry',
+                                 onPressed: () => ref.invalidate(artisanProfileProvider(int.parse(widget.artisanId))),
+                               ),
+                             ],
+                           ),
+                         ),
                       )
                       : const Center(child: Text('Invalid Artisan ID')))
                   : _step == 1

@@ -14,6 +14,7 @@ import 'package:skilllink_app/features/auth/presentation/providers/user_provider
 import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
 import 'package:skilllink_app/features/booking/presentation/providers/booking_provider.dart';
 import 'package:skilllink_app/core/network/location_provider.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -108,12 +109,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             color: Colors.white),
                       ),
                       // Avatar
-                      const CircleAvatar(
-                        radius: 20,
-                        backgroundColor: AppColors.surfaceTint,
-                        child: Icon(Icons.person_rounded,
-                            size: 20, color: Colors.white),
-                      ),
+                      ref.watch(userStateProvider).when(
+                            data: (user) => CircleAvatar(
+                              radius: 20,
+                              backgroundColor: AppColors.surfaceTint,
+                              backgroundImage: user?.avatarUrl != null 
+                                  ? NetworkImage(UrlUtils.resolveImageUrl(user!.avatarUrl)) 
+                                  : null,
+                              child: user?.avatarUrl == null || user!.avatarUrl!.isEmpty
+                                  ? const Icon(Icons.person_rounded, size: 20, color: Colors.white)
+                                  : null,
+                            ),
+                            loading: () => const CircleAvatar(radius: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                            error: (_, __) => const CircleAvatar(radius: 20, child: Icon(Icons.error)),
+                          ),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -289,9 +298,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: SkillLinkArtisanCard(
                               name: artisan.user?.name ?? 'Artisan',
                               craft: artisan.skill ?? artisan.bio ?? 'Professional Artisan',
-                              imageUrl: artisan.user?.avatarUrl != null 
-                                  ? (artisan.user!.avatarUrl!.startsWith('http') ? artisan.user!.avatarUrl! : 'http://localhost/SkillLink/api/public/${artisan.user!.avatarUrl}')
-                                  : 'https://i.pravatar.cc/200?u=${artisan.userId}',
+                              imageUrl: UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
                               rating: artisan.rating.toDouble(),
                               price: '₦${NumberFormat('#,###').format(artisan.hourlyRate)}/hr',
                               location: artisan.locationName ?? 'Lagos',
@@ -351,9 +358,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     color: AppColors.surfaceContainerHigh,
                                     child: booking.partnerAvatar != null
                                         ? Image.network(
-                                            booking.partnerAvatar!.startsWith('http') 
-                                              ? booking.partnerAvatar! 
-                                              : 'http://localhost/SkillLink/api/public/${booking.partnerAvatar}',
+                                            UrlUtils.resolveImageUrl(booking.partnerAvatar),
                                             fit: BoxFit.cover,
                                             errorBuilder: (_, __, ___) => const Icon(Icons.person, color: AppColors.outline),
                                           )

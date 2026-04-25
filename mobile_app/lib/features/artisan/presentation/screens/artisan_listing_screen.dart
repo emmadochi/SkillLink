@@ -9,6 +9,7 @@ import '../../../../shared/widgets/skilllink_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
 import 'package:skilllink_app/features/artisan/data/models/artisan_model.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class ArtisanListingScreen extends ConsumerStatefulWidget {
   final String? category;
@@ -127,8 +128,7 @@ class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
                                     bottomLeft: Radius.circular(24),
                                   ),
                                   child: Image.network(
-                                    artisan.user?.avatarUrl ??
-                                        'https://i.pravatar.cc/120?u=${artisan.userId}',
+                                    UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
                                     width: 110,
                                     height: 130,
                                     fit: BoxFit.cover,

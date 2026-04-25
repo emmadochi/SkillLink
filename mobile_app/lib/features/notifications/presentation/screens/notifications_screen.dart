@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/widgets/skilllink_card.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:skilllink_app/core/theme/app_colors.dart';
+import 'package:skilllink_app/core/theme/app_typography.dart';
+import 'package:skilllink_app/shared/widgets/skilllink_card.dart';
+import 'package:skilllink_app/features/notifications/data/models/notification_model.dart';
+import 'package:skilllink_app/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:skilllink_app/features/notifications/data/repositories/notification_repository.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notificationsAsync = ref.watch(notificationsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -18,80 +25,125 @@ class NotificationsScreen extends StatelessWidget {
                 )),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () async {
+              await ref.read(notificationRepositoryProvider).markAsRead();
+              ref.invalidate(notificationsProvider);
+            },
             child: Text('Mark All Read',
                 style: AppTypography.labelLg.copyWith(color: AppColors.primary)),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        children: [
-          _NotifSection(label: 'Today', notifications: [
-            _Notif(
-              icon: Icons.check_circle_outline_rounded,
-              color: Colors.green,
-              title: 'Booking Confirmed',
-              subtitle: 'Emmanuel has confirmed your booking for tomorrow at 10AM.',
-              time: '2m ago',
-              isRead: false,
-            ),
-            _Notif(
-              icon: Icons.chat_bubble_outline_rounded,
-              color: AppColors.primary,
-              title: 'New Message',
-              subtitle: 'Emmanuel: "I\'ll be there by 10am. Please make sure..."',
-              time: '15m ago',
-              isRead: false,
-            ),
-          ]),
-          _NotifSection(label: 'Yesterday', notifications: [
-            _Notif(
-              icon: Icons.star_outline_rounded,
-              color: const Color(0xFFFFB84D),
-              title: 'Rate Your Experience',
-              subtitle: 'How was your service with Chukwudi Adeyemi?',
-              time: '1d ago',
-              isRead: true,
-            ),
-            _Notif(
-              icon: Icons.payment_outlined,
-              color: AppColors.tertiary,
-              title: 'Payment Received',
-              subtitle: 'Your payment of ₦15,000 was processed successfully.',
-              time: '1d ago',
-              isRead: true,
-            ),
-          ]),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(notificationsProvider.future),
+        child: notificationsAsync.when(
+          data: (notifications) {
+            if (notifications.isEmpty) {
+              return ListView(
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                  Center(
+                    child: Column(
+                      children: [
+                        Icon(Icons.notifications_none_rounded, size: 64, color: AppColors.outlineVariant),
+                        const SizedBox(height: 16),
+                        Text('No notifications yet', style: AppTypography.titleSm),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            final grouped = _groupNotifications(notifications);
+
+            return ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              children: grouped.entries.map((entry) {
+                return _NotifSection(
+                  label: entry.key,
+                  notifications: entry.value,
+                  onMarkRead: (id) async {
+                    await ref.read(notificationRepositoryProvider).markAsRead(id: id);
+                    ref.invalidate(notificationsProvider);
+                  },
+                );
+              }).toList(),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, __) => Center(child: Text('Error: $e')),
+        ),
       ),
     );
   }
-}
 
-class _Notif {
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String subtitle;
-  final String time;
-  final bool isRead;
+  Map<String, List<NotificationModel>> _groupNotifications(List<NotificationModel> notifications) {
+    final Map<String, List<NotificationModel>> grouped = {};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
 
-  const _Notif({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.subtitle,
-    required this.time,
-    required this.isRead,
-  });
+    for (final n in notifications) {
+      final date = DateTime.parse(n.createdAt);
+      final normalizedDate = DateTime(date.year, date.month, date.day);
+      
+      String label;
+      if (normalizedDate == today) {
+        label = 'Today';
+      } else if (normalizedDate == yesterday) {
+        label = 'Yesterday';
+      } else {
+        label = DateFormat('MMMM d, yyyy').format(date);
+      }
+
+      if (!grouped.containsKey(label)) {
+        grouped[label] = [];
+      }
+      grouped[label]!.add(n);
+    }
+    return grouped;
+  }
 }
 
 class _NotifSection extends StatelessWidget {
   final String label;
-  final List<_Notif> notifications;
+  final List<NotificationModel> notifications;
+  final Function(int) onMarkRead;
 
-  const _NotifSection({required this.label, required this.notifications});
+  const _NotifSection({
+    required this.label, 
+    required this.notifications,
+    required this.onMarkRead,
+  });
+
+  IconData _getIcon(String type) {
+    switch (type) {
+      case 'booking': return Icons.calendar_month_rounded;
+      case 'message': return Icons.chat_bubble_outline_rounded;
+      case 'payment': return Icons.payment_outlined;
+      case 'review': return Icons.star_outline_rounded;
+      default: return Icons.notifications_outlined;
+    }
+  }
+
+  Color _getColor(String type) {
+    switch (type) {
+      case 'booking': return Colors.green;
+      case 'message': return AppColors.primary;
+      case 'payment': return AppColors.tertiary;
+      case 'review': return const Color(0xFFFFB84D);
+      default: return AppColors.outline;
+    }
+  }
+
+  String _formatTime(String createdAt) {
+    final date = DateTime.parse(createdAt);
+    final diff = DateTime.now().difference(date);
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +154,10 @@ class _NotifSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(label, style: Theme.of(context).textTheme.titleSmall),
         ),
-        ...notifications.map((n) => Padding(
+        ...notifications.map((NotificationModel n) => Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: SkillLinkCard(
+            onTap: n.isRead ? null : () => onMarkRead(n.id),
             padding: const EdgeInsets.all(14),
             backgroundColor: n.isRead
                 ? AppColors.surfaceContainerLowest
@@ -114,10 +167,10 @@ class _NotifSection extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: n.color.withOpacity(0.12),
+                  color: _getColor(n.type).withOpacity(0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(n.icon, color: n.color, size: 20),
+                child: Icon(_getIcon(n.type), color: _getColor(n.type), size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -125,14 +178,20 @@ class _NotifSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(children: [
-                      Text(n.title, style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w700,
-                      )),
-                      const Spacer(),
-                      Text(n.time, style: Theme.of(context).textTheme.labelSmall),
+                      Expanded(
+                        child: Text(n.title, 
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w700,
+                          )
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(_formatTime(n.createdAt), style: Theme.of(context).textTheme.labelSmall),
                     ]),
                     const SizedBox(height: 4),
-                    Text(n.subtitle,
+                    Text(n.message,
                         style: AppTypography.bodyMd.copyWith(
                           color: AppColors.outline,
                           height: 1.4,

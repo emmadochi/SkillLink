@@ -17,6 +17,25 @@ class Artisan {
             echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
             exit;
         }
+        
+        // Self-healing: Ensure saved_artisans table exists
+        $this->ensureTablesExist();
+    }
+
+    private function ensureTablesExist() {
+        $sql = "CREATE TABLE IF NOT EXISTS saved_artisans (
+            user_id INT, 
+            artisan_id INT, 
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (user_id, artisan_id), 
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, 
+            FOREIGN KEY (artisan_id) REFERENCES artisans(user_id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        try {
+            $this->conn->exec($sql);
+        } catch (\PDOException $e) {
+            // Ignore if already exists or other non-critical errors
+        }
     }
 
     /**
