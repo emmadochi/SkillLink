@@ -50,6 +50,17 @@ try {
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
     )");
 
+    // 1.1 Create saved_artisans table if not exists
+    $pdo->exec("CREATE TABLE IF NOT EXISTS saved_artisans (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        artisan_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY(user_id, artisan_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (artisan_id) REFERENCES users(id) ON DELETE CASCADE
+    )");
+
     // 2. Fetch all categories to map names to IDs
     $stmt = $pdo->query("SELECT id, name FROM categories");
     $categoryMap = [];
