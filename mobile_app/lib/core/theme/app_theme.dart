@@ -64,8 +64,8 @@ class AppTheme {
       // ── Text Button ───────────────────────────────────────────────────
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          textStyle: AppTypography.labelLg,
+          foregroundColor: AppColors.tertiary,
+          textStyle: AppTypography.labelLg.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
 
@@ -102,10 +102,11 @@ class AppTheme {
       // ── Bottom Navigation ─────────────────────────────────────────────
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surfaceContainerLowest,
-        selectedItemColor: AppColors.primary,
+        selectedItemColor: AppColors.tertiary,
         unselectedItemColor: AppColors.outline,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.w700),
       ),
 
       // ── Chip theme ────────────────────────────────────────────────────

@@ -19,9 +19,10 @@ class AppColors {
   static const Color onSecondary        = Color(0xFFFFFFFF);
 
   // ── Tertiary – "Golden Hour" ─────────────────────────────────────────
-  static const Color tertiary          = Color(0xFF7A5232);
+  static const Color tertiary          = Color(0xFFF97316); // Professional Orange
   static const Color tertiaryFixed     = Color(0xFFFFDDB8);
   static const Color onTertiaryFixed   = Color(0xFF2A1700);
+  static const Color accent            = Color(0xFFF97316); // Alias for convenience
 
   // ── Error ────────────────────────────────────────────────────────────
   static const Color error             = Color(0xFFBA1A1A);

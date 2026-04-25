@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
-import '../../presentation/providers/category_provider.dart';
+import '../../../artisan/presentation/providers/category_provider.dart';
 
 class SubServiceSheet extends ConsumerStatefulWidget {
   final int categoryId;

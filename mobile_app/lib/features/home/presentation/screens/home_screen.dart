@@ -18,6 +18,7 @@ import 'package:skilllink_app/features/artisan/presentation/providers/artisan_pr
 import 'package:skilllink_app/features/booking/presentation/providers/booking_provider.dart';
 import 'package:skilllink_app/core/network/location_provider.dart';
 import '../../../../core/utils/url_utils.dart';
+import '../widgets/sub_service_sheet.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -164,7 +165,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(Icons.location_on_rounded,
-                              size: 14, color: AppColors.tertiaryFixed),
+                              size: 14, color: AppColors.tertiary),
                           const SizedBox(width: 6),
                           ref.watch(currentLocationProvider).when(
                                 data: (loc) => Text(loc.name,
@@ -221,7 +222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onPressed: () => context.push(AppRoutes.artisanListing),
                     child: Text('See All',
                         style: AppTypography.labelLg.copyWith(
-                            color: AppColors.primary,
+                            color: AppColors.tertiary,
                             fontWeight: FontWeight.w700)),
                   ),
                 ],

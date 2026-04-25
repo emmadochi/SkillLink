@@ -18,8 +18,8 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = color ?? AppColors.primary.withOpacity(0.05);
-    final iconColor = color?.withOpacity(0.8) ?? AppColors.primary;
+    final cardColor = color ?? AppColors.tertiary.withOpacity(0.05);
+    final iconColor = color?.withOpacity(0.8) ?? AppColors.tertiary;
 
     return GestureDetector(
       onTap: onTap,

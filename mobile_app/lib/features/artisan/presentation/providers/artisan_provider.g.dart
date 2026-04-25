@@ -24,7 +24,7 @@ final artisanRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ArtisanRepositoryRef = AutoDisposeProviderRef<ArtisanRepository>;
-String _$artisansHash() => r'e031da39f03c8d38059b0878dc6a0e1bb0103e95';
+String _$artisansHash() => r'708e1cf4a830a8e436dc3b734a9619837548db0b';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -61,11 +61,13 @@ class ArtisansFamily extends Family<AsyncValue<List<Artisan>>> {
     int? categoryId,
     double? minRating,
     String? query,
+    String? skills,
   }) {
     return ArtisansProvider(
       categoryId: categoryId,
       minRating: minRating,
       query: query,
+      skills: skills,
     );
   }
 
@@ -77,6 +79,7 @@ class ArtisansFamily extends Family<AsyncValue<List<Artisan>>> {
       categoryId: provider.categoryId,
       minRating: provider.minRating,
       query: provider.query,
+      skills: provider.skills,
     );
   }
 
@@ -102,12 +105,14 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
     int? categoryId,
     double? minRating,
     String? query,
+    String? skills,
   }) : this._internal(
           (ref) => artisans(
             ref as ArtisansRef,
             categoryId: categoryId,
             minRating: minRating,
             query: query,
+            skills: skills,
           ),
           from: artisansProvider,
           name: r'artisansProvider',
@@ -120,6 +125,7 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
           categoryId: categoryId,
           minRating: minRating,
           query: query,
+          skills: skills,
         );
 
   ArtisansProvider._internal(
@@ -132,11 +138,13 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
     required this.categoryId,
     required this.minRating,
     required this.query,
+    required this.skills,
   }) : super.internal();
 
   final int? categoryId;
   final double? minRating;
   final String? query;
+  final String? skills;
 
   @override
   Override overrideWith(
@@ -154,6 +162,7 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
         categoryId: categoryId,
         minRating: minRating,
         query: query,
+        skills: skills,
       ),
     );
   }
@@ -168,7 +177,8 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
     return other is ArtisansProvider &&
         other.categoryId == categoryId &&
         other.minRating == minRating &&
-        other.query == query;
+        other.query == query &&
+        other.skills == skills;
   }
 
   @override
@@ -177,6 +187,7 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
     hash = _SystemHash.combine(hash, categoryId.hashCode);
     hash = _SystemHash.combine(hash, minRating.hashCode);
     hash = _SystemHash.combine(hash, query.hashCode);
+    hash = _SystemHash.combine(hash, skills.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -193,6 +204,9 @@ mixin ArtisansRef on FutureProviderRef<List<Artisan>> {
 
   /// The parameter `query` of this provider.
   String? get query;
+
+  /// The parameter `skills` of this provider.
+  String? get skills;
 }
 
 class _ArtisansProviderElement extends FutureProviderElement<List<Artisan>>
@@ -205,6 +219,8 @@ class _ArtisansProviderElement extends FutureProviderElement<List<Artisan>>
   double? get minRating => (origin as ArtisansProvider).minRating;
   @override
   String? get query => (origin as ArtisansProvider).query;
+  @override
+  String? get skills => (origin as ArtisansProvider).skills;
 }
 
 String _$artisanProfileHash() => r'cd01d36c615fbed149c80633c95ab3aa352886a8';
