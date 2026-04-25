@@ -64,12 +64,16 @@ class SkillLinkButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[icon!, const SizedBox(width: 8)],
-              Text(label,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTypography.titleMd.copyWith(
-                    color: isOutlined
-                        ? AppColors.primary
-                        : AppColors.onPrimary,
-                  )),
+                    color: isOutlined ? AppColors.primary : AppColors.onPrimary,
+                  ),
+                ),
+              ),
             ],
           );
 
@@ -81,8 +85,7 @@ class SkillLinkButton extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             shape: const StadiumBorder(),
             side: const BorderSide(color: AppColors.primary, width: 1.5),
-            padding: padding ??
-                const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
           child: child,
         ),
@@ -94,8 +97,7 @@ class SkillLinkButton extends StatelessWidget {
         onTap: isLoading ? null : onPressed,
         child: Container(
           width: width,
-          padding: padding ??
-              const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
             gradient: AppColors.buttonGradient,
             borderRadius: BorderRadius.circular(100),
@@ -120,8 +122,7 @@ class SkillLinkButton extends StatelessWidget {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           elevation: 0,
-          padding: padding ??
-              const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           shape: const StadiumBorder(),
         ),
         child: child,

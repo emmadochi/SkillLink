@@ -202,20 +202,20 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, __) => Center(child: Text('Error: $err')),
           ),
-      bottomNavigationBar: Container(
-        height: 100,
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5))),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.04),
-              blurRadius: 16,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5))),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.04),
+                blurRadius: 16,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
         child: Row(children: [
           Expanded(
             child: SkillLinkButton.outlined(
