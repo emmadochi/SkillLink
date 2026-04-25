@@ -31,9 +31,10 @@ class SettingsController extends BaseController {
         if ($name) {
             $categoryModel = new CategoryModel($this->db());
             $categoryModel->create($name);
+            $this->json(['status' => 'success', 'message' => 'Category added successfully']);
         }
         
-        $this->redirect('/SkillLink/admin/settings');
+        $this->json(['status' => 'error', 'message' => 'Category name is required'], 400);
     }
 
     public function updateCategory() {
@@ -47,9 +48,10 @@ class SettingsController extends BaseController {
         if ($id && $name) {
             $categoryModel = new CategoryModel($this->db());
             $categoryModel->update($id, $name, $order);
+            $this->json(['status' => 'success', 'message' => 'Category updated successfully']);
         }
         
-        $this->redirect('/SkillLink/admin/settings');
+        $this->json(['status' => 'error', 'message' => 'ID and Name are required'], 400);
     }
 
     public function deleteCategory() {
@@ -60,8 +62,9 @@ class SettingsController extends BaseController {
         if ($id) {
             $categoryModel = new CategoryModel($this->db());
             $categoryModel->delete($id);
+            $this->json(['status' => 'success', 'message' => 'Category deleted successfully']);
         }
         
-        $this->redirect('/SkillLink/admin/settings');
+        $this->json(['status' => 'error', 'message' => 'ID is required'], 400);
     }
 }

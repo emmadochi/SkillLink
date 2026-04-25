@@ -63,4 +63,14 @@ abstract class BaseController {
             die("Method Not Allowed. Expected: $method");
         }
     }
+
+    /**
+     * Send JSON response.
+     */
+    protected function json(array $data, int $status = 200): void {
+        header('Content-Type: application/json');
+        http_response_code($status);
+        echo json_encode($data);
+        exit;
+    }
 }

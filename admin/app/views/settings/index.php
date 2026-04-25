@@ -70,7 +70,7 @@
     <script>
     function showAddCategory() {
         document.getElementById('modalTitle').innerText = 'Add New Vertical';
-        document.getElementById('categoryForm').action = '/SkillLink/admin/settings/addCategory';
+        document.getElementById('categoryForm').action = '<?php echo admin_url('settings/addCategory'); ?>';
         document.getElementById('catId').value = '';
         document.getElementById('catName').value = '';
         document.getElementById('orderField').style.display = 'none';
@@ -79,7 +79,7 @@
 
     function editCategory(id, name, order) {
         document.getElementById('modalTitle').innerText = 'Edit Vertical';
-        document.getElementById('categoryForm').action = '/SkillLink/admin/settings/updateCategory';
+        document.getElementById('categoryForm').action = '<?php echo admin_url('settings/updateCategory'); ?>';
         document.getElementById('catId').value = id;
         document.getElementById('catName').value = name;
         document.getElementById('catOrder').value = order;
@@ -91,19 +91,67 @@
         document.getElementById('categoryModal').style.display = 'none';
     }
 
+    // Handle Form Submission via AJAX
+    document.getElementById('categoryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerText;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Saving...';
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload(); // Refresh to show changes
+            } else {
+                alert(data.message || 'An error occurred');
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('A system error occurred');
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        });
+    });
+
     function deleteCategory(id) {
-        if (confirm('Are you sure you want to delete this category? This will affect all artisans assigned to it.')) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/SkillLink/admin/settings/deleteCategory';
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'id';
-            input.value = id;
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
-        }
+        if (!confirm('Are you sure you want to delete this category? This will affect all artisans assigned to it.')) return;
+
+        const formData = new FormData();
+        formData.append('id', id);
+
+        fetch('<?php echo admin_url('settings/deleteCategory'); ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message || 'Delete failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('A system error occurred');
+        });
     }
     </script>
     
