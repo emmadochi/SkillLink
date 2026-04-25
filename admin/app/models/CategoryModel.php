@@ -17,12 +17,12 @@ class CategoryModel {
     /** All categories with artisan count */
     public function getAll(): array {
         $result = $this->db->query(
-            "SELECT c.id, c.name, c.slug, c.icon,
+            "SELECT c.id, c.name, c.slug, c.icon, c.sort_order,
                     COUNT(ac.artisan_id) AS artisan_count
              FROM categories c
              LEFT JOIN artisan_categories ac ON ac.category_id = c.id
              GROUP BY c.id
-             ORDER BY c.name ASC"
+             ORDER BY c.sort_order ASC, c.name ASC"
         );
         return $result->fetch_all(MYSQLI_ASSOC);
     }
@@ -38,15 +38,15 @@ class CategoryModel {
         return $stmt->affected_rows > 0;
     }
 
-    /** Update category name */
-    public function update(int $id, string $name): bool {
+    /** Update category name and order */
+    public function update(int $id, string $name, int $order = 0): bool {
         $slug = strtolower(preg_replace('/\s+/', '-', trim($name)));
         $stmt = $this->db->prepare(
-            "UPDATE categories SET name = ?, slug = ? WHERE id = ?"
+            "UPDATE categories SET name = ?, slug = ?, sort_order = ? WHERE id = ?"
         );
-        $stmt->bind_param('ssi', $name, $slug, $id);
+        $stmt->bind_param('ssii', $name, $slug, $order, $id);
         $stmt->execute();
-        return $stmt->affected_rows > 0;
+        return $stmt->affected_rows >= 0; // Use >= 0 because it might not change
     }
 
     /** Delete a category */

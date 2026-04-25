@@ -24,12 +24,15 @@
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                         </div>
                         <div>
-                            <strong class="text-sm" style="display: block; color: var(--primary);"><?php echo htmlspecialchars($cat['name']); ?></strong>
+                            <div class="flex-row gap-2">
+                                <span class="text-xs font-bold" style="background: var(--surface-container-low); padding: 2px 6px; border-radius: 4px; color: var(--primary);">#<?php echo $cat['sort_order']; ?></span>
+                                <strong class="text-sm" style="color: var(--primary);"><?php echo htmlspecialchars($cat['name']); ?></strong>
+                            </div>
                             <span class="text-xs text-muted font-bold"><?php echo (int)$cat['artisan_count']; ?> Professionals</span>
                         </div>
                     </div>
                     <div class="flex-row gap-2">
-                        <button class="btn-premium btn-outline btn-icon-only" onclick="editCategory(<?php echo $cat['id']; ?>, '<?php echo addslashes($cat['name']); ?>')">
+                        <button class="btn-premium btn-outline btn-icon-only" onclick="editCategory(<?php echo $cat['id']; ?>, '<?php echo addslashes($cat['name']); ?>', <?php echo $cat['sort_order']; ?>)">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                         </button>
                         <button class="btn-premium btn-outline btn-icon-only" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);" onclick="deleteCategory(<?php echo $cat['id']; ?>)">
@@ -41,6 +44,68 @@
             <?php endif; ?>
         </div>
     </div>
+    
+    <!-- Category Modals -->
+    <div id="categoryModal" class="modal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+        <div class="stat-card" style="width: 400px; padding: 2rem; min-height: auto; background: white;">
+            <h3 id="modalTitle" class="mb-5">Add Vertical</h3>
+            <form id="categoryForm" method="POST" action="/SkillLink/admin/settings/addCategory">
+                <input type="hidden" name="id" id="catId">
+                <div class="mb-4">
+                    <label class="input-label mb-2">Category Name</label>
+                    <input type="text" name="name" id="catName" class="admin-input" required>
+                </div>
+                <div class="mb-5" id="orderField" style="display:none;">
+                    <label class="input-label mb-2">Display Order (Lower comes first)</label>
+                    <input type="number" name="sort_order" id="catOrder" class="admin-input" value="0">
+                </div>
+                <div class="flex-row gap-3 justify-end">
+                    <button type="button" class="btn-premium btn-outline" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-premium btn-primary">Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function showAddCategory() {
+        document.getElementById('modalTitle').innerText = 'Add New Vertical';
+        document.getElementById('categoryForm').action = '/SkillLink/admin/settings/addCategory';
+        document.getElementById('catId').value = '';
+        document.getElementById('catName').value = '';
+        document.getElementById('orderField').style.display = 'none';
+        document.getElementById('categoryModal').style.display = 'flex';
+    }
+
+    function editCategory(id, name, order) {
+        document.getElementById('modalTitle').innerText = 'Edit Vertical';
+        document.getElementById('categoryForm').action = '/SkillLink/admin/settings/updateCategory';
+        document.getElementById('catId').value = id;
+        document.getElementById('catName').value = name;
+        document.getElementById('catOrder').value = order;
+        document.getElementById('orderField').style.display = 'block';
+        document.getElementById('categoryModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('categoryModal').style.display = 'none';
+    }
+
+    function deleteCategory(id) {
+        if (confirm('Are you sure you want to delete this category? This will affect all artisans assigned to it.')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/SkillLink/admin/settings/deleteCategory';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = id;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    </script>
     
     <!-- Platform System Config -->
     <div class="flex-column gap-6" style="flex: 1;">

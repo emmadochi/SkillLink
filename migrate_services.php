@@ -15,18 +15,29 @@ try {
         $insCat->execute();
     }
 
-    // 0.1 Add is_technical column to categories if not exists
+    // 0.1 Add columns to categories if not exists
     try {
         $pdo->exec("ALTER TABLE categories ADD COLUMN is_technical TINYINT(1) DEFAULT 0");
-    } catch (Exception $e) {
-        // Column might already exist
-    }
+    } catch (Exception $e) {}
+    
+    try {
+        $pdo->exec("ALTER TABLE categories ADD COLUMN sort_order INT DEFAULT 0");
+    } catch (Exception $e) {}
 
-    // 0.2 Set technical status for major categories
-    $technicalCategories = ['electrical', 'plumbing', 'carpentry', 'ac-repair', 'ac repair'];
-    foreach ($technicalCategories as $slug) {
-        $upd = $pdo->prepare("UPDATE categories SET is_technical = 1 WHERE slug = ? OR name = ?");
-        $upd->execute([$slug, $slug]);
+    // 0.2 Set technical status and sort order for major categories
+    $majorCategories = [
+        'ac-repair' => 1,
+        'ac repair' => 1,
+        'electrical' => 2,
+        'plumbing' => 3,
+        'carpentry' => 4,
+        'cleaning' => 5,
+        'painting' => 6,
+        'laundry' => 7,
+    ];
+    foreach ($majorCategories as $slug => $order) {
+        $upd = $pdo->prepare("UPDATE categories SET is_technical = 1, sort_order = ? WHERE slug = ? OR name = ?");
+        $upd->execute([$order, $slug, $slug]);
     }
 
     // 1. Create sub-services table if not exists

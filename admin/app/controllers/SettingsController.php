@@ -42,10 +42,11 @@ class SettingsController extends BaseController {
         
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
+        $order = (int)($_POST['sort_order'] ?? 0);
         
         if ($id && $name) {
             $categoryModel = new CategoryModel($this->db());
-            $categoryModel->update($id, $name);
+            $categoryModel->update($id, $name, $order);
         }
         
         $this->redirect('/SkillLink/admin/settings');
