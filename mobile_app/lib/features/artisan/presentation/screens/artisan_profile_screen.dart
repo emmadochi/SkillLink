@@ -420,7 +420,7 @@ class _PortfolioTab extends StatelessWidget {
       itemBuilder: (context, i) => ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Image.network(
-          portfolio[i].imageUrl,
+          UrlUtils.resolveImageUrl(portfolio[i].imageUrl),
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) =>
               Container(color: AppColors.surfaceContainerLow, child: const Icon(Icons.broken_image_outlined)),
@@ -463,9 +463,12 @@ class _ReviewsTab extends StatelessWidget {
               Row(children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundImage: NetworkImage(
-                    UrlUtils.resolveImageUrl(review.customerAvatar)
-                  ),
+                  backgroundImage: review.customerAvatar != null && review.customerAvatar!.isNotEmpty
+                      ? NetworkImage(UrlUtils.resolveImageUrl(review.customerAvatar))
+                      : null,
+                  child: review.customerAvatar == null || review.customerAvatar!.isEmpty
+                      ? const Icon(Icons.person, size: 18, color: AppColors.outline)
+                      : null,
                 ),
                 const SizedBox(width: 10),
                 Expanded(child: Column(

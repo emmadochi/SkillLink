@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../../../booking/presentation/providers/booking_provider.dart';
 import '../../../artisan/presentation/providers/artisan_provider.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class ArtisanDashboardScreen extends ConsumerStatefulWidget {
   const ArtisanDashboardScreen({super.key});
@@ -141,8 +142,12 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
                               Row(children: [
                                 CircleAvatar(
                                   radius: 18,
-                                  backgroundImage: NetworkImage(
-                                      b.partnerAvatar ?? 'https://i.pravatar.cc/150'),
+                                  backgroundImage: b.partnerAvatar != null && b.partnerAvatar!.isNotEmpty
+                                      ? NetworkImage(UrlUtils.resolveImageUrl(b.partnerAvatar))
+                                      : null,
+                                  child: b.partnerAvatar == null || b.partnerAvatar!.isEmpty
+                                      ? const Icon(Icons.person, size: 18, color: AppColors.outline)
+                                      : null,
                                 ),
                                 const SizedBox(width: 10),
                                 Column(
@@ -265,8 +270,12 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
                               Row(children: [
                                 CircleAvatar(
                                   radius: 18,
-                                  backgroundImage: NetworkImage(
-                                      b.partnerAvatar ?? 'https://i.pravatar.cc/150'),
+                                  backgroundImage: b.partnerAvatar != null && b.partnerAvatar!.isNotEmpty
+                                      ? NetworkImage(UrlUtils.resolveImageUrl(b.partnerAvatar))
+                                      : null,
+                                  child: b.partnerAvatar == null || b.partnerAvatar!.isEmpty
+                                      ? const Icon(Icons.person, size: 18, color: AppColors.outline)
+                                      : null,
                                 ),
                                 const SizedBox(width: 10),
                                 Column(

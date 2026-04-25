@@ -8,6 +8,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../booking/presentation/providers/booking_provider.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class CustomerDashboardScreen extends ConsumerWidget {
   const CustomerDashboardScreen({super.key});
@@ -93,8 +94,12 @@ class CustomerDashboardScreen extends ConsumerWidget {
                               Row(children: [
                                 CircleAvatar(
                                   radius: 20,
-                                  backgroundImage: NetworkImage(
-                                      b.partnerAvatar ?? 'https://i.pravatar.cc/150'),
+                                  backgroundImage: b.partnerAvatar != null && b.partnerAvatar!.isNotEmpty
+                                      ? NetworkImage(UrlUtils.resolveImageUrl(b.partnerAvatar))
+                                      : null,
+                                  child: b.partnerAvatar == null || b.partnerAvatar!.isEmpty
+                                      ? const Icon(Icons.person, size: 20, color: AppColors.outline)
+                                      : null,
                                 ),
                                 const SizedBox(width: 12),
                                 Column(

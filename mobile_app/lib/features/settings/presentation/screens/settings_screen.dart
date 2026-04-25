@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -43,8 +44,13 @@ class SettingsScreen extends ConsumerWidget {
                       children: [
                         CircleAvatar(
                           radius: 34,
-                          backgroundImage: NetworkImage(user?.avatarUrl ??
-                              'https://i.pravatar.cc/100?u=${user?.id ?? 0}'),
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          backgroundImage: user?.avatarUrl != null
+                              ? NetworkImage(UrlUtils.resolveImageUrl(user!.avatarUrl))
+                              : null,
+                          child: user?.avatarUrl == null
+                              ? const Icon(Icons.person, color: Colors.white, size: 34)
+                              : null,
                         ),
                         const SizedBox(width: 16),
                         Expanded(

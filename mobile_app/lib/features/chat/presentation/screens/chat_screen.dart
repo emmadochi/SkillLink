@@ -8,6 +8,7 @@ import '../../../artisan/presentation/providers/artisan_provider.dart';
 import '../providers/chat_provider.dart';
 import '../../data/models/chat_model.dart';
 import '../../../auth/presentation/providers/auth_repository_provider.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String conversationId;
@@ -199,7 +200,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Row(children: [
       CircleAvatar(
         radius: 18,
-        backgroundImage: NetworkImage(avatar ?? 'https://i.pravatar.cc/60?u=${widget.conversationId}'),
+        backgroundImage: avatar != null && avatar.isNotEmpty
+            ? NetworkImage(UrlUtils.resolveImageUrl(avatar))
+            : null,
+        child: avatar == null || avatar.isEmpty
+            ? const Icon(Icons.person, size: 18, color: AppColors.outline)
+            : null,
       ),
       const SizedBox(width: 10),
       Column(
@@ -249,7 +255,12 @@ class _MessageBubble extends StatelessWidget {
           if (isPartner) ...[
             CircleAvatar(
               radius: 14,
-              backgroundImage: NetworkImage(partnerAvatar ?? 'https://i.pravatar.cc/40?img=10'),
+              backgroundImage: partnerAvatar != null && partnerAvatar!.isNotEmpty
+                  ? NetworkImage(UrlUtils.resolveImageUrl(partnerAvatar))
+                  : null,
+              child: partnerAvatar == null || partnerAvatar!.isEmpty
+                  ? const Icon(Icons.person, size: 14, color: AppColors.outline)
+                  : null,
             ),
             const SizedBox(width: 8),
           ],

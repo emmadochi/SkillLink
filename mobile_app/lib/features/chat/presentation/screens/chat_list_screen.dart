@@ -8,6 +8,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../providers/chat_provider.dart';
 import '../../data/models/chat_model.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -115,8 +116,12 @@ class _ChatTile extends StatelessWidget {
         child: Row(children: [
           CircleAvatar(
             radius: 26,
-            backgroundImage: NetworkImage(
-                chat.partnerAvatar ?? 'https://i.pravatar.cc/80?u=${chat.partnerId}'),
+            backgroundImage: chat.partnerAvatar != null && chat.partnerAvatar!.isNotEmpty
+                ? NetworkImage(UrlUtils.resolveImageUrl(chat.partnerAvatar))
+                : null,
+            child: chat.partnerAvatar == null || chat.partnerAvatar!.isEmpty
+                ? const Icon(Icons.person, color: AppColors.outline)
+                : null,
           ),
           const SizedBox(width: 14),
           Expanded(

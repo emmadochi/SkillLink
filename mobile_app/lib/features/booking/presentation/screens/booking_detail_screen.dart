@@ -8,6 +8,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../providers/booking_provider.dart';
 import '../../data/models/booking_model.dart';
+import '../../../../core/utils/url_utils.dart';
 
 class BookingDetailScreen extends ConsumerWidget {
   final String bookingId;
@@ -83,9 +84,12 @@ class BookingDetailScreen extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundImage: NetworkImage(
-                  booking.partnerAvatar ?? 'https://i.pravatar.cc/100?u=${booking.artisanId}'
-                ),
+                backgroundImage: booking.partnerAvatar != null && booking.partnerAvatar!.isNotEmpty
+                    ? NetworkImage(UrlUtils.resolveImageUrl(booking.partnerAvatar))
+                    : null,
+                child: booking.partnerAvatar == null || booking.partnerAvatar!.isEmpty
+                    ? const Icon(Icons.person, size: 28, color: AppColors.outline)
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
