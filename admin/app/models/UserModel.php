@@ -41,7 +41,7 @@ class UserModel {
         $stmt = $this->db->prepare(
             "SELECT u.id, u.name, u.email, u.phone, u.avatar_url,
                     a.verification_status AS status, a.average_rating AS rating,
-                    a.experience_years, a.location_name,
+                    a.experience_years, a.location_name, a.skill,
                     GROUP_CONCAT(c.name SEPARATOR ', ') AS skills
              FROM users u
              JOIN artisans a ON a.user_id = u.id
@@ -61,7 +61,7 @@ class UserModel {
     public function getArtisanById(int $id): ?array {
         $stmt = $this->db->prepare(
             "SELECT u.id, u.name, u.email, u.phone, u.avatar_url, u.created_at,
-                    a.bio, a.experience_years, a.location_name,
+                    a.bio, a.skill, a.experience_years, a.location_name,
                     a.verification_status AS status,
                     a.average_rating AS rating, a.total_reviews,
                     v.id_type, v.id_number, v.id_image_front, v.id_image_back, v.passport_photo, v.status as id_status,

@@ -51,7 +51,8 @@
                 <label class="input-label mb-2">Primary Skills</label>
                 <div class="flex-row gap-2" style="flex-wrap: wrap;">
                     <?php 
-                    $skills = explode(',', $artisan['skills'] ?: 'Uncategorized');
+                    $skillsList = $artisan['skills'] ?: $artisan['skill'] ?: 'Uncategorized';
+                    $skills = explode(',', $skillsList);
                     foreach($skills as $skill): ?>
                         <span style="background: var(--surface); border: 1px solid var(--border); padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 600;">
                             <?php echo trim($skill); ?>

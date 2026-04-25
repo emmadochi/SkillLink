@@ -96,7 +96,7 @@
                         </td>
                         <td>
                             <span class="text-sm" style="background: var(--surface); padding: 4px 8px; border-radius: 6px; font-weight: 500;">
-                                <?php echo htmlspecialchars($a['skills'] ?: 'Misc'); ?>
+                                <?php echo htmlspecialchars($a['skills'] ?: $a['skill'] ?: 'Misc'); ?>
                             </span>
                         </td>
                         <td><span class="text-sm"><?php echo htmlspecialchars($a['location_name'] ?: 'N/A'); ?></span></td>
