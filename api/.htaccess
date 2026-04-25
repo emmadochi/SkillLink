@@ -8,5 +8,9 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{HTTP:Authorization} .
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
+# Allow direct access to utility scripts
+RewriteCond %{REQUEST_URI} ^/api/(optimize_db|check_chat)\.php$ [NC]
+RewriteRule .* - [L]
+
 # Route all other traffic to index.php
 RewriteRule ^(.*)$ index.php [L,QSA]
