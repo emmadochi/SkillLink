@@ -46,9 +46,22 @@ $base_path = '/api/v1';
 
 // Get the path after /v1 accurately
 $full_path = parse_url($request_uri, PHP_URL_PATH);
-$path_segments = explode($base_path, $full_path);
-$path = end($path_segments);
+$path = $full_path;
+
+// Remove base path if present
+if (strpos($path, $base_path) !== false) {
+    $path = substr($path, strpos($path, $base_path) + strlen($base_path));
+}
+
 $path = trim($path, '/');
+
+// Robustness: If path starts with 'api' or 'v1' after stripping, strip it again
+// This handles cases like /api/v1/api/artisans or /api/v1/v1/artisans
+$path_parts = explode('/', $path);
+while (!empty($path_parts) && ($path_parts[0] === 'api' || $path_parts[0] === 'v1')) {
+    array_shift($path_parts);
+}
+$path = implode('/', $path_parts);
 
 // Dispatcher
 $parts = explode('/', $path);
