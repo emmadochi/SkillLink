@@ -24,7 +24,7 @@ final artisanRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ArtisanRepositoryRef = AutoDisposeProviderRef<ArtisanRepository>;
-String _$artisansHash() => r'708e1cf4a830a8e436dc3b734a9619837548db0b';
+String _$artisansHash() => r'52b15d952025eb479da289ed6641fac10ac68ce6';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -99,7 +99,7 @@ class ArtisansFamily extends Family<AsyncValue<List<Artisan>>> {
 }
 
 /// See also [artisans].
-class ArtisansProvider extends FutureProvider<List<Artisan>> {
+class ArtisansProvider extends StreamProvider<List<Artisan>> {
   /// See also [artisans].
   ArtisansProvider({
     int? categoryId,
@@ -148,7 +148,7 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
 
   @override
   Override overrideWith(
-    FutureOr<List<Artisan>> Function(ArtisansRef provider) create,
+    Stream<List<Artisan>> Function(ArtisansRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -168,7 +168,7 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
   }
 
   @override
-  FutureProviderElement<List<Artisan>> createElement() {
+  StreamProviderElement<List<Artisan>> createElement() {
     return _ArtisansProviderElement(this);
   }
 
@@ -195,7 +195,7 @@ class ArtisansProvider extends FutureProvider<List<Artisan>> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin ArtisansRef on FutureProviderRef<List<Artisan>> {
+mixin ArtisansRef on StreamProviderRef<List<Artisan>> {
   /// The parameter `categoryId` of this provider.
   int? get categoryId;
 
@@ -209,7 +209,7 @@ mixin ArtisansRef on FutureProviderRef<List<Artisan>> {
   String? get skills;
 }
 
-class _ArtisansProviderElement extends FutureProviderElement<List<Artisan>>
+class _ArtisansProviderElement extends StreamProviderElement<List<Artisan>>
     with ArtisansRef {
   _ArtisansProviderElement(super.provider);
 

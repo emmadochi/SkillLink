@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/network/api_client.dart';
@@ -7,43 +8,30 @@ import '../../data/models/category_model.dart';
 part 'category_provider.g.dart';
 
 @Riverpod(keepAlive: true)
-class Categories extends _$Categories {
-  @override
-  Future<List<Category>> build() async {
-    const cacheKey = 'categories_list';
-    
-    // 1. Check cache
-    final cached = await LocalCacheService.get(cacheKey);
-    if (cached != null && cached is List) {
-      // Trigger background refresh
-      _refresh(cacheKey);
-      return cached.map((e) => Category.fromJson(e as Map<String, dynamic>)).toList();
-    }
-
-    // 2. No cache, fetch fresh
-    return _fetch(cacheKey);
+@Riverpod(keepAlive: true)
+Stream<List<Category>> categories(CategoriesRef ref) async* {
+  const cacheKey = 'categories_list';
+  
+  // 1. Yield cached data immediately if available
+  final cached = await LocalCacheService.get(cacheKey);
+  if (cached != null && cached is List) {
+    yield cached.map((e) => Category.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  Future<List<Category>> _fetch(String cacheKey) async {
-    final dio = ref.watch(dioProvider);
-    final client = ApiClient(dio);
-    
+  // 2. Fetch fresh data from network
+  final dio = ref.watch(dioProvider);
+  final client = ApiClient(dio);
+  
+  try {
     final response = await client.getCategories().timeout(const Duration(seconds: 15));
     if (response.status == 'success' && response.data != null) {
       final list = response.data!.map((e) => Category.fromJson(e)).toList();
       await LocalCacheService.set(cacheKey, response.data!);
-      return list;
+      yield list;
     }
-    return [];
-  }
-
-  Future<void> _refresh(String cacheKey) async {
-    try {
-      final data = await _fetch(cacheKey);
-      state = AsyncData(data);
-    } catch (e) {
-      // Silent fail on background refresh
-    }
+  } catch (e) {
+    // If network fails and we haven't yielded anything yet, yield empty list
+    if (cached == null) yield [];
   }
 }
 

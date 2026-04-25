@@ -24,11 +24,11 @@ final bookingRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef BookingRepositoryRef = AutoDisposeProviderRef<BookingRepository>;
-String _$bookingHistoryHash() => r'4cff763b9641cc4086d1480451da00fc2d0fa7b8';
+String _$bookingHistoryHash() => r'7a5095d04d97699e07bf3029d08228e2ca011cb4';
 
 /// See also [bookingHistory].
 @ProviderFor(bookingHistory)
-final bookingHistoryProvider = FutureProvider<List<Booking>>.internal(
+final bookingHistoryProvider = StreamProvider<List<Booking>>.internal(
   bookingHistory,
   name: r'bookingHistoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -40,7 +40,7 @@ final bookingHistoryProvider = FutureProvider<List<Booking>>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef BookingHistoryRef = FutureProviderRef<List<Booking>>;
+typedef BookingHistoryRef = StreamProviderRef<List<Booking>>;
 String _$categoryServicesHash() => r'21f2bebb7b5c0486cc5a162fe65a214e6b7c0781';
 
 /// Copied from Dart SDK

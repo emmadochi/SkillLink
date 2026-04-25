@@ -166,7 +166,7 @@ class _GlassBottomNav extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: AppColors.tertiary.withOpacity(0.12),
+            color: AppColors.primary.withOpacity(0.12),
             blurRadius: 32,
             offset: const Offset(0, 8),
           ),
@@ -195,7 +195,7 @@ class _GlassBottomNav extends StatelessWidget {
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
-                          color: AppColors.tertiary.withOpacity(0.1),
+                          color: AppColors.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(24),
                         ),
                       ),
@@ -217,7 +217,7 @@ class _GlassBottomNav extends StatelessWidget {
                                 children: [
                                   Icon(
                                     items[i].icon,
-                                    color: selected ? AppColors.tertiary : AppColors.outline,
+                                    color: selected ? AppColors.primary : AppColors.outline,
                                     size: 24,
                                   ),
                                   const SizedBox(height: 4),
@@ -226,7 +226,7 @@ class _GlassBottomNav extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: AppTypography.labelSm.copyWith(
-                                      color: selected ? AppColors.tertiary : AppColors.outline,
+                                      color: selected ? AppColors.primary : AppColors.outline,
                                       fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                                       fontSize: 10,
                                     ),

@@ -1,8 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/repositories/artisan_repository.dart';
 import '../../data/models/artisan_model.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/local_cache_service.dart';
+
 
 part 'artisan_provider.g.dart';
 
@@ -14,23 +17,18 @@ ArtisanRepository artisanRepository(ArtisanRepositoryRef ref) {
 }
 
 @Riverpod(keepAlive: true)
-class Artisans extends _$Artisans {
-  @override
-  Future<List<Artisan>> build({int? categoryId, double? minRating, String? query, String? skills}) async {
-    final cacheKey = 'artisans_${categoryId}_${query}_$skills';
-    
-    // 1. Check cache
-    final cached = await LocalCacheService.get(cacheKey);
-    if (cached != null && cached is List) {
-      _refresh(cacheKey, categoryId, minRating, query, skills);
-      return cached.map((e) => Artisan.fromJson(e as Map<String, dynamic>)).toList();
-    }
 
-    // 2. Fetch fresh
-    return _fetch(cacheKey, categoryId, minRating, query, skills);
+Stream<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRating, String? query, String? skills}) async* {
+  final cacheKey = 'artisans_${categoryId}_${query}_$skills';
+  
+  // 1. Yield cached data immediately
+  final cached = await LocalCacheService.get(cacheKey);
+  if (cached != null && cached is List) {
+    yield cached.map((e) => Artisan.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  Future<List<Artisan>> _fetch(String cacheKey, int? categoryId, double? minRating, String? query, String? skills) async {
+  // 2. Fetch fresh
+  try {
     final response = await ref.watch(artisanRepositoryProvider).getArtisans(
       categoryId: categoryId,
       minRating: minRating,
@@ -38,16 +36,9 @@ class Artisans extends _$Artisans {
       skills: skills,
     ).timeout(const Duration(seconds: 15));
     
-    return response;
-  }
-
-  Future<void> _refresh(String cacheKey, int? categoryId, double? minRating, String? query, String? skills) async {
-    try {
-      final data = await _fetch(cacheKey, categoryId, minRating, query, skills);
-      state = AsyncData(data);
-    } catch (e) {
-      // Silent fail
-    }
+    yield response;
+  } catch (e) {
+    if (cached == null) yield [];
   }
 }
 

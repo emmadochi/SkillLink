@@ -6,11 +6,11 @@ part of 'category_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$categoriesHash() => r'20717859298316e1858ef60d342fec00ce58a2e4';
+String _$categoriesHash() => r'79f29ca2e3f5a97904305318e8dbf266e47f8466';
 
 /// See also [categories].
 @ProviderFor(categories)
-final categoriesProvider = FutureProvider<List<Category>>.internal(
+final categoriesProvider = StreamProvider<List<Category>>.internal(
   categories,
   name: r'categoriesProvider',
   debugGetCreateSourceHash:
@@ -21,7 +21,7 @@ final categoriesProvider = FutureProvider<List<Category>>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef CategoriesRef = FutureProviderRef<List<Category>>;
+typedef CategoriesRef = StreamProviderRef<List<Category>>;
 String _$categoryServicesHash() => r'2d0681202e0e3aaa8a93158b329fb1f2b30f2457';
 
 /// Copied from Dart SDK

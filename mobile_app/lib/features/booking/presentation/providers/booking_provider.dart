@@ -1,8 +1,10 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/repositories/booking_repository.dart';
 import '../../data/models/booking_model.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/local_cache_service.dart';
 
 part 'booking_provider.g.dart';
 
@@ -14,34 +16,21 @@ BookingRepository bookingRepository(BookingRepositoryRef ref) {
 }
 
 @Riverpod(keepAlive: true)
-class BookingHistory extends _$BookingHistory {
-  @override
-  Future<List<Booking>> build() async {
-    const cacheKey = 'booking_history';
-    
-    // 1. Check cache
-    final cached = await LocalCacheService.get(cacheKey);
-    if (cached != null && cached is List) {
-      _refresh(cacheKey);
-      return cached.map((e) => Booking.fromJson(e as Map<String, dynamic>)).toList();
-    }
-
-    // 2. Fetch fresh
-    return _fetch(cacheKey);
+Stream<List<Booking>> bookingHistory(BookingHistoryRef ref) async* {
+  const cacheKey = 'booking_history';
+  
+  // 1. Yield cached data immediately
+  final cached = await LocalCacheService.get(cacheKey);
+  if (cached != null && cached is List) {
+    yield cached.map((e) => Booking.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  Future<List<Booking>> _fetch(String cacheKey) async {
+  // 2. Fetch fresh
+  try {
     final response = await ref.watch(bookingRepositoryProvider).getBookingHistory().timeout(const Duration(seconds: 15));
-    return response;
-  }
-
-  Future<void> _refresh(String cacheKey) async {
-    try {
-      final data = await _fetch(cacheKey);
-      state = AsyncData(data);
-    } catch (e) {
-      // Silent fail
-    }
+    yield response;
+  } catch (e) {
+    if (cached == null) yield [];
   }
 }
 
