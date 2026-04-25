@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +34,27 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
   Category? _selectedCategory;
   bool _isLoading = false;
 
+  XFile? _profileImage;
+  final List<XFile> _portfolioImages = [];
+  final _picker = ImagePicker();
+
+  Future<void> _pickProfileImage() async {
+    final img = await _picker.pickImage(source: ImageSource.gallery);
+    if (img != null) setState(() => _profileImage = img);
+  }
+
+  Future<void> _pickPortfolioImages() async {
+    final images = await _picker.pickMultiImage();
+    if (images.isNotEmpty) {
+      setState(() {
+        _portfolioImages.addAll(images);
+        if (_portfolioImages.length > 5) {
+          _portfolioImages.removeRange(5, _portfolioImages.length);
+        }
+      });
+    }
+  }
+
   Future<void> _submit() async {
     if (_selectedCategory == null || _bioCtrl.text.isEmpty || _expCtrl.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -44,13 +67,12 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
 
     try {
       final dio = ref.read(dioProvider);
-      final apiClient = ApiClient(dio);
       
       final locationState = ref.read(currentLocationProvider);
       final locationData = locationState.value;
 
-      // 1. Update Profile
-      final profileResponse = await apiClient.updateArtisanProfile({
+      // Prepare Multipart Data
+      final formData = FormData.fromMap({
         'skill': _selectedCategory!.name,
         'bio': _bioCtrl.text,
         'experience_years': int.tryParse(_expCtrl.text) ?? 0,
@@ -62,14 +84,32 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
         'guarantor_phone': _guarantorPhoneCtrl.text,
       });
 
-      if (profileResponse.status != 'success') throw profileResponse.message ?? 'Update failed';
+      // Add Profile Image
+      if (_profileImage != null) {
+        formData.files.add(MapEntry(
+          'avatar',
+          await MultipartFile.fromFile(_profileImage!.path),
+        ));
+      }
+
+      // Add Portfolio Images
+      for (var img in _portfolioImages) {
+        formData.files.add(MapEntry(
+          'portfolio[]',
+          await MultipartFile.fromFile(img.path),
+        ));
+      }
+
+      final response = await dio.post('artisan/update', data: formData);
+
+      if (response.data['status'] != 'success') throw response.data['message'] ?? 'Update failed';
 
       // 2. Submit Verification if ID number is provided
       if (_idNumberCtrl.text.isNotEmpty) {
-        await apiClient.submitVerification({
+        await dio.post('artisan/verify', data: {
           'id_type': _idType,
           'id_number': _idNumberCtrl.text,
-          'passport_photo': '', // Placeholder for now
+          'passport_photo': '', 
           'id_image_front': '', 
           'id_image_back': '',
         });
@@ -77,7 +117,7 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Professional profile and security details saved!')),
+          const SnackBar(content: Text('Professional profile and portfolio saved!')),
         );
         context.go(AppRoutes.artisanDashboard);
       }
@@ -117,6 +157,94 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildSectionHeader('Professional Identity', 'Upload a profile photo and portfolio'),
+            const SizedBox(height: 20),
+            
+            // Profile Image Picker
+            Center(
+              child: GestureDetector(
+                onTap: _pickProfileImage,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: AppColors.surfaceContainerHigh,
+                      backgroundImage: _profileImage != null ? FileImage(File(_profileImage!.path)) : null,
+                      child: _profileImage == null ? const Icon(Icons.person_add_rounded, size: 32, color: AppColors.primary) : null,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                        child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            
+            // Portfolio Picker
+            const Text('Portfolio / Work Pictures (3-5 recommended)', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _portfolioImages.length + 1,
+                itemBuilder: (context, i) {
+                  if (i == _portfolioImages.length) {
+                    if (_portfolioImages.length >= 5) return const SizedBox.shrink();
+                    return GestureDetector(
+                      onTap: _pickPortfolioImages,
+                      child: Container(
+                        width: 100,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.outline.withOpacity(0.2)),
+                        ),
+                        child: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
+                      ),
+                    );
+                  }
+                  
+                  return Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          image: DecorationImage(
+                            image: FileImage(File(_portfolioImages[i].path)),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 4,
+                        right: 16,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _portfolioImages.removeAt(i)),
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            
+            const SizedBox(height: 32),
             _buildSectionHeader('Professional Details', 'Showcase your skills'),
             const SizedBox(height: 20),
             const Text('Primary Skill / Profession', style: TextStyle(fontWeight: FontWeight.bold)),

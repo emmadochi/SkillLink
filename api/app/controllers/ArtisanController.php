@@ -73,16 +73,48 @@ class ArtisanController extends Controller {
             $this->error('Only artisans can update professional profiles', 403);
         }
 
-        $data = $this->getPostData();
+        // Use $_POST instead of getPostData() because we are using multipart/form-data
+        $data = $_POST;
+        $data['user_id'] = $user['id'];
 
         try {
             $artisanModel = new Artisan();
-            $data['user_id'] = $user['id'];
             
+            // 1. Handle Profile Avatar Upload
+            $avatarPath = $this->uploadFile('avatar', 'uploads/avatars/');
+            if ($avatarPath) {
+                $db = (new \core\Database())->getConnection();
+                $stmt = $db->prepare("UPDATE users SET avatar_url = :url WHERE id = :id");
+                $stmt->execute([':url' => $avatarPath, ':id' => $user['id']]);
+            }
+
+            // 2. Update Profile Details
             if ($artisanModel->updateProfile($data)) {
+                
+                // 3. Handle Portfolio Uploads (Multi-file)
+                if (isset($_FILES['portfolio']) && is_array($_FILES['portfolio']['name'])) {
+                    $files = $_FILES['portfolio'];
+                    for ($i = 0; $i < count($files['name']); $i++) {
+                        if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                            // Create a temporary pseudo-file array for uploadFile helper
+                            $_FILES['temp_p'] = [
+                                'name' => $files['name'][$i],
+                                'type' => $files['type'][$i],
+                                'tmp_name' => $files['tmp_name'][$i],
+                                'error' => $files['error'][$i],
+                                'size' => $files['size'][$i]
+                            ];
+                            $pPath = $this->uploadFile('temp_p', 'uploads/portfolio/');
+                            if ($pPath) {
+                                $artisanModel->addPortfolioItem($user['id'], $pPath, "");
+                            }
+                        }
+                    }
+                }
+
                 $this->json([
                     'status' => 'success',
-                    'message' => 'Artisan profile updated successfully'
+                    'message' => 'Profile updated successfully'
                 ]);
             } else {
                 $this->error('Failed to update artisan profile');

@@ -55,8 +55,36 @@ class Controller {
     /**
      * Get the currently logged-in user data from token.
      */
-    protected function getCurrentUser() {
+    protected function getCurrentUser($required = true) {
         $token = Auth::getBearerToken();
-        return Auth::verifyToken($token);
+        $user = Auth::verifyToken($token);
+        if ($required && !$user) {
+            $this->error('Unauthorized', 401);
+        }
+        return $user;
+    }
+
+    /**
+     * Handle file uploads
+     */
+    protected function uploadFile($fileKey, $targetDir = 'uploads/') {
+        if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+
+        $file = $_FILES[$fileKey];
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = uniqid() . '.' . $ext;
+        $targetPath = $targetDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            return $targetPath;
+        }
+
+        return null;
     }
 }
