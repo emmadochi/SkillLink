@@ -18,7 +18,8 @@ class ArtisanController extends Controller {
         $filters = [
             'category_id' => $_GET['category'] ?? null,
             'min_rating' => $_GET['rating'] ?? null,
-            'query' => $_GET['q'] ?? null
+            'query' => $_GET['q'] ?? null,
+            'skills' => $_GET['skills'] ?? null
         ];
 
         try {

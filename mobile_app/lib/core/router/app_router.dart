@@ -76,6 +76,7 @@ final GoRouter appRouter = GoRouter(
         return ArtisanListingScreen(
           category: state.uri.queryParameters['category'],
           categoryId: categoryIdStr != null ? int.tryParse(categoryIdStr) : null,
+          skills: state.uri.queryParameters['skills'],
         );
       },
     ),

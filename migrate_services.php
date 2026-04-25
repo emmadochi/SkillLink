@@ -7,7 +7,29 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
     ]);
 
-    // Create services table
+    // 0. Ensure AC Repair category exists
+    $checkCat = $pdo->prepare("SELECT id FROM categories WHERE slug = 'ac-repair' OR name = 'AC Repair'");
+    $checkCat->execute();
+    if (!$checkCat->fetch()) {
+        $insCat = $pdo->prepare("INSERT INTO categories (name, slug, icon) VALUES ('AC Repair', 'ac-repair', 'ac_unit')");
+        $insCat->execute();
+    }
+
+    // 0.1 Add is_technical column to categories if not exists
+    try {
+        $pdo->exec("ALTER TABLE categories ADD COLUMN is_technical TINYINT(1) DEFAULT 0");
+    } catch (Exception $e) {
+        // Column might already exist
+    }
+
+    // 0.2 Set technical status for major categories
+    $technicalCategories = ['electrical', 'plumbing', 'carpentry', 'ac-repair', 'ac repair'];
+    foreach ($technicalCategories as $slug) {
+        $upd = $pdo->prepare("UPDATE categories SET is_technical = 1 WHERE slug = ? OR name = ?");
+        $upd->execute([$slug, $slug]);
+    }
+
+    // 1. Create sub-services table if not exists
     $pdo->exec("CREATE TABLE IF NOT EXISTS category_services (
         id INT AUTO_INCREMENT PRIMARY KEY,
         category_id INT NOT NULL,
@@ -17,30 +39,57 @@ try {
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
     )");
 
-    // Insert professional default services
-    $services = [
-        // Electrical (assuming ID 1)
-        [1, 'Wiring & Installation', 'bolt_outlined'],
-        [1, 'Fault Diagnosis & Repair', 'build_circle_outlined'],
-        [1, 'CCTV & Security Setup', 'videocam_outlined'],
-        [1, 'Solar & Inverter Setup', 'wb_sunny_outlined'],
-        
-        // Plumbing (assuming ID 2)
-        [2, 'Pipe Leakage Repair', 'water_drop_outlined'],
-        [2, 'Bathroom/Toilet Fitting', 'bathtub_outlined'],
-        [2, 'Water Tank Cleaning', 'vape_free_outlined'],
-        [2, 'Drainage Unclogging', 'plumbing_outlined'],
+    // 2. Fetch all categories to map names to IDs
+    $stmt = $pdo->query("SELECT id, name FROM categories");
+    $categoryMap = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $categoryMap[strtolower($row['name'])] = $row['id'];
+    }
 
-        // Carpentry (assuming ID 3)
-        [3, 'Furniture Repair', 'chair_outlined'],
-        [3, 'Door & Lock Fitting', 'door_front_outlined'],
-        [3, 'Cabinet & Kitchen Work', 'kitchen_outlined'],
-        [3, 'Roofing & Woodwork', 'house_siding_outlined']
+    // 3. Define sub-services data
+    $servicesData = [
+        'electrical' => [
+            ['Wiring & Installation', 'bolt_outlined'],
+            ['Fault Diagnosis & Repair', 'build_circle_outlined'],
+            ['CCTV & Security Setup', 'videocam_outlined'],
+            ['Solar & Inverter Setup', 'wb_sunny_outlined'],
+        ],
+        'plumbing' => [
+            ['Pipe Leakage Repair', 'water_drop_outlined'],
+            ['Bathroom/Toilet Fitting', 'bathtub_outlined'],
+            ['Water Tank Cleaning', 'vape_free_outlined'],
+            ['Drainage Unclogging', 'plumbing_outlined'],
+        ],
+        'carpentry' => [
+            ['Furniture Repair', 'chair_outlined'],
+            ['Door & Lock Fitting', 'door_front_outlined'],
+            ['Cabinet & Kitchen Work', 'kitchen_outlined'],
+            ['Roofing & Woodwork', 'house_siding_outlined'],
+        ],
+        'ac repair' => [
+            ['A.C Gas Filling / Servicing', 'ac_unit'],
+            ['A.C Repair or Installation', 'build'],
+            ['Refrigerator Repair', 'kitchen'],
+            ['Freezer Repair', 'icecream'],
+            ['Water Dispenser', 'water_drop'],
+            ['Cold Room Servicing', 'severe_cold'],
+        ]
     ];
 
-    $stmt = $pdo->prepare("INSERT INTO category_services (category_id, service_name, icon_name) VALUES (?, ?, ?)");
-    foreach ($services as $s) {
-        $stmt->execute($s);
+    // 4. Insert data
+    $insertStmt = $pdo->prepare("INSERT INTO category_services (category_id, service_name, icon_name) VALUES (?, ?, ?)");
+    foreach ($servicesData as $catName => $subs) {
+        if (isset($categoryMap[$catName])) {
+            $catId = $categoryMap[$catName];
+            foreach ($subs as $s) {
+                // Check if already exists to avoid duplicates
+                $checkStmt = $pdo->prepare("SELECT 1 FROM category_services WHERE category_id = ? AND service_name = ?");
+                $checkStmt->execute([$catId, $s[0]]);
+                if (!$checkStmt->fetch()) {
+                    $insertStmt->execute([$catId, $s[0], $s[1]]);
+                }
+            }
+        }
     }
 
     echo "Migration successful: Created category_services and added default data.\n";

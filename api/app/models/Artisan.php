@@ -60,6 +60,18 @@ class Artisan {
             $query .= " AND (u.name LIKE :q OR a.bio LIKE :q OR a.skill LIKE :q OR a.location_name LIKE :q)";
         }
 
+        if (!empty($filters['skills'])) {
+            $skills = is_array($filters['skills']) ? $filters['skills'] : explode(',', $filters['skills']);
+            $skillConditions = [];
+            foreach ($skills as $index => $skill) {
+                $paramName = ":skill_" . $index;
+                $skillConditions[] = "(a.bio LIKE $paramName OR a.skill LIKE $paramName)";
+            }
+            if (!empty($skillConditions)) {
+                $query .= " AND (" . implode(' OR ', $skillConditions) . ")";
+            }
+        }
+
         $query .= " ORDER BY a.average_rating DESC";
         
         $stmt = $this->conn->prepare($query);
@@ -73,6 +85,15 @@ class Artisan {
         if (!empty($filters['query'])) {
             $searchTerm = '%' . $filters['query'] . '%';
             $stmt->bindParam(':q', $searchTerm);
+        }
+
+        if (!empty($filters['skills'])) {
+            $skills = is_array($filters['skills']) ? $filters['skills'] : explode(',', $filters['skills']);
+            foreach ($skills as $index => $skill) {
+                $paramName = ":skill_" . $index;
+                $val = '%' . trim($skill) . '%';
+                $stmt->bindValue($paramName, $val);
+            }
         }
 
         $stmt->execute();

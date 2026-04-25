@@ -224,7 +224,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       title: cat.name,
                       icon: _categoryIcons[cat.name] ?? Icons.build_outlined,
                       onTap: () {
-                        context.push('${AppRoutes.artisanListing}?category=${cat.name}&categoryId=${cat.id}');
+                        if (cat.isTechnical) {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => SubServiceSheet(
+                              categoryId: cat.id,
+                              categoryName: cat.name,
+                            ),
+                          );
+                        } else {
+                          context.push('${AppRoutes.artisanListing}?category=${cat.name}&categoryId=${cat.id}');
+                        }
                       },
                     );
                   },

@@ -23,10 +23,10 @@ class Category {
      * Get all categories.
      */
     public function getAll() {
-        $query = "SELECT * FROM " . $this->table . " ORDER BY name ASC";
+        $query = "SELECT id, name, slug, icon, is_technical FROM " . $this->table . " ORDER BY name ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**

@@ -3,7 +3,7 @@ import '../../../../core/network/api_client.dart';
 import 'package:dio/dio.dart';
 
 abstract class ArtisanRepository {
-  Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query});
+  Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query, String? skills});
   Future<Artisan> getArtisanProfile(int id);
   Future<bool> updateArtisanProfile(Map<String, dynamic> data);
   Future<bool> toggleSaveArtisan(int id);
@@ -16,12 +16,13 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
   ArtisanRepositoryImpl(this._apiClient);
 
   @override
-  Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query}) async {
+  Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query, String? skills}) async {
     try {
       final response = await _apiClient.getArtisans(
         categoryId: categoryId,
         minRating: minRating,
         query: query,
+        skills: skills,
       );
 
       if (response.status == 'success' && response.data != null) {

@@ -16,3 +16,15 @@ Future<List<Category>> categories(CategoriesRef ref) async {
   }
   return [];
 }
+
+@riverpod
+Future<List<Map<String, dynamic>>> categoryServices(CategoryServicesRef ref, int categoryId) async {
+  final dio = ref.watch(dioProvider);
+  final client = ApiClient(dio);
+  
+  final response = await client.getCategoryServices(categoryId);
+  if (response.status == 'success' && response.data != null) {
+    return response.data!;
+  }
+  return [];
+}

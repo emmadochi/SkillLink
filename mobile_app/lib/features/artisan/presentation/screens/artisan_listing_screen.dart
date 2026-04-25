@@ -14,7 +14,8 @@ import '../../../../core/utils/url_utils.dart';
 class ArtisanListingScreen extends ConsumerStatefulWidget {
   final String? category;
   final int? categoryId;
-  const ArtisanListingScreen({super.key, this.category, this.categoryId});
+  final String? skills;
+  const ArtisanListingScreen({super.key, this.category, this.categoryId, this.skills});
 
   @override
   ConsumerState<ArtisanListingScreen> createState() => _ArtisanListingScreenState();
@@ -99,6 +100,7 @@ class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
             child: ref.watch(artisansProvider(
               categoryId: widget.categoryId,
               query: _searchCtrl.text.isEmpty ? null : _searchCtrl.text,
+              skills: widget.skills,
             )).when(
                   data: (artisans) {
                     if (artisans.isEmpty) {
