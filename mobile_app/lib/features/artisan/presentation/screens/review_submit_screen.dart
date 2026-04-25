@@ -113,7 +113,7 @@ class _ReviewSubmitScreenState extends ConsumerState<ReviewSubmitScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Add a comment (optional)',
-                style: AppTypography.titleSmall,
+                style: AppTypography.titleSm,
               ),
             ),
             const SizedBox(height: 12),

@@ -48,12 +48,36 @@ class Auth {
      * Get bearer token from headers.
      */
     public static function getBearerToken() {
-        $headers = getallheaders();
+        $headers = self::getAllHeaders();
         if (isset($headers['Authorization'])) {
             if (preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
                 return $matches[1];
             }
         }
+        
+        // Fallback for some server configs
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            if (preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+                return $matches[1];
+            }
+        }
+        
         return null;
+    }
+
+    /**
+     * Polyfill for getallheaders() if it doesn't exist.
+     */
+    private static function getAllHeaders() {
+        if (function_exists('getallheaders')) {
+            return getallheaders();
+        }
+        $headers = [];
+        foreach ($_SERVER as $name => $value) {
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
+        return $headers;
     }
 }

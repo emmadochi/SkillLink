@@ -17,11 +17,11 @@ class ReviewRepositoryImpl implements ReviewRepository {
 
   @override
   Future<List<Review>> getArtisanReviews(int artisanId) async {
-    final response = await _apiClient.get('/artisan/reviews/$artisanId');
-    if (response.status == 'success') {
-      return (response.data as List).map((json) => Review.fromJson(json)).toList();
+    final response = await _apiClient.getArtisanReviews(artisanId);
+    if (response.status == 'success' && response.data != null) {
+      return response.data!;
     }
-    throw Exception(response.message);
+    throw Exception(response.message ?? 'Failed to fetch reviews');
   }
 
   @override
@@ -30,7 +30,7 @@ class ReviewRepositoryImpl implements ReviewRepository {
     required int rating,
     String? comment,
   }) async {
-    final response = await _apiClient.post('/review/submit', data: {
+    final response = await _apiClient.submitReview({
       'booking_id': bookingId,
       'rating': rating,
       'comment': comment,

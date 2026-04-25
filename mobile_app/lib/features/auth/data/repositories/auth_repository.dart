@@ -70,7 +70,10 @@ class AuthRepositoryImpl implements AuthRepository {
       if (responseData is Map<String, dynamic>) {
         throw responseData['error'] ?? responseData['message'] ?? 'Upload error';
       }
-      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
+      if (e.response != null) {
+        throw 'Server error: ${e.response!.statusCode}';
+      }
+      throw 'Upload failed: ${e.type.toString().split('.').last} - ${e.message ?? 'Unknown network error'}';
     } catch (e) {
       rethrow;
     }

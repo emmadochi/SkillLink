@@ -81,45 +81,69 @@ class Artisan {
      * Get artisan full profile details.
      */
     public function getProfile($id, $currentUserId = null) {
-        $query = "SELECT u.id as user_id, u.name, u.email, u.phone, u.avatar_url, a.*,
+        // First get basic user info
+        $uQuery = "SELECT id as user_id, name, email, phone, avatar_url, role FROM users WHERE id = :id";
+        $uStmt = $this->conn->prepare($uQuery);
+        $uStmt->bindParam(':id', $id);
+        $uStmt->execute();
+        $user = $uStmt->fetch();
+
+        if (!$user) return null;
+
+        // Then try to get artisan specific info
+        $aQuery = "SELECT a.*,
                   (SELECT status FROM artisan_verifications WHERE artisan_id = a.user_id ORDER BY created_at DESC LIMIT 1) as identity_status
                   FROM " . $this->table . " a
-                  JOIN users u ON u.id = a.user_id
                   WHERE a.user_id = :id";
         
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        $profile = $stmt->fetch();
+        $aStmt = $this->conn->prepare($aQuery);
+        $aStmt->bindParam(':id', $id);
+        $aStmt->execute();
+        $artisan = $aStmt->fetch();
 
-        if ($profile) {
-            $profile['user'] = [
-                'id' => $profile['user_id'],
-                'name' => $profile['name'],
-                'email' => $profile['email'],
-                'phone' => $profile['phone'],
-                'avatar_url' => $profile['avatar_url']
-            ];
-            // Get portfolio
-            $profile['portfolio'] = $this->getPortfolio($id);
-            // Get reviews
-            $profile['reviews'] = $this->getReviews($id);
-            // Check if saved
-            $profile['is_saved'] = false;
-            if ($currentUserId) {
-                $sQuery = "SELECT 1 FROM saved_artisans WHERE user_id = :cuid AND artisan_id = :aid";
-                $sStmt = $this->conn->prepare($sQuery);
-                $sStmt->bindParam(':cuid', $currentUserId);
-                $sStmt->bindParam(':aid', $id);
-                $sStmt->execute();
-                $profile['is_saved'] = $sStmt->fetch() ? true : false;
-            }
-            // Cast types
-            $profile['average_rating'] = (float)($profile['average_rating'] ?? 0.0);
-            $profile['experience_years'] = (int)($profile['experience_years'] ?? 0);
-            $profile['hourly_rate'] = (float)($profile['hourly_rate'] ?? 0.0);
-            $profile['identity_verified'] = (bool)($profile['identity_verified'] ?? false);
+        $profile = $user;
+        if ($artisan) {
+            $profile = array_merge($profile, $artisan);
+        } else {
+            // Default values for a user who isn't (yet) an artisan
+            $profile['bio'] = null;
+            $profile['skill'] = $user['role'] === 'artisan' ? 'Artisan' : 'Customer';
+            $profile['experience_years'] = 0;
+            $profile['average_rating'] = 0.0;
+            $profile['hourly_rate'] = 0.0;
+            $profile['location_name'] = null;
+            $profile['identity_verified'] = false;
+            $profile['identity_status'] = null;
         }
+
+        $profile['user'] = [
+            'id' => $user['user_id'],
+            'name' => $user['name'],
+            'email' => $user['email'],
+            'phone' => $user['phone'],
+            'avatar_url' => $user['avatar_url']
+        ];
+        
+        // Get portfolio & reviews
+        $profile['portfolio'] = $this->getPortfolio($id);
+        $profile['reviews'] = $this->getReviews($id);
+        
+        // Check if saved
+        $profile['is_saved'] = false;
+        if ($currentUserId) {
+            $sQuery = "SELECT 1 FROM saved_artisans WHERE user_id = :cuid AND artisan_id = :aid";
+            $sStmt = $this->conn->prepare($sQuery);
+            $sStmt->bindParam(':cuid', $currentUserId);
+            $sStmt->bindParam(':aid', $id);
+            $sStmt->execute();
+            $profile['is_saved'] = $sStmt->fetch() ? true : false;
+        }
+
+        // Cast types
+        $profile['average_rating'] = (float)($profile['average_rating'] ?? 0.0);
+        $profile['experience_years'] = (int)($profile['experience_years'] ?? 0);
+        $profile['hourly_rate'] = (float)($profile['hourly_rate'] ?? 0.0);
+        $profile['identity_verified'] = (bool)($profile['identity_verified'] ?? false);
 
         return $profile;
     }

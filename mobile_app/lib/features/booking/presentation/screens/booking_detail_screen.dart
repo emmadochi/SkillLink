@@ -7,7 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
 import '../providers/booking_provider.dart';
-import '../models/booking_model.dart';
+import '../../data/models/booking_model.dart';
 
 class BookingDetailScreen extends ConsumerWidget {
   final String bookingId;
@@ -60,7 +60,7 @@ class BookingDetailScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Status: ${booking.status.toUpperCase()}',
-                  style: AppTypography.titleMedium.copyWith(
+                  style: AppTypography.titleMd.copyWith(
                     color: _getStatusColor(booking.status),
                     fontWeight: FontWeight.bold,
                   ),
@@ -77,7 +77,7 @@ class BookingDetailScreen extends ConsumerWidget {
           const SizedBox(height: 32),
           
           // Artisan Info
-          Text('Artisan Info', style: AppTypography.titleMedium),
+          Text('Artisan Info', style: AppTypography.titleMd),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -107,7 +107,7 @@ class BookingDetailScreen extends ConsumerWidget {
           const SizedBox(height: 32),
           
           // Service Details
-          Text('Service Details', style: AppTypography.titleMedium),
+          Text('Service Details', style: AppTypography.titleMd),
           const SizedBox(height: 12),
           _detailItem(Icons.description_outlined, 'Description', booking.serviceDescription ?? 'No description'),
           _detailItem(Icons.calendar_today_rounded, 'Date & Time', _formatDate(booking.scheduledAt)),

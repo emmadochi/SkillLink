@@ -33,8 +33,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     super.initState();
     _refreshTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      final partnerId = int.tryParse(widget.conversationId) ?? 1;
-      ref.invalidate(conversationProvider(partnerId));
+      final partnerId = int.tryParse(widget.conversationId);
+      if (partnerId != null) {
+        ref.invalidate(conversationProvider(partnerId));
+      }
     });
   }
 
@@ -50,7 +52,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final text = _msgCtrl.text.trim();
     if (text.isEmpty) return;
     
-    final partnerId = int.tryParse(widget.conversationId) ?? 1;
+    final partnerId = int.tryParse(widget.conversationId);
+    if (partnerId == null) return;
+    
     final repo = ref.read(chatRepositoryProvider);
     
     _msgCtrl.clear();
@@ -69,7 +73,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final partnerId = int.tryParse(widget.conversationId) ?? 1;
+    final partnerId = int.tryParse(widget.conversationId);
+    if (partnerId == null) {
+      return const Scaffold(body: Center(child: Text('Invalid Conversation')));
+    }
+
     final artisanAsync = ref.watch(artisanProfileProvider(partnerId));
     final messagesAsync = ref.watch(conversationProvider(partnerId));
     

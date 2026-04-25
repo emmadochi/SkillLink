@@ -34,31 +34,44 @@ class UserController extends Controller {
         }
 
         $file = $_FILES['avatar'];
+        
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $this->error('File upload error code: ' . $file['error']);
+        }
+
         $uploadDir = __DIR__ . '/../../public/uploads/avatars/';
         
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+            if (!mkdir($uploadDir, 0777, true)) {
+                $this->error('Failed to create upload directory. Check permissions.');
+            }
         }
 
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        if (empty($extension)) $extension = 'jpg'; // Fallback
+        
         $fileName = 'avatar_' . $user['id'] . '_' . time() . '.' . $extension;
         $targetPath = $uploadDir . $fileName;
 
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
             $avatarUrl = 'uploads/avatars/' . $fileName;
             
-            $userModel = new User();
-            if ($userModel->updateAvatar($user['id'], $avatarUrl)) {
-                $this->json([
-                    'status' => 'success',
-                    'message' => 'Profile picture updated',
-                    'data' => ['avatar_url' => $avatarUrl]
-                ]);
-            } else {
-                $this->error('Failed to update database');
+            try {
+                $userModel = new User();
+                if ($userModel->updateAvatar($user['id'], $avatarUrl)) {
+                    $this->json([
+                        'status' => 'success',
+                        'message' => 'Profile picture updated',
+                        'data' => ['avatar_url' => $avatarUrl]
+                    ]);
+                } else {
+                    $this->error('Failed to update database record');
+                }
+            } catch (\Exception $e) {
+                $this->error('Database error: ' . $e->getMessage());
             }
         } else {
-            $this->error('Failed to save uploaded file');
+            $this->error('Failed to move uploaded file to target directory. Check permissions.');
         }
     }
 }

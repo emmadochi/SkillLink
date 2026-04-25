@@ -25,7 +25,11 @@ class BookingRepositoryImpl implements BookingRepository {
         throw response.message ?? 'Booking failed';
       }
     } on DioException catch (e) {
-      throw e.response?.data['error'] ?? 'Network error';
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Booking failed';
+      }
+      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
       rethrow;
     }
@@ -41,7 +45,11 @@ class BookingRepositoryImpl implements BookingRepository {
         throw response.message ?? 'Failed to load history';
       }
     } on DioException catch (e) {
-      throw e.response?.data['error'] ?? 'Network error';
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Network error';
+      }
+      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
       rethrow;
     }
@@ -57,7 +65,11 @@ class BookingRepositoryImpl implements BookingRepository {
       });
       return response.status == 'success';
     } on DioException catch (e) {
-      throw e.response?.data['error'] ?? 'Update failed';
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Update failed';
+      }
+      throw 'Server error';
     } catch (e) {
       rethrow;
     }
@@ -73,7 +85,11 @@ class BookingRepositoryImpl implements BookingRepository {
       });
       return response.status == 'success';
     } on DioException catch (e) {
-      throw e.response?.data['error'] ?? 'Negotiation failed';
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Negotiation failed';
+      }
+      throw 'Server error';
     } catch (e) {
       rethrow;
     }

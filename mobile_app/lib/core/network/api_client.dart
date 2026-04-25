@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../../features/auth/data/models/user_model.dart';
 import '../../features/artisan/data/models/artisan_model.dart';
+import '../../features/artisan/data/models/review_model.dart';
 import '../../features/booking/data/models/booking_model.dart';
 import '../../features/settings/data/models/address_model.dart';
 import '../../features/chat/data/models/chat_model.dart';
@@ -16,17 +17,17 @@ class ApiClient {
   }
 
   Future<ApiResponse<AuthData>> signup(Map<String, dynamic> body) async {
-    final response = await dio.post('/auth/signup', data: body);
+    final response = await dio.post('auth/signup', data: body);
     return _safeParse(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
   }
 
   Future<ApiResponse<AuthData>> login(Map<String, dynamic> body) async {
-    final response = await dio.post('/auth/login', data: body);
+    final response = await dio.post('auth/login', data: body);
     return _safeParse(response.data, (json) => AuthData.fromJson(json as Map<String, dynamic>));
   }
 
   Future<ApiResponse<List<Artisan>>> getArtisans({int? categoryId, double? minRating, String? query}) async {
-    final response = await dio.get('/artisan', queryParameters: {
+    final response = await dio.get('artisan', queryParameters: {
       if (categoryId != null) 'category': categoryId,
       if (minRating != null) 'rating': minRating,
       if (query != null && query.isNotEmpty) 'q': query,
@@ -36,103 +37,113 @@ class ApiClient {
   }
 
   Future<ApiResponse<Artisan>> getArtisanProfile(int id) async {
-    final response = await dio.get('/artisan/profile/$id');
+    final response = await dio.get('artisan/profile/$id');
     return _safeParse(response.data, (json) => Artisan.fromJson(json as Map<String, dynamic>));
   }
 
   Future<ApiResponse<List<Map<String, dynamic>>>> getCategories() async {
-    final response = await dio.get('/category');
+    final response = await dio.get('category');
     return _safeParse(response.data, (json) => List<Map<String, dynamic>>.from(json as List));
   }
 
   Future<ApiResponse<List<Map<String, dynamic>>>> getCategoryServices(int id) async {
-    final response = await dio.get('/category/services', queryParameters: {'id': id});
+    final response = await dio.get('category/services', queryParameters: {'id': id});
     return _safeParse(response.data, (json) => List<Map<String, dynamic>>.from(json as List));
   }
 
   Future<ApiResponse<Map<String, dynamic>>> createBooking(Map<String, dynamic> body) async {
-    final response = await dio.post('/booking/create', data: body);
+    final response = await dio.post('booking/create', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
 
   Future<ApiResponse<List<Booking>>> getBookingHistory() async {
-    final response = await dio.get('/booking/history');
+    final response = await dio.get('booking/history');
     return _safeParse(response.data, (json) => (json as List).map((i) => Booking.fromJson(i as Map<String, dynamic>)).toList());
   }
 
   Future<ApiResponse<Map<String, dynamic>>> updateStatus(Map<String, dynamic> body) async {
-    final response = await dio.post('/booking/updateStatus', data: body);
+    final response = await dio.post('booking/updateStatus', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> negotiate(Map<String, dynamic> body) async {
-    final response = await dio.post('/booking/negotiate', data: body);
+    final response = await dio.post('booking/negotiate', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> initializePayment(Map<String, dynamic> body) async {
-    final response = await dio.post('/payment/initialize', data: body);
+    final response = await dio.post('payment/initialize', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> verifyPayment(Map<String, dynamic> body) async {
-    final response = await dio.post('/payment/verify', data: body);
+    final response = await dio.post('payment/verify', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<List<UserAddress>>> getAddresses() async {
-    final response = await dio.get('/address');
+    final response = await dio.get('address');
     return _safeParse(response.data, (json) => (json as List).map((i) => UserAddress.fromJson(i as Map<String, dynamic>)).toList());
   }
 
   Future<ApiResponse<Map<String, dynamic>>> createAddress(Map<String, dynamic> body) async {
-    final response = await dio.post('/address/create', data: body);
+    final response = await dio.post('address/create', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> deleteAddress(int id) async {
-    final response = await dio.delete('/address/delete/$id');
+    final response = await dio.delete('address/delete/$id');
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> updateArtisanProfile(Map<String, dynamic> body) async {
-    final response = await dio.post('/artisan/update', data: body);
+    final response = await dio.post('artisan/update', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> submitVerification(Map<String, dynamic> body) async {
-    final response = await dio.post('/artisan/verify', data: body);
+    final response = await dio.post('artisan/verify', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> addPortfolio(Map<String, dynamic> body) async {
-    final response = await dio.post('/artisan/portfolio', data: body);
+    final response = await dio.post('artisan/portfolio', data: body);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  Future<ApiResponse<List<Review>>> getArtisanReviews(int artisanId) async {
+    final response = await dio.get('artisan/reviews/$artisanId');
+    return _safeParse(response.data, (json) => (json as List).map((i) => Review.fromJson(i as Map<String, dynamic>)).toList());
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> submitReview(Map<String, dynamic> body) async {
+    final response = await dio.post('review/submit', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> toggleSaveArtisan(int artisanId) async {
-    final response = await dio.post('/artisan/toggle-save', data: {'artisan_id': artisanId});
+    final response = await dio.post('artisan/toggle-save', data: {'artisan_id': artisanId});
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<List<Artisan>>> getSavedArtisans() async {
-    final response = await dio.get('/artisan/saved');
+    final response = await dio.get('artisan/saved');
     return _safeParse(response.data, (json) => (json as List).map((i) => Artisan.fromJson(i as Map<String, dynamic>)).toList());
   }
 
   Future<ApiResponse<Map<String, dynamic>>> sendMessage(Map<String, dynamic> body) async {
-    final response = await dio.post('/chat/send', data: body);
+    final response = await dio.post('chat/send', data: body);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
   Future<ApiResponse<List<ChatMessage>>> getConversation(int partnerId) async {
-    final response = await dio.get('/chat/conversation/$partnerId');
+    final response = await dio.get('chat/conversation/$partnerId');
     return _safeParse(response.data, (json) => (json as List).map((i) => ChatMessage.fromJson(i as Map<String, dynamic>)).toList());
   }
 
   Future<ApiResponse<List<ChatConversation>>> getChatHistory() async {
-    final response = await dio.get('/chat/history');
+    final response = await dio.get('chat/history');
     return _safeParse(response.data, (json) => (json as List).map((i) => ChatConversation.fromJson(i as Map<String, dynamic>)).toList());
   }
 
@@ -140,7 +151,7 @@ class ApiClient {
     final formData = FormData.fromMap({
       'avatar': await MultipartFile.fromFile(filePath),
     });
-    final response = await dio.post('/user/upload-avatar', data: formData);
+    final response = await dio.post('user/upload-avatar', data: formData);
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 

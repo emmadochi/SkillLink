@@ -29,7 +29,22 @@ try {
     echo "<p style='color:green'>✅ Search query executed!</p>";
     echo "<p>Found <b>" . count($results) . "</b> artisans.</p>";
     
-    echo "<h3>3. Raw Data Sample:</h3>";
+    echo "<h3>3. Checking Bookings Table...</h3>";
+    $stmt = $conn->query("SHOW COLUMNS FROM bookings");
+    $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    echo "<p>Columns found: <b>" . implode(", ", $columns) . "</b></p>";
+    
+    $required = ['offer_price', 'counter_price', 'negotiation_status', 'is_negotiated'];
+    $missing = array_diff($required, $columns);
+    
+    if (empty($missing)) {
+        echo "<p style='color:green'>✅ All negotiation columns present!</p>";
+    } else {
+        echo "<p style='color:red'>❌ Missing columns: " . implode(", ", $missing) . "</p>";
+        echo "<p>Please run <b>sql/negotiation_migration.sql</b> on your database.</p>";
+    }
+
+    echo "<h3>4. Raw Data Sample:</h3>";
     echo "<pre>";
     print_r(array_slice($results, 0, 1));
     echo "</pre>";

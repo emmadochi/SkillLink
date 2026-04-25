@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
@@ -29,7 +30,7 @@ class SavedArtisansScreen extends ConsumerWidget {
                 children: [
                   Icon(Icons.bookmark_border_rounded, size: 64, color: AppColors.outlineVariant),
                   const SizedBox(height: 16),
-                  Text('No saved artisans yet', style: AppTypography.titleSmall),
+                  Text('No saved artisans yet', style: AppTypography.titleSm),
                   const SizedBox(height: 8),
                   Text('Artisans you save will appear here', style: AppTypography.labelMd.copyWith(color: AppColors.outline)),
                 ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
@@ -38,9 +39,17 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    final artisanId = int.tryParse(widget.artisanId);
+    if (artisanId == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text('Invalid Artisan ID')),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: ref.watch(artisanProfileProvider(int.parse(widget.artisanId))).when(
+      body: ref.watch(artisanProfileProvider(artisanId)).when(
             data: (artisan) => CustomScrollView(
               slivers: [
                 // ── Hero Header ──────────────────────────────────────────────

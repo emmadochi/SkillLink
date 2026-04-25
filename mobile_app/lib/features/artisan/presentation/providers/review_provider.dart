@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../repositories/review_repository.dart';
-import '../models/review_model.dart';
+import '../../data/repositories/review_repository.dart';
+import '../../data/models/review_model.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/network/api_client.dart';
 
