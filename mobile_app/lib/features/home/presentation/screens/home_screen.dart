@@ -8,6 +8,8 @@ import '../../../../core/router/app_router.dart';
 import 'package:skilllink_app/features/artisan/presentation/providers/category_provider.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../../../../shared/widgets/skilllink_input.dart';
+import '../../../../shared/widgets/service_card.dart';
+import '../widgets/ongoing_jobs_banner.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
@@ -182,80 +184,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // ── Categories ───────────────────────────────────────────────
+          // ── Popular Services Grid ──────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
               child: Row(
                 children: [
-                  Text('Categories',
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text('Popular Services',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      )),
                   const Spacer(),
                   TextButton(
-                    onPressed: () =>
-                        context.push(AppRoutes.artisanListing),
+                    onPressed: () => context.push(AppRoutes.artisanListing),
                     child: Text('See All',
                         style: AppTypography.labelLg.copyWith(
-                            color: AppColors.primary)),
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),
             ),
           ),
 
-          SliverToBoxAdapter(
-            child: ref.watch(categoriesProvider).when(
-              data: (categories) => SizedBox(
-                height: 110,
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categories.length,
-                  itemBuilder: (context, i) {
+          ref.watch(categoriesProvider).when(
+            data: (categories) => SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.3,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) {
                     final cat = categories[i];
-                    final selected = _selectedCategory == cat.name;
-                    return GestureDetector(
+                    return ServiceCard(
+                      title: cat.name,
+                      icon: _categoryIcons[cat.name] ?? Icons.build_outlined,
                       onTap: () {
-                        setState(() => _selectedCategory = selected ? null : cat.name);
                         context.push('${AppRoutes.artisanListing}?category=${cat.name}&categoryId=${cat.id}');
                       },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.only(right: 14),
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: selected ? AppColors.primary : AppColors.surfaceContainerLowest,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.06),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _categoryIcons[cat.name] ?? Icons.build_outlined,
-                              size: 24,
-                              color: selected ? AppColors.onPrimary : AppColors.primary,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(cat.name,
-                                style: AppTypography.labelSm.copyWith(
-                                    color: selected ? AppColors.onPrimary : AppColors.onSurface)),
-                          ],
-                        ),
-                      ),
                     );
                   },
+                  childCount: categories.length > 6 ? 6 : categories.length,
                 ),
               ),
-              loading: () => const SizedBox(height: 110, child: Center(child: CircularProgressIndicator())),
-              error: (err, _) => const SizedBox.shrink(),
             ),
+            loading: () => const SliverToBoxAdapter(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (err, _) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+          ),
+
+          // ── Ongoing Jobs Banner ──────────────────────────────────────
+          ref.watch(bookingHistoryProvider).when(
+            data: (bookings) {
+              final activeCount = bookings.where((b) => b.status == 'pending' || b.status == 'confirmed').length;
+              return SliverToBoxAdapter(
+                child: OngoingJobsBanner(
+                  count: activeCount,
+                  onTap: () => context.go(AppRoutes.customerDashboard), // Navigate to Bookings tab
+                ),
+              );
+            },
+            loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+            error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
           ),
 
           // ── Featured Artisans ─────────────────────────────────────────
