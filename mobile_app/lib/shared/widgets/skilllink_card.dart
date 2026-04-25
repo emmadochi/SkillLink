@@ -172,7 +172,7 @@ class SkillLinkArtisanCard extends StatelessWidget {
 
             // Content Section
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -199,7 +199,7 @@ class SkillLinkArtisanCard extends StatelessWidget {
                         ),
                         maxLines: 1),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   // Location Indicator
                   Row(
                     children: [
@@ -216,10 +216,10 @@ class SkillLinkArtisanCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   // Divider for visual structure
                   Container(height: 1, color: AppColors.outline.withOpacity(0.08)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   // Price and Rating footer
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

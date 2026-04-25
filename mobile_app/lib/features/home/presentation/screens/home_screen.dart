@@ -280,7 +280,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 310,
+              height: 340,
               child: ref.watch(artisansProvider(query: _searchCtrl.text)).when(
                     data: (artisans) {
                       if (artisans.isEmpty) {
