@@ -51,7 +51,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       // Check if user data is also present in storage
       final user = await ref.read(userStateProvider.future);
       if (user != null) {
-        context.go(AppRoutes.home);
+        if (user.role == 'artisan') {
+          context.go(AppRoutes.artisanDashboard);
+        } else {
+          context.go(AppRoutes.home);
+        }
         return;
       }
     }

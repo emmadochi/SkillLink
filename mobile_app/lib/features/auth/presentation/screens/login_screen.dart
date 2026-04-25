@@ -53,7 +53,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (mounted) {
         setState(() => _isLoading = false);
-        context.go(AppRoutes.home);
+        if (authData.user.role == 'artisan') {
+          context.go(AppRoutes.artisanDashboard);
+        } else {
+          context.go(AppRoutes.home);
+        }
       }
     } catch (e) {
       if (mounted) {

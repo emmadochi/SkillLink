@@ -101,7 +101,16 @@ class _AppShell extends ConsumerWidget {
     
     // Find the current selected index in the filtered list
     int selectedIndex = branchIndices.indexOf(navigationShell.currentIndex);
-    if (selectedIndex == -1) selectedIndex = 0;
+    
+    // If current branch is not valid for the role, redirect to the first valid branch
+    if (selectedIndex == -1) {
+      selectedIndex = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          navigationShell.goBranch(branchIndices[0]);
+        }
+      });
+    }
 
     return Scaffold(
       body: navigationShell,
