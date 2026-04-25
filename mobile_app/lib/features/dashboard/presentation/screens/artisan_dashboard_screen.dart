@@ -384,7 +384,7 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
                 const SizedBox(height: 16),
                 Text(
                   'Connection Problem',
-                  style: AppTypography.titleLarge,
+                  style: AppTypography.titleLg,
                 ),
                 const SizedBox(height: 8),
                 Text(
