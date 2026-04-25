@@ -132,10 +132,15 @@ class ArtisanController extends Controller {
             $this->error('Access denied', 403);
         }
 
-        $data = $this->getPostData();
+        $data = $_POST;
         $data['artisan_id'] = $user['id'];
 
         try {
+            // Handle ID Document Uploads
+            $data['id_image_front'] = $this->uploadFile('id_front', 'uploads/verification/');
+            $data['id_image_back'] = $this->uploadFile('id_back', 'uploads/verification/');
+            $data['passport_photo'] = $this->uploadFile('passport', 'uploads/verification/');
+
             $artisanModel = new Artisan();
             if ($artisanModel->submitVerification($data)) {
                 $this->json([

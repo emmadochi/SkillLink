@@ -11,9 +11,11 @@
     <div class="stat-card" style="padding: 2.5rem; min-height: auto; flex: 2;">
         <div class="flex-row justify-between mb-5 align-start">
             <div class="flex-row gap-4">
-                <div class="avatar-circle" style="width: 100px; height: 100px; font-size: 2.5rem; overflow: hidden;">
-                    <?php if (!empty($artisan['passport_photo'])): ?>
-                        <img src="<?php echo asset_url($artisan['passport_photo']); ?>" alt="Passport" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="avatar-circle" style="width: 100px; height: 100px; font-size: 2.5rem; overflow: hidden; background: var(--surface-container-high);">
+                    <?php 
+                    $photo = $artisan['avatar_url'] ?: $artisan['passport_photo'];
+                    if (!empty($photo)): ?>
+                        <img src="<?php echo asset_url('api/' . $photo); ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
                     <?php else: ?>
                         <?php echo strtoupper(substr($artisan['name'], 0, 1)); ?>
                     <?php endif; ?>
@@ -118,10 +120,12 @@
                 <?php else: ?>
                     <?php foreach($artisan['portfolio'] as $work): ?>
                     <div class="portfolio-item animate-fade-in" style="position: relative; border-radius: var(--radius-md); overflow: hidden; height: 160px;">
-                        <img src="<?php echo asset_url($work['image_url']); ?>" alt="<?php echo htmlspecialchars($work['description']); ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="<?php echo asset_url('api/' . $work['image_url']); ?>" alt="<?php echo htmlspecialchars($work['description'] ?: 'Portfolio Image'); ?>" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src)">
+                        <?php if (!empty($work['description'])): ?>
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 12px; color: white;">
                             <span style="font-size: 0.75rem; font-weight: 600;"><?php echo htmlspecialchars($work['description']); ?></span>
                         </div>
+                        <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -140,13 +144,13 @@
                 <?php if ($artisan['id_image_front']): ?>
                 <div class="flex-column gap-2 mt-3">
                     <label class="text-xs opacity-70">ID Front</label>
-                    <img src="<?php echo asset_url($artisan['id_image_front']); ?>" style="width: 100%; border-radius: 4px; cursor: pointer;" onclick="window.open(this.src)">
+                    <img src="<?php echo asset_url('api/' . $artisan['id_image_front']); ?>" style="width: 100%; border-radius: 4px; cursor: pointer;" onclick="window.open(this.src)">
                 </div>
                 <?php endif; ?>
                 <?php if ($artisan['id_image_back']): ?>
                 <div class="flex-column gap-2 mt-2">
                     <label class="text-xs opacity-70">ID Back</label>
-                    <img src="<?php echo asset_url($artisan['id_image_back']); ?>" style="width: 100%; border-radius: 4px; cursor: pointer;" onclick="window.open(this.src)">
+                    <img src="<?php echo asset_url('api/' . $artisan['id_image_back']); ?>" style="width: 100%; border-radius: 4px; cursor: pointer;" onclick="window.open(this.src)">
                 </div>
                 <?php endif; ?>
             </div>
