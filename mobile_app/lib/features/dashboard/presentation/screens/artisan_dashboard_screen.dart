@@ -373,8 +373,41 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
           ),
         );
       },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error loading dashboard: $e')),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.tertiary)),
+        error: (e, st) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.signal_wifi_off_outlined, size: 64, color: AppColors.outline),
+                const SizedBox(height: 16),
+                Text(
+                  'Connection Problem',
+                  style: AppTypography.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'We couldn\'t load your dashboard. Please check your internet connection and try again.',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyMd.copyWith(color: AppColors.outline),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => ref.invalidate(bookingHistoryProvider),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry Now'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.tertiary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -73,15 +73,7 @@ class Booking {
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':uid', $userId, PDO::PARAM_INT);
         $stmt->execute();
-        $results = $stmt->fetchAll();
-
-        // Secondary safety check: Ensure all returned rows match the user and role
-        // This prevents logic leaks if the SQL where clause is somehow bypassed or misconfigured
-        $filtered = array_filter($results, function($row) use ($userId, $field) {
-            return (int)$row[$field] === (int)$userId;
-        });
-
-        return array_values($filtered);
+        return $stmt->fetchAll();
     }
 
     /**
