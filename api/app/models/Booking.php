@@ -54,6 +54,8 @@ class Booking {
      * Get bookings by user (Customer or Artisan).
      */
     public function getByUser($userId, $role = 'customer') {
+        // Normalize role and set filtering field
+        $role = strtolower($role);
         $field = ($role === 'customer') ? 'customer_id' : 'artisan_id';
         
         $query = "SELECT b.*, u_other.name as partner_name, u_other.avatar_url as partner_avatar, c.name as category_name
@@ -69,20 +71,30 @@ class Booking {
         $query .= "WHERE b.$field = :uid ORDER BY b.created_at DESC";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':uid', $userId);
+        $stmt->bindParam(':uid', $userId, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll();
+        $results = $stmt->fetchAll();
+
+        // Secondary safety check: Ensure all returned rows match the user and role
+        // This prevents logic leaks if the SQL where clause is somehow bypassed or misconfigured
+        $filtered = array_filter($results, function($row) use ($userId, $field) {
+            return (int)$row[$field] === (int)$userId;
+        });
+
+        return array_values($filtered);
     }
 
     /**
      * Update booking status.
      */
-    public function updateStatus($id, $status, $reason = null) {
+    public function updateStatus($id, $status, $userId, $role = 'customer', $reason = null) {
+        $field = ($role === 'customer') ? 'customer_id' : 'artisan_id';
+        
         $query = "UPDATE " . $this->table . " SET status = :status";
         if ($reason !== null) {
             $query .= ", cancellation_reason = :reason";
         }
-        $query .= " WHERE id = :id";
+        $query .= " WHERE id = :id AND $field = :uid";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':status', $status);
@@ -90,6 +102,7 @@ class Booking {
             $stmt->bindParam(':reason', $reason);
         }
         $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':uid', $userId);
         return $stmt->execute();
     }
 

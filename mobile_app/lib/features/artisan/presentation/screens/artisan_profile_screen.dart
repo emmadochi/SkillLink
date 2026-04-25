@@ -241,8 +241,9 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
           ),
         ]),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _StatChip extends StatelessWidget {

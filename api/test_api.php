@@ -44,7 +44,34 @@ try {
         echo "<p>Please run <b>sql/negotiation_migration.sql</b> on your database.</p>";
     }
 
-    echo "<h3>4. Raw Data Sample:</h3>";
+    echo "<h3>4. Booking Integrity Check</h3>";
+    $leakageCheck = $conn->query("SELECT b.id, b.artisan_id, u.name as artisan_name, b.customer_id, cu.name as customer_name 
+                                  FROM bookings b 
+                                  LEFT JOIN users u ON u.id = b.artisan_id 
+                                  LEFT JOIN users cu ON cu.id = b.customer_id 
+                                  LIMIT 10");
+    if ($leakageCheck && $leakageCheck->rowCount() > 0) {
+        echo "<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%; font-size:12px;'>";
+        echo "<tr style='background:#eee'><th>Booking ID</th><th>Artisan ID</th><th>Artisan Name</th><th>Customer ID</th><th>Customer Name</th></tr>";
+        while ($row = $leakageCheck->fetch(PDO::FETCH_ASSOC)) {
+            echo "<tr><td>{$row['id']}</td><td>{$row['artisan_id']}</td><td>{$row['artisan_name']}</td><td>{$row['customer_id']}</td><td>{$row['customer_name']}</td></tr>";
+        }
+        echo "</table>";
+    } else {
+        echo "<p>No bookings found to analyze.</p>";
+    }
+
+    // Check for inconsistent roles
+    echo "<h3>5. Inconsistent Roles Check</h3>";
+    $roleCheck = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'artisan' AND id NOT IN (SELECT user_id FROM artisans)");
+    $roleRes = $roleCheck->fetch();
+    if ($roleRes['count'] > 0) {
+        echo "<p style='color:red'>❌ Found <b>{$roleRes['count']}</b> users with 'artisan' role but NO entry in 'artisans' table!</p>";
+    } else {
+        echo "<p style='color:green'>✅ All artisans have valid profile entries.</p>";
+    }
+
+    echo "<h3>6. Raw Data Sample:</h3>";
     echo "<pre>";
     print_r(array_slice($results, 0, 1));
     echo "</pre>";

@@ -141,13 +141,15 @@ class BookingController extends Controller {
         try {
             $bookingModel = new Booking();
             $reason = $body['reason'] ?? null;
-            if ($bookingModel->updateStatus($body['id'], $body['status'], $reason)) {
+            $role = $tokenData['role'] ?? 'customer';
+            
+            if ($bookingModel->updateStatus($body['id'], $body['status'], $tokenData['id'], $role, $reason)) {
                 $this->json([
                     'status' => 'success',
                     'message' => 'Status updated to ' . $body['status']
                 ]);
             } else {
-                $this->error('Failed to update status', 500);
+                $this->error('Failed to update status or unauthorized', 403);
             }
         } catch (\Exception $e) {
             $this->error('Update error: ' . $e->getMessage(), 500);
