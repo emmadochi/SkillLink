@@ -32,4 +32,22 @@ class DashboardController extends BaseController {
         
         $this->render('dashboard/index', $data);
     }
+    public function stats() {
+        $this->requireAuth();
+        
+        $db = $this->db();
+        $userModel = new UserModel($db);
+        $bookingModel = new BookingModel($db);
+        $paymentModel = new PaymentModel($db);
+
+        $data = [
+            'total_users'     => $userModel->getTotalUsers(),
+            'active_artisans' => $userModel->getTotalArtisans(),
+            'recent_bookings' => $bookingModel->getBookingsToday(),
+            'revenue'         => $paymentModel->getMonthlyRevenue(),
+            'pending_artisans'=> array_slice($userModel->getArtisans(5), 0, 5)
+        ];
+        
+        $this->json($data);
+    }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,24 @@ class ArtisanDashboardScreen extends ConsumerStatefulWidget {
 
 class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen> {
   bool _isAvailable = true;
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Set up auto-refresh every 30 seconds for new job requests
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) {
+        ref.invalidate(bookingHistoryProvider);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

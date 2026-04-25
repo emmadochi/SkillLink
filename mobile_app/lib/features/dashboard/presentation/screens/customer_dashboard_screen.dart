@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,11 +11,34 @@ import '../../../../shared/widgets/skilllink_button.dart';
 import '../../../booking/presentation/providers/booking_provider.dart';
 import '../../../../core/utils/url_utils.dart';
 
-class CustomerDashboardScreen extends ConsumerWidget {
+class CustomerDashboardScreen extends ConsumerStatefulWidget {
   const CustomerDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CustomerDashboardScreen> createState() => _CustomerDashboardScreenState();
+}
+
+class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScreen> {
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) {
+        ref.invalidate(bookingHistoryProvider);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final historyAsync = ref.watch(bookingHistoryProvider);
 
     return Scaffold(
