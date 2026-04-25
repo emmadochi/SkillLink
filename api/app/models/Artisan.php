@@ -26,7 +26,7 @@ class Artisan {
         $query = "SELECT u.id as user_id, u.name, u.avatar_url, a.bio, a.skill, a.category_id, a.average_rating, a.experience_years, a.location_name, a.hourly_rate
                   FROM " . $this->table . " a
                   JOIN users u ON u.id = a.user_id
-                  WHERE (a.verification_status = 'approved' OR a.verification_status = 'verified' OR a.verification_status = 'pending') 
+                  WHERE (a.verification_status = 'approved' OR a.verification_status = 'verified') 
                   AND a.is_available = 1";
         
         if (!empty($filters['category_id'])) {
