@@ -19,6 +19,7 @@ import 'package:skilllink_app/features/booking/presentation/providers/booking_pr
 import 'package:skilllink_app/core/network/location_provider.dart';
 import '../../../../core/utils/url_utils.dart';
 import '../widgets/sub_service_sheet.dart';
+import '../../../../shared/widgets/shimmer_loading.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -267,8 +268,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
-            loading: () => const SliverToBoxAdapter(
-              child: Center(child: CircularProgressIndicator()),
+            loading: () => SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.3,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => const ShimmerLoading(
+                    child: ShimmerBox(height: 100),
+                  ),
+                  childCount: 4,
+                ),
+              ),
             ),
             error: (err, _) => const SliverToBoxAdapter(child: SizedBox.shrink()),
           ),
@@ -340,8 +355,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         },
                       );
                     },
-                    loading: () => const Center(
-                        child: CircularProgressIndicator(color: AppColors.primary)),
+                    loading: () => ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 3,
+                        itemBuilder: (context, i) => const Padding(
+                          padding: EdgeInsets.only(right: 16),
+                          child: ShimmerLoading(child: ShimmerBox(width: 280, height: 300)),
+                        ),
+                      ),
                     error: (err, __) => Center(child: Text('Error: $err')),
                   ),
             ),
@@ -461,8 +483,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   );
                 },
-                loading: () => const SliverToBoxAdapter(
-                  child: Center(child: CircularProgressIndicator()),
+                loading: () => SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, i) => const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                      child: ShimmerLoading(child: ShimmerBox(height: 80)),
+                    ),
+                    childCount: 2,
+                  ),
                 ),
                 error: (err, __) => SliverToBoxAdapter(
                   child: Center(child: Text('Error: $err')),

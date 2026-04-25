@@ -7,25 +7,43 @@ import '../../data/models/category_model.dart';
 part 'category_provider.g.dart';
 
 @Riverpod(keepAlive: true)
-Future<List<Category>> categories(CategoriesRef ref) async {
-  final dio = ref.watch(dioProvider);
-  final client = ApiClient(dio);
-  const cacheKey = 'categories_list';
-  
-  try {
-    final response = await client.getCategories();
+class Categories extends _$Categories {
+  @override
+  Future<List<Category>> build() async {
+    const cacheKey = 'categories_list';
+    
+    // 1. Check cache
+    final cached = await LocalCacheService.get(cacheKey);
+    if (cached != null && cached is List) {
+      // Trigger background refresh
+      _refresh(cacheKey);
+      return cached.map((e) => Category.fromJson(e as Map<String, dynamic>)).toList();
+    }
+
+    // 2. No cache, fetch fresh
+    return _fetch(cacheKey);
+  }
+
+  Future<List<Category>> _fetch(String cacheKey) async {
+    final dio = ref.watch(dioProvider);
+    final client = ApiClient(dio);
+    
+    final response = await client.getCategories().timeout(const Duration(seconds: 15));
     if (response.status == 'success' && response.data != null) {
       final list = response.data!.map((e) => Category.fromJson(e)).toList();
       await LocalCacheService.set(cacheKey, response.data!);
       return list;
     }
     return [];
-  } catch (e) {
-    final cached = await LocalCacheService.get(cacheKey);
-    if (cached != null && cached is List) {
-      return cached.map((e) => Category.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> _refresh(String cacheKey) async {
+    try {
+      final data = await _fetch(cacheKey);
+      state = AsyncData(data);
+    } catch (e) {
+      // Silent fail on background refresh
     }
-    return [];
   }
 }
 

@@ -14,13 +14,41 @@ ArtisanRepository artisanRepository(ArtisanRepositoryRef ref) {
 }
 
 @Riverpod(keepAlive: true)
-Future<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRating, String? query, String? skills}) {
-  return ref.watch(artisanRepositoryProvider).getArtisans(
-    categoryId: categoryId,
-    minRating: minRating,
-    query: query,
-    skills: skills,
-  );
+class Artisans extends _$Artisans {
+  @override
+  Future<List<Artisan>> build({int? categoryId, double? minRating, String? query, String? skills}) async {
+    final cacheKey = 'artisans_${categoryId}_${query}_$skills';
+    
+    // 1. Check cache
+    final cached = await LocalCacheService.get(cacheKey);
+    if (cached != null && cached is List) {
+      _refresh(cacheKey, categoryId, minRating, query, skills);
+      return cached.map((e) => Artisan.fromJson(e as Map<String, dynamic>)).toList();
+    }
+
+    // 2. Fetch fresh
+    return _fetch(cacheKey, categoryId, minRating, query, skills);
+  }
+
+  Future<List<Artisan>> _fetch(String cacheKey, int? categoryId, double? minRating, String? query, String? skills) async {
+    final response = await ref.watch(artisanRepositoryProvider).getArtisans(
+      categoryId: categoryId,
+      minRating: minRating,
+      query: query,
+      skills: skills,
+    ).timeout(const Duration(seconds: 15));
+    
+    return response;
+  }
+
+  Future<void> _refresh(String cacheKey, int? categoryId, double? minRating, String? query, String? skills) async {
+    try {
+      final data = await _fetch(cacheKey, categoryId, minRating, query, skills);
+      state = AsyncData(data);
+    } catch (e) {
+      // Silent fail
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)
