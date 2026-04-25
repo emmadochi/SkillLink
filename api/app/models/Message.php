@@ -8,11 +8,14 @@ class Message {
     private $conn;
     private $table = "messages";
 
+    private static $tableEnsured = false;
+
     public function __construct() {
         $database = new Database();
         $this->conn = $database->getConnection();
-        if ($this->conn) {
+        if ($this->conn && !self::$tableEnsured) {
             $this->ensureTableExists();
+            self::$tableEnsured = true;
         }
     }
 
@@ -24,13 +27,30 @@ class Message {
             message TEXT NOT NULL,
             is_read TINYINT(1) DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX (sender_id),
+            INDEX (receiver_id),
             FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         try {
             $this->conn->exec($sql);
         } catch (\PDOException $e) {
-            // Error logged by Database class
+            // If it fails (e.g. foreign key constraint), try creating without constraints
+            $sqlFallback = "CREATE TABLE IF NOT EXISTS " . $this->table . " (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                sender_id INT NOT NULL,
+                receiver_id INT NOT NULL,
+                message TEXT NOT NULL,
+                is_read TINYINT(1) DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX (sender_id),
+                INDEX (receiver_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+            try {
+                $this->conn->exec($sqlFallback);
+            } catch (\Exception $e2) {
+                error_log("Failed to create messages table: " . $e2->getMessage());
+            }
         }
     }
 
@@ -44,16 +64,19 @@ class Message {
         return $stmt->execute();
     }
 
-    public function getConversation($user1, $user2) {
+    public function getConversation($user1, $user2, $limit = 50) {
         if (!$this->conn) return [];
-        $query = "SELECT * FROM " . $this->table . " 
-                  WHERE (sender_id = :u1 AND receiver_id = :u2) 
-                  OR (sender_id = :u2 AND receiver_id = :u1) 
-                  ORDER BY created_at ASC";
+        $query = "SELECT * FROM (
+                    SELECT * FROM " . $this->table . " 
+                    WHERE (sender_id = :u1 AND receiver_id = :u2) 
+                    OR (sender_id = :u2 AND receiver_id = :u1) 
+                    ORDER BY created_at DESC LIMIT :limit
+                  ) tmp ORDER BY created_at ASC";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':u1', $user1);
         $stmt->bindParam(':u2', $user2);
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
     }

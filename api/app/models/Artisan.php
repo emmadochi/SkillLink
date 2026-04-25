@@ -8,6 +8,8 @@ class Artisan {
     private $conn;
     private $table = "artisans";
 
+    private static $tablesEnsured = false;
+
     public function __construct() {
         $database = new Database();
         $this->conn = $database->getConnection();
@@ -18,8 +20,11 @@ class Artisan {
             exit;
         }
         
-        // Self-healing: Ensure saved_artisans table exists
-        $this->ensureTablesExist();
+        // Self-healing: Ensure saved_artisans table exists (run only once per request)
+        if (!self::$tablesEnsured) {
+            $this->ensureTablesExist();
+            self::$tablesEnsured = true;
+        }
     }
 
     private function ensureTablesExist() {
@@ -100,20 +105,15 @@ class Artisan {
         $artisans = $stmt->fetchAll();
 
         return array_map(function($a) {
-            $res = [];
-            foreach ($a as $key => $value) {
-                $res[$key] = is_string($value) ? mb_convert_encoding($value, 'UTF-8', 'UTF-8') : $value;
-            }
-            
-            $res['user'] = [
+            $a['user'] = [
                 'id' => (int)($a['user_id'] ?? 0),
-                'name' => mb_convert_encoding($a['name'] ?? 'Artisan', 'UTF-8', 'UTF-8'),
+                'name' => $a['name'] ?? 'Artisan',
                 'avatar_url' => $a['avatar_url'] ?? ''
             ];
-            $res['average_rating'] = (float)($a['average_rating'] ?? 0.0);
-            $res['experience_years'] = (int)($a['experience_years'] ?? 0);
-            $res['hourly_rate'] = (float)($a['hourly_rate'] ?? 0.0);
-            return $res;
+            $a['average_rating'] = (float)($a['average_rating'] ?? 0.0);
+            $a['experience_years'] = (int)($a['experience_years'] ?? 0);
+            $a['hourly_rate'] = (float)($a['hourly_rate'] ?? 0.0);
+            return $a;
         }, $artisans ?: []);
     }
 

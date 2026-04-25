@@ -4,9 +4,9 @@
  * Handles all requests to /api/v1/
  */
 
-error_reporting(0);
-ini_set('display_errors', 0);
-ob_start(); // Start output buffering to catch stray warnings
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ob_start(); // Buffer output to prevent warnings from breaking JSON
 
 // Basic CORS headers
 header("Access-Control-Allow-Origin: *");

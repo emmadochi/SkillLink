@@ -1,5 +1,6 @@
 import '../models/artisan_model.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/local_cache_service.dart';
 import 'package:dio/dio.dart';
 
 abstract class ArtisanRepository {
@@ -17,6 +18,8 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
 
   @override
   Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query, String? skills}) async {
+    final cacheKey = 'artisans_${categoryId}_${query}_$skills';
+    
     try {
       final response = await _apiClient.getArtisans(
         categoryId: categoryId,
@@ -26,37 +29,38 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
       );
 
       if (response.status == 'success' && response.data != null) {
+        // Save to cache
+        await LocalCacheService.set(cacheKey, response.data!.map((e) => e.toJson()).toList());
         return response.data!;
       } else {
         throw response.message ?? 'Failed to fetch artisans';
       }
-    } on DioException catch (e) {
-      final responseData = e.response?.data;
-      if (responseData is Map<String, dynamic>) {
-        throw responseData['error'] ?? responseData['message'] ?? 'Network error';
-      }
-      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
+      // Try to get from cache on error (network failure)
+      final cached = await LocalCacheService.get(cacheKey);
+      if (cached != null && cached is List) {
+        return cached.map((e) => Artisan.fromJson(e as Map<String, dynamic>)).toList();
+      }
       rethrow;
     }
   }
 
   @override
   Future<Artisan> getArtisanProfile(int id) async {
+    final cacheKey = 'artisan_profile_$id';
     try {
       final response = await _apiClient.getArtisanProfile(id);
       if (response.status == 'success' && response.data != null) {
+        await LocalCacheService.set(cacheKey, response.data!.toJson());
         return response.data!;
       } else {
         throw response.message ?? 'Profile not found';
       }
-    } on DioException catch (e) {
-      final responseData = e.response?.data;
-      if (responseData is Map<String, dynamic>) {
-        throw responseData['error'] ?? responseData['message'] ?? 'Network error';
-      }
-      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
+      final cached = await LocalCacheService.get(cacheKey);
+      if (cached != null && cached is Map<String, dynamic>) {
+        return Artisan.fromJson(cached);
+      }
       rethrow;
     }
   }
@@ -89,13 +93,19 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
 
   @override
   Future<List<Artisan>> getSavedArtisans() async {
+    const cacheKey = 'saved_artisans';
     try {
       final response = await _apiClient.getSavedArtisans();
       if (response.status == 'success' && response.data != null) {
+        await LocalCacheService.set(cacheKey, response.data!.map((e) => e.toJson()).toList());
         return response.data!;
       }
       return [];
     } catch (e) {
+      final cached = await LocalCacheService.get(cacheKey);
+      if (cached != null && cached is List) {
+        return cached.map((e) => Artisan.fromJson(e as Map<String, dynamic>)).toList();
+      }
       return [];
     }
   }

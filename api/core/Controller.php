@@ -11,8 +11,17 @@ class Controller {
     protected function json($data, $status = 200) {
         header('Content-Type: application/json; charset=utf-8');
         http_response_code($status);
-        if (ob_get_length()) ob_clean(); // Clear any stray warnings/output
-        echo json_encode($data);
+        
+        $json = json_encode($data);
+        if ($json === false) {
+            $json = json_encode([
+                'status' => 'error',
+                'message' => 'JSON Encoding Error: ' . json_last_error_msg()
+            ]);
+        }
+
+        if (ob_get_length()) ob_clean(); 
+        echo $json;
         exit;
     }
 

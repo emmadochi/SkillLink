@@ -4,5 +4,9 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
+# Pass Authorization header to PHP
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # Route all other traffic to index.php
 RewriteRule ^(.*)$ index.php [L,QSA]

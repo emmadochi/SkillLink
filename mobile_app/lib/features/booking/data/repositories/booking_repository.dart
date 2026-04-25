@@ -1,5 +1,6 @@
 import '../models/booking_model.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/local_cache_service.dart';
 import 'package:dio/dio.dart';
 
 abstract class BookingRepository {
@@ -37,20 +38,20 @@ class BookingRepositoryImpl implements BookingRepository {
 
   @override
   Future<List<Booking>> getBookingHistory() async {
+    const cacheKey = 'booking_history';
     try {
       final response = await _apiClient.getBookingHistory();
       if (response.status == 'success' && response.data != null) {
+        await LocalCacheService.set(cacheKey, response.data!.map((e) => e.toJson()).toList());
         return response.data!;
       } else {
         throw response.message ?? 'Failed to load history';
       }
-    } on DioException catch (e) {
-      final responseData = e.response?.data;
-      if (responseData is Map<String, dynamic>) {
-        throw responseData['error'] ?? responseData['message'] ?? 'Network error';
-      }
-      throw 'Server error: ${e.response?.statusCode ?? "Unknown error"}';
     } catch (e) {
+      final cached = await LocalCacheService.get(cacheKey);
+      if (cached != null && cached is List) {
+        return cached.map((e) => Booking.fromJson(e as Map<String, dynamic>)).toList();
+      }
       rethrow;
     }
   }
@@ -97,14 +98,20 @@ class BookingRepositoryImpl implements BookingRepository {
 
   @override
   Future<List<Map<String, dynamic>>> getCategoryServices(int categoryId) async {
+    final cacheKey = 'cat_services_$categoryId';
     try {
       final response = await _apiClient.getCategoryServices(categoryId);
       if (response.status == 'success' && response.data != null) {
+        await LocalCacheService.set(cacheKey, response.data!);
         return response.data!;
       } else {
         return [];
       }
     } catch (e) {
+      final cached = await LocalCacheService.get(cacheKey);
+      if (cached != null && cached is List) {
+        return List<Map<String, dynamic>>.from(cached);
+      }
       return [];
     }
   }
