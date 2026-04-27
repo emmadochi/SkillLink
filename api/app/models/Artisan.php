@@ -164,9 +164,11 @@ class Artisan {
             'avatar_url' => $user['avatar_url']
         ];
         
-        // Get portfolio & reviews
+        // Get portfolio, reviews & sub-services
         $profile['portfolio'] = $this->getPortfolio($id);
         $profile['reviews'] = $this->getReviews($id);
+        $profile['sub_services'] = $this->getSubServices($id);
+
         
         // Check if saved
         $profile['is_saved'] = false;
@@ -276,4 +278,39 @@ class Artisan {
 
         return $stmt->execute();
     }
+
+    public function getSubServices($artisan_id) {
+        $query = "SELECT cs.id, cs.service_name 
+                  FROM artisan_sub_services ass
+                  JOIN category_services cs ON cs.id = ass.sub_service_id
+                  WHERE ass.artisan_id = :aid";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':aid', $artisan_id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function updateSubServices($artisan_id, $sub_service_ids) {
+        // 1. Delete existing
+        $del = $this->conn->prepare("DELETE FROM artisan_sub_services WHERE artisan_id = :aid");
+        $del->execute([':aid' => $artisan_id]);
+
+        if (empty($sub_service_ids)) return true;
+
+        // 2. Insert new
+        if (is_string($sub_service_ids)) {
+            $sub_service_ids = explode(',', $sub_service_ids);
+        }
+
+        $query = "INSERT INTO artisan_sub_services (artisan_id, sub_service_id) VALUES (:aid, :sid)";
+        $stmt = $this->conn->prepare($query);
+        
+        foreach ($sub_service_ids as $sid) {
+            if (empty($sid)) continue;
+            $stmt->execute([':aid' => $artisan_id, ':sid' => (int)$sid]);
+        }
+        
+        return true;
+    }
 }
+

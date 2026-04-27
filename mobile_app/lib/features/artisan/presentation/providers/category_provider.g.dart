@@ -6,7 +6,7 @@ part of 'category_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$categoriesHash() => r'79f29ca2e3f5a97904305318e8dbf266e47f8466';
+String _$categoriesHash() => r'7966294ae0ee5cab3c76efb7370aafa64361da40';
 
 /// See also [categories].
 @ProviderFor(categories)
@@ -22,7 +22,7 @@ final categoriesProvider = StreamProvider<List<Category>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef CategoriesRef = StreamProviderRef<List<Category>>;
-String _$categoryServicesHash() => r'2d0681202e0e3aaa8a93158b329fb1f2b30f2457';
+String _$categoryServicesHash() => r'7ef01d811c69c222bb59eb2b6d38cfd27eae8f28';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -50,8 +50,7 @@ class _SystemHash {
 const categoryServicesProvider = CategoryServicesFamily();
 
 /// See also [categoryServices].
-class CategoryServicesFamily
-    extends Family<AsyncValue<List<Map<String, dynamic>>>> {
+class CategoryServicesFamily extends Family<AsyncValue<List<CategoryService>>> {
   /// See also [categoryServices].
   const CategoryServicesFamily();
 
@@ -90,7 +89,7 @@ class CategoryServicesFamily
 
 /// See also [categoryServices].
 class CategoryServicesProvider
-    extends AutoDisposeFutureProvider<List<Map<String, dynamic>>> {
+    extends AutoDisposeFutureProvider<List<CategoryService>> {
   /// See also [categoryServices].
   CategoryServicesProvider(
     int categoryId,
@@ -125,7 +124,7 @@ class CategoryServicesProvider
 
   @override
   Override overrideWith(
-    FutureOr<List<Map<String, dynamic>>> Function(CategoryServicesRef provider)
+    FutureOr<List<CategoryService>> Function(CategoryServicesRef provider)
         create,
   ) {
     return ProviderOverride(
@@ -143,7 +142,7 @@ class CategoryServicesProvider
   }
 
   @override
-  AutoDisposeFutureProviderElement<List<Map<String, dynamic>>> createElement() {
+  AutoDisposeFutureProviderElement<List<CategoryService>> createElement() {
     return _CategoryServicesProviderElement(this);
   }
 
@@ -164,13 +163,13 @@ class CategoryServicesProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin CategoryServicesRef
-    on AutoDisposeFutureProviderRef<List<Map<String, dynamic>>> {
+    on AutoDisposeFutureProviderRef<List<CategoryService>> {
   /// The parameter `categoryId` of this provider.
   int get categoryId;
 }
 
 class _CategoryServicesProviderElement
-    extends AutoDisposeFutureProviderElement<List<Map<String, dynamic>>>
+    extends AutoDisposeFutureProviderElement<List<CategoryService>>
     with CategoryServicesRef {
   _CategoryServicesProviderElement(super.provider);
 

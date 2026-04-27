@@ -32,7 +32,9 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
   
   String _idType = 'national_id';
   Category? _selectedCategory;
+  final List<int> _selectedSubServices = [];
   bool _isLoading = false;
+
 
   XFile? _profileImage;
   final List<XFile> _portfolioImages = [];
@@ -82,7 +84,9 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
         'business_address': _businessAddrCtrl.text,
         'guarantor_name': _guarantorNameCtrl.text,
         'guarantor_phone': _guarantorPhoneCtrl.text,
+        'sub_services': _selectedSubServices.join(','),
       });
+
 
       // Add Profile Image
       if (_profileImage != null) {
@@ -260,12 +264,51 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
                   value: cat,
                   child: Text(cat.name),
                 )).toList(),
-                onChanged: (val) => setState(() => _selectedCategory = val),
+                onChanged: (val) {
+                  setState(() {
+                    _selectedCategory = val;
+                    _selectedSubServices.clear(); // Reset sub-services when category changes
+                  });
+                },
               ),
               loading: () => const LinearProgressIndicator(),
               error: (e, _) => Text('Error loading categories: $e'),
             ),
             const SizedBox(height: 16),
+
+            // Sub-Services Selection
+            if (_selectedCategory != null) ...[
+              const Text('Specific Services / Expertise', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ref.watch(categoryServicesProvider(_selectedCategory!.id)).when(
+                data: (services) => Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: services.map((service) {
+                    final isSelected = _selectedSubServices.contains(service.id);
+                    return FilterChip(
+                      label: Text(service.name),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _selectedSubServices.add(service.id);
+                          } else {
+                            _selectedSubServices.remove(service.id);
+                          }
+                        });
+                      },
+                      selectedColor: AppColors.primary.withOpacity(0.2),
+                      checkmarkColor: AppColors.primary,
+                    );
+                  }).toList(),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text('Error loading services: $e'),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             SkillLinkInput(
               label: 'Years of Experience',
               hint: 'e.g. 5',

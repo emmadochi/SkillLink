@@ -91,8 +91,14 @@ class ArtisanController extends Controller {
             // 2. Update Profile Details
             if ($artisanModel->updateProfile($data)) {
                 
+                // 2.1 Update Sub-Services
+                if (isset($data['sub_services'])) {
+                    $artisanModel->updateSubServices($user['id'], $data['sub_services']);
+                }
+
                 // 3. Handle Portfolio Uploads (Multi-file)
                 if (isset($_FILES['portfolio']) && is_array($_FILES['portfolio']['name'])) {
+
                     $files = $_FILES['portfolio'];
                     for ($i = 0; $i < count($files['name']); $i++) {
                         if ($files['error'][$i] === UPLOAD_ERR_OK) {

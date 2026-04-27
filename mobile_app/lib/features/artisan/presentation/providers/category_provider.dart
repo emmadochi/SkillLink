@@ -4,10 +4,10 @@ import '../../../../core/network/dio_provider.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/local_cache_service.dart';
 import '../../data/models/category_model.dart';
+import '../../data/models/category_service_model.dart';
 
 part 'category_provider.g.dart';
 
-@Riverpod(keepAlive: true)
 @Riverpod(keepAlive: true)
 Stream<List<Category>> categories(CategoriesRef ref) async* {
   const cacheKey = 'categories_list';
@@ -36,13 +36,14 @@ Stream<List<Category>> categories(CategoriesRef ref) async* {
 }
 
 @riverpod
-Future<List<Map<String, dynamic>>> categoryServices(CategoryServicesRef ref, int categoryId) async {
+Future<List<CategoryService>> categoryServices(CategoryServicesRef ref, int categoryId) async {
   final dio = ref.watch(dioProvider);
   final client = ApiClient(dio);
   
   final response = await client.getCategoryServices(categoryId);
   if (response.status == 'success' && response.data != null) {
-    return response.data!;
+    return response.data!.map((e) => CategoryService.fromJson(e)).toList();
   }
   return [];
 }
+
