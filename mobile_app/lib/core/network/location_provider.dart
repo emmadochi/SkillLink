@@ -39,4 +39,9 @@ class CurrentLocation extends _$CurrentLocation {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> setLocation(ArtisanLocation loc) async {
+    state = AsyncValue.data(loc);
+  }
 }
+

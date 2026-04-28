@@ -26,7 +26,9 @@ import '../../features/artisan/presentation/screens/artisan_setup_screen.dart';
 import '../../features/artisan/presentation/screens/saved_artisans_screen.dart';
 import '../../features/artisan/presentation/screens/review_submit_screen.dart';
 import '../../features/booking/presentation/screens/booking_detail_screen.dart';
+import '../../shared/widgets/location_picker_map.dart';
 import '../constants/app_constants.dart';
+
 import 'shell_route.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -164,10 +166,16 @@ final GoRouter appRouter = GoRouter(
       builder: (_, __) => const SavedArtisansScreen(),
     ),
     GoRoute(
+      path: AppRoutes.locationPicker,
+      name: 'location-picker',
+      builder: (_, __) => const LocationPickerMap(),
+    ),
+    GoRoute(
       path: AppRoutes.about,
       name: 'about',
       builder: (_, __) => const AboutScreen(),
     ),
+
   ],
 );
 
@@ -197,4 +205,6 @@ abstract class AppRoutes {
   static const faq                = '/faq';
   static const privacyPolicy      = '/privacy-policy';
   static const about              = '/about';
+  static const locationPicker     = '/location-picker';
 }
+

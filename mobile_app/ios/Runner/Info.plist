@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SkillLink needs access to your location to find nearby artisans and set your service area.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>SkillLink needs access to your location to find nearby artisans and set your service area.</string>
 </dict>
 </plist>
+

@@ -14,8 +14,9 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/location_provider.dart';
 import '../providers/category_provider.dart';
 import '../../data/models/category_model.dart';
-import '../../auth/presentation/providers/user_provider.dart';
+import 'package:skilllink_app/features/auth/presentation/providers/user_provider.dart';
 import '../providers/artisan_provider.dart';
+
 import '../../../../core/utils/url_utils.dart';
 
 
@@ -101,8 +102,9 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
       // Handle portfolio
       if (artisan.portfolio != null) {
         _existingPortfolioUrls.clear();
-        _existingPortfolioUrls.addAll(artisan.portfolio!.map((p) => p['image_url'] as String));
+        _existingPortfolioUrls.addAll(artisan.portfolio!.map((p) => p.imageUrl));
       }
+
 
       _hasInitialized = true;
     } catch (e) {
@@ -495,11 +497,21 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
               const SizedBox(width: 8),
               Text('Based Location', style: AppTypography.titleMd),
               const Spacer(),
-              TextButton.icon(
-                onPressed: () => ref.read(currentLocationProvider.notifier).detectLocation(),
-                icon: const Icon(Icons.my_location, size: 16),
-                label: const Text('Detect'),
+              Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () => ref.read(currentLocationProvider.notifier).detectLocation(),
+                    icon: const Icon(Icons.my_location, size: 16),
+                    label: const Text('Detect'),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => context.push(AppRoutes.locationPicker),
+                    icon: const Icon(Icons.map_outlined, size: 16),
+                    label: const Text('Map'),
+                  ),
+                ],
               ),
+
             ],
           ),
           const SizedBox(height: 8),
