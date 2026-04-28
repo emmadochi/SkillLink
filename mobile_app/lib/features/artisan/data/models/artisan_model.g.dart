@@ -41,6 +41,9 @@ Artisan _$ArtisanFromJson(Map<String, dynamic> json) => Artisan(
           ?.map((e) => Review.fromJson(e as Map<String, dynamic>))
           .toList(),
       isSaved: json['is_saved'] as bool? ?? false,
+      subServices: (json['sub_services'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
     );
 
 Map<String, dynamic> _$ArtisanToJson(Artisan instance) => <String, dynamic>{
@@ -62,6 +65,7 @@ Map<String, dynamic> _$ArtisanToJson(Artisan instance) => <String, dynamic>{
       'portfolio': instance.portfolio,
       'reviews': instance.reviews,
       'is_saved': instance.isSaved,
+      'sub_services': instance.subServices,
     };
 
 ArtisanMiniUser _$ArtisanMiniUserFromJson(Map<String, dynamic> json) =>

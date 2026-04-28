@@ -14,6 +14,10 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/location_provider.dart';
 import '../providers/category_provider.dart';
 import '../../data/models/category_model.dart';
+import '../../auth/presentation/providers/user_provider.dart';
+import '../providers/artisan_provider.dart';
+import '../../../../core/utils/url_utils.dart';
+
 
 class ArtisanSetupScreen extends ConsumerStatefulWidget {
   const ArtisanSetupScreen({super.key});
@@ -38,7 +42,11 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
 
   XFile? _profileImage;
   final List<XFile> _portfolioImages = [];
+  final List<String> _existingPortfolioUrls = [];
   final _picker = ImagePicker();
+  bool _isEditMode = false;
+  bool _hasInitialized = false;
+
 
   Future<void> _pickProfileImage() async {
     final img = await _picker.pickImage(source: ImageSource.gallery);
@@ -57,7 +65,56 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
     }
   }
 
+  void _initializeWithExistingProfile() async {
+    final user = ref.read(userStateProvider).value;
+    if (user == null || _hasInitialized) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final artisan = await ref.read(artisanProfileProvider(user.id).future);
+      
+      // If we got here, it means the artisan has a profile
+      _isEditMode = true;
+      _bioCtrl.text = artisan.bio ?? '';
+      _expCtrl.text = artisan.experienceYears.toString();
+      _businessAddrCtrl.text = artisan.businessAddress ?? '';
+      _guarantorNameCtrl.text = artisan.guarantorName ?? '';
+      _guarantorPhoneCtrl.text = artisan.guarantorPhone ?? '';
+      
+      // Handle category
+      if (artisan.categoryId != null) {
+        final categories = ref.read(categoriesProvider).value;
+        if (categories != null) {
+          _selectedCategory = categories.firstWhere(
+            (c) => c.id == artisan.categoryId,
+            orElse: () => categories.first,
+          );
+        }
+      }
+
+      // Handle sub-services
+      if (artisan.subServices != null) {
+        _selectedSubServices.clear();
+        _selectedSubServices.addAll(artisan.subServices!.map((s) => s['id'] as int));
+      }
+
+      // Handle portfolio
+      if (artisan.portfolio != null) {
+        _existingPortfolioUrls.clear();
+        _existingPortfolioUrls.addAll(artisan.portfolio!.map((p) => p['image_url'] as String));
+      }
+
+      _hasInitialized = true;
+    } catch (e) {
+      // Not an artisan yet or error fetching
+      _isEditMode = false;
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _submit() async {
+
     if (_selectedCategory == null || _bioCtrl.text.isEmpty || _expCtrl.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required professional fields')),
@@ -123,7 +180,12 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Professional profile and portfolio saved!')),
         );
+        final user = ref.read(userStateProvider).value;
+        if (user != null) {
+          ref.invalidate(artisanProfileProvider(user.id));
+        }
         context.go(AppRoutes.artisanDashboard);
+
       }
     } catch (e) {
       String errorMessage = e.toString();
@@ -151,11 +213,19 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Trigger initialization once categories are ready
+    ref.listen(categoriesProvider, (prev, next) {
+      if (next.hasValue && !_hasInitialized) {
+        _initializeWithExistingProfile();
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Professional Setup'),
+        title: Text(_isEditMode ? 'Edit Professional Profile' : 'Professional Setup'),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -198,53 +268,73 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
               height: 100,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: _portfolioImages.length + 1,
+                itemCount: _existingPortfolioUrls.length + _portfolioImages.length + 1,
                 itemBuilder: (context, i) {
-                  if (i == _portfolioImages.length) {
-                    if (_portfolioImages.length >= 5) return const SizedBox.shrink();
-                    return GestureDetector(
-                      onTap: _pickPortfolioImages,
-                      child: Container(
-                        width: 100,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.outline.withOpacity(0.2)),
+                  // 1. Existing Portfolio Images
+                  if (i < _existingPortfolioUrls.length) {
+                    final url = _existingPortfolioUrls[i];
+                    return Container(
+                      width: 100,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(
+                          image: NetworkImage(UrlUtils.resolveImageUrl(url)),
+                          fit: BoxFit.cover,
                         ),
-                        child: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
                       ),
                     );
                   }
-                  
-                  return Stack(
-                    children: [
-                      Container(
-                        width: 100,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          image: DecorationImage(
-                            image: FileImage(File(_portfolioImages[i].path)),
-                            fit: BoxFit.cover,
+
+                  // 2. New Portfolio Images
+                  final newIdx = i - _existingPortfolioUrls.length;
+                  if (newIdx < _portfolioImages.length) {
+                    return Stack(
+                      children: [
+                        Container(
+                          width: 100,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            image: DecorationImage(
+                              image: FileImage(File(_portfolioImages[newIdx].path)),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        top: 4,
-                        right: 16,
-                        child: GestureDetector(
-                          onTap: () => setState(() => _portfolioImages.removeAt(i)),
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                        Positioned(
+                          top: 4,
+                          right: 16,
+                          child: GestureDetector(
+                            onTap: () => setState(() => _portfolioImages.removeAt(newIdx)),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                              child: const Icon(Icons.close, size: 14, color: Colors.white),
+                            ),
                           ),
                         ),
+                      ],
+                    );
+                  }
+
+                  // 3. Add Button
+                  if (_existingPortfolioUrls.length + _portfolioImages.length >= 5) return const SizedBox.shrink();
+                  return GestureDetector(
+                    onTap: _pickPortfolioImages,
+                    child: Container(
+                      width: 100,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.outline.withOpacity(0.2)),
                       ),
-                    ],
+                      child: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
+                    ),
                   );
                 },
+
               ),
             ),
             
@@ -373,11 +463,12 @@ class _ArtisanSetupScreenState extends ConsumerState<ArtisanSetupScreen> {
 
             const SizedBox(height: 40),
             SkillLinkButton.gradient(
-              label: 'Save Professional Profile',
+              label: _isEditMode ? 'Update Professional Profile' : 'Save Professional Profile',
               isLoading: _isLoading,
               width: double.infinity,
               onPressed: _submit,
             ),
+
             const SizedBox(height: 40),
           ],
         ),

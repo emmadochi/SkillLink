@@ -10,6 +10,9 @@ import '../../../../shared/widgets/skilllink_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skilllink_app/features/booking/presentation/providers/booking_provider.dart';
 import 'package:skilllink_app/features/artisan/presentation/providers/artisan_provider.dart';
+import 'package:skilllink_app/features/artisan/data/models/category_service_model.dart';
+import 'package:skilllink_app/features/artisan/presentation/providers/category_provider.dart';
+
 
 class BookingScreen extends ConsumerStatefulWidget {
   final String artisanId;
@@ -95,9 +98,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   ? (int.tryParse(widget.artisanId) != null 
                       ? ref.watch(artisanProfileProvider(int.parse(widget.artisanId))).when(
                         data: (artisan) => ref.watch(categoryServicesProvider(artisan.categoryId ?? 1)).when(
-                              data: (services) => _ServiceStep(
-                                services: services.map((s) => s['service_name'] as String).toList(),
-                                icons: services.map((s) => s['icon_name'] as String).toList(),
+                              data: (List<CategoryService> services) => _ServiceStep(
+                                services: services.map((s) => s.name).toList(),
+                                icons: services.map((s) => s.iconName ?? 'handyman').toList(),
+
                                 selected: _selectedService,
                                 onSelect: (s) => setState(() => _selectedService = s),
                               ),

@@ -43,6 +43,20 @@ try {
         echo "Creation command executed.<br>";
     }
 
+    echo "Testing chat history query for a dummy user (ID 1)...<br>";
+    try {
+        $chats = $msg->getChatList(1);
+        echo "Query executed successfully. Result count: " . count($chats) . "<br>";
+        if (count($chats) > 0) {
+            echo "Sample result:<pre>";
+            print_r($chats[0]);
+            echo "</pre>";
+        }
+    } catch (Exception $eq) {
+        echo "Query Error: " . $eq->getMessage() . "<br>";
+    }
+
+
 } catch (Exception $e) {
     echo "ERROR: " . $e->getMessage() . "<br>";
     echo "Trace: <pre>" . $e->getTraceAsString() . "</pre>";

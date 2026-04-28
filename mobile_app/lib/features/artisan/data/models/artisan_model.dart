@@ -42,6 +42,9 @@ class Artisan {
   final List<Review>? reviews;
   @JsonKey(name: 'is_saved')
   final bool isSaved;
+  @JsonKey(name: 'sub_services')
+  final List<Map<String, dynamic>>? subServices;
+
 
   Artisan({
     required this.userId,
@@ -62,7 +65,9 @@ class Artisan {
     this.portfolio,
     this.reviews,
     this.isSaved = false,
+    this.subServices,
   });
+
 
   factory Artisan.fromJson(Map<String, dynamic> json) => _$ArtisanFromJson(json);
 

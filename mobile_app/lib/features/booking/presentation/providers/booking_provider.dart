@@ -34,7 +34,4 @@ Stream<List<Booking>> bookingHistory(BookingHistoryRef ref) async* {
   }
 }
 
-@Riverpod(keepAlive: true)
-Future<List<Map<String, dynamic>>> categoryServices(CategoryServicesRef ref, int categoryId) {
-  return ref.watch(bookingRepositoryProvider).getCategoryServices(categoryId);
-}
+

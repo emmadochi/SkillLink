@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../artisan/presentation/providers/category_provider.dart';
+import '../../../artisan/data/models/category_service_model.dart';
 
 class SubServiceSheet extends ConsumerStatefulWidget {
   final int categoryId;
@@ -106,7 +107,7 @@ class _SubServiceSheetState extends ConsumerState<SubServiceSheet> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: services.length,
                   itemBuilder: (context, i) {
-                    final serviceName = services[i]['service_name'] as String;
+                    final serviceName = services[i].name;
                     final isSelected = _selectedServices.contains(serviceName);
 
                     return CheckboxListTile(
