@@ -82,6 +82,8 @@ class Message {
     }
 
     public function getChatList($userId) {
+        if (!$this->conn) return [];
+
         $query = "SELECT 
                     t.partner_id,
                     u.name as partner_name, 
