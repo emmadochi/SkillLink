@@ -35,6 +35,8 @@ class SkillLinkApp extends StatelessWidget {
       title: 'SkillLink',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       routerConfig: appRouter,
     );
   }

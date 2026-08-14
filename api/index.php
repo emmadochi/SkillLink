@@ -5,8 +5,8 @@
  */
 
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ob_start(); // Buffer output to prevent warnings from breaking JSON
+// Buffer output and enable Gzip compression for faster network transfer
+if (!ob_start('ob_gzhandler')) ob_start();
 
 // Basic CORS headers
 header("Access-Control-Allow-Origin: *");

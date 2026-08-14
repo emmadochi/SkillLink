@@ -13,7 +13,6 @@ import 'package:skilllink_app/features/artisan/presentation/providers/artisan_pr
 import 'package:skilllink_app/features/artisan/data/models/category_service_model.dart';
 import 'package:skilllink_app/features/artisan/presentation/providers/category_provider.dart';
 
-
 class BookingScreen extends ConsumerStatefulWidget {
   final String artisanId;
   const BookingScreen({super.key, required this.artisanId});
@@ -31,24 +30,26 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   int _step = 0; // 0: service, 1: date/time, 2: confirm
   bool _isLoading = false;
 
-  static const _services = [
-    'Wiring & Installation',
-    'Fault Diagnosis & Repair',
-    'Panel Installation',
-    'CCTV Setup',
-    'Solar Panel Setup',
-  ];
+  @override
+  void dispose() {
+    _descCtrl.dispose();
+    _offerCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: Text('Book Service',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.primary,
-                  fontFamily: 'PlusJakartaSans',
-                )),
+        title: Text(
+          'Book Service',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppColors.primary,
+                fontFamily: 'PlusJakartaSans',
+                fontWeight: FontWeight.bold,
+              ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => _step > 0 ? setState(() => _step--) : context.pop(),
@@ -98,13 +99,41 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   ? (int.tryParse(widget.artisanId) != null 
                       ? ref.watch(artisanProfileProvider(int.parse(widget.artisanId))).when(
                         data: (artisan) => ref.watch(categoryServicesProvider(artisan.categoryId ?? 1)).when(
-                              data: (List<CategoryService> services) => _ServiceStep(
-                                services: services.map((s) => s.name).toList(),
-                                icons: services.map((s) => s.iconName ?? 'handyman').toList(),
+                              data: (List<CategoryService> services) {
+                                // Gather service names dynamically
+                                final serviceNames = <String>[];
+                                final serviceIcons = <String>[];
 
-                                selected: _selectedService,
-                                onSelect: (s) => setState(() => _selectedService = s),
-                              ),
+                                if (artisan.subServices != null && artisan.subServices!.isNotEmpty) {
+                                  for (var sub in artisan.subServices!) {
+                                    final name = sub['name']?.toString() ?? '';
+                                    if (name.isNotEmpty && !serviceNames.contains(name)) {
+                                      serviceNames.add(name);
+                                      serviceIcons.add('handyman_outlined');
+                                    }
+                                  }
+                                }
+
+                                for (var s in services) {
+                                  if (!serviceNames.contains(s.name)) {
+                                    serviceNames.add(s.name);
+                                    serviceIcons.add(s.iconName ?? 'handyman_outlined');
+                                  }
+                                }
+
+                                // Always provide a custom / general option
+                                if (!serviceNames.contains('General Inspection & Repair')) {
+                                  serviceNames.add('General Inspection & Repair');
+                                  serviceIcons.add('build_circle_outlined');
+                                }
+
+                                return _ServiceStep(
+                                  services: serviceNames,
+                                  icons: serviceIcons,
+                                  selected: _selectedService,
+                                  onSelect: (s) => setState(() => _selectedService = s),
+                                );
+                              },
                               loading: () => const Center(child: CircularProgressIndicator()),
                               error: (e, __) => Center(
                                  child: Column(
@@ -113,7 +142,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                      const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
                                      const SizedBox(height: 12),
                                      Text('Failed to load services', style: AppTypography.titleMd),
-                                     Text('Please try again later', style: AppTypography.bodySm),
+                                     const SizedBox(height: 8),
+                                     SkillLinkButton(
+                                       label: 'Retry',
+                                       onPressed: () => ref.invalidate(categoryServicesProvider),
+                                     ),
                                    ],
                                  ),
                                ),
@@ -201,7 +234,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             'category_id': artisan?.categoryId ?? 1,
                             'service_description': '$_selectedService: ${_descCtrl.text}',
                             'scheduled_at': scheduledAt,
-                            'price': artisan?.hourlyRate ?? 5000,
+                            'price': artisan?.hourlyRate != null && artisan!.hourlyRate > 0 ? artisan.hourlyRate : 5000,
                             'offer_price': double.tryParse(_offerCtrl.text),
                           });
                           if (mounted) {
@@ -270,16 +303,19 @@ class _ServiceStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Select a Service', style: Theme.of(context).textTheme.headlineSmall),
+        Text(
+          'Select a Service',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 6),
-        Text('What do you need help with?',
+        Text('Select the specific task or craft needed.',
             style: AppTypography.bodyMd.copyWith(color: AppColors.outline)),
         const SizedBox(height: 24),
         if (services.isEmpty)
           const Center(child: Text('No specific services listed for this category.')),
         ...List.generate(services.length, (i) {
           final s = services[i];
-          final iconName = icons[i];
+          final iconName = i < icons.length ? icons[i] : 'handyman_outlined';
           final sel = selected == s;
           return GestureDetector(
             onTap: () => onSelect(s),
@@ -291,17 +327,25 @@ class _ServiceStep extends StatelessWidget {
                 color: sel ? AppColors.primary.withOpacity(0.06) : AppColors.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(16),
                 border: sel
-                    ? Border.all(color: AppColors.primary.withOpacity(0.40))
-                    : null,
+                    ? Border.all(color: AppColors.primary, width: 1.5)
+                    : Border.all(color: AppColors.surfaceContainerHigh),
               ),
               child: Row(children: [
                 Icon(_getIcon(iconName),
                     color: sel ? AppColors.primary : AppColors.outline),
                 const SizedBox(width: 14),
-                Expanded(child: Text(s, style: Theme.of(context).textTheme.titleSmall)),
+                Expanded(
+                  child: Text(
+                    s,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: sel ? FontWeight.bold : FontWeight.w500,
+                          color: sel ? AppColors.primary : AppColors.onSurface,
+                        ),
+                  ),
+                ),
                 if (sel)
-                  const Icon(Icons.radio_button_checked,
-                      color: AppColors.primary, size: 20)
+                  const Icon(Icons.check_circle_rounded,
+                      color: AppColors.primary, size: 22)
                 else
                   const Icon(Icons.radio_button_off_outlined,
                       color: AppColors.outlineVariant, size: 20),
@@ -334,9 +378,12 @@ class _DateTimeStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Schedule', style: Theme.of(context).textTheme.headlineSmall),
+        Text(
+          'Schedule Appointment',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 6),
-        Text('Pick a date and time that works for you.',
+        Text('Pick a convenient date and time for the artisan to visit.',
             style: AppTypography.bodyMd.copyWith(color: AppColors.outline)),
         const SizedBox(height: 28),
         GestureDetector(
@@ -378,8 +425,8 @@ class _DateTimeStep extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         SkillLinkInput(
-          label: 'Describe the Problem',
-          hint: 'E.g. My main power socket is faulty...',
+          label: 'Describe the Problem (Optional)',
+          hint: 'E.g. Main power socket is sparking or pipe is leaking...',
           controller: descCtrl,
           maxLines: 4,
         ),
@@ -411,9 +458,12 @@ class _ConfirmStep extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Confirm Booking', style: Theme.of(context).textTheme.headlineSmall),
+        Text(
+          'Confirm Booking',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 6),
-        Text('Review your booking details.',
+        Text('Review appointment details before dispatching request.',
             style: AppTypography.bodyMd.copyWith(color: AppColors.outline)),
         const SizedBox(height: 28),
         SkillLinkCard(
@@ -424,39 +474,47 @@ class _ConfirmStep extends ConsumerWidget {
                 value: artisanAsync.when(
                   data: (a) => a.user?.name ?? 'Artisan',
                   loading: () => 'Loading...',
-                  error: (e, __) => 'Artisan Profile', // Fallback to generic name
+                  error: (e, __) => 'Artisan Profile',
                 )),
             _ConfirmRow(label: 'Service', value: service),
             if (date != null)
               _ConfirmRow(label: 'Date', value: '${date!.day}/${date!.month}/${date!.year}'),
             if (time != null)
               _ConfirmRow(label: 'Time', value: time!.format(context)),
-            _ConfirmRow(label: 'Rate', value: '₦${artisanAsync.value?.hourlyRate ?? 5000}/hr'),
+            _ConfirmRow(
+              label: 'Standard Rate',
+              value: artisanAsync.value?.hourlyRate != null && artisanAsync.value!.hourlyRate > 0
+                  ? '₦${artisanAsync.value!.hourlyRate.toInt()}/hr'
+                  : '₦5,000/hr',
+            ),
           ]),
         ),
         const SizedBox(height: 24),
         SkillLinkInput(
-          label: 'Suggest Your Price (Optional)',
+          label: 'Suggest Offer Price (Optional)',
           hint: 'E.g. 4500',
           controller: offerCtrl,
           keyboardType: TextInputType.number,
           prefixIcon: const Icon(Icons.payments_outlined, color: AppColors.primary),
         ),
         const SizedBox(height: 8),
-        Text('Negotiating a price may help you get a better deal, but the artisan must accept it.',
-            style: AppTypography.bodySm.copyWith(color: AppColors.outline)),
+        Text(
+          'Negotiating a price sends a custom offer to the artisan for approval.',
+          style: AppTypography.bodySm.copyWith(color: AppColors.outline),
+        ),
         const SizedBox(height: 16),
         SkillLinkCard(
           backgroundColor: AppColors.tertiaryFixed.withOpacity(0.30),
           padding: const EdgeInsets.all(16),
           child: Row(children: [
-            const Icon(Icons.info_outline_rounded,
-                color: AppColors.onTertiaryFixed, size: 18),
+            const Icon(Icons.shield_outlined,
+                color: AppColors.onTertiaryFixed, size: 20),
             const SizedBox(width: 10),
             Expanded(child: Text(
-              'Payment will be collected after service completion.',
+              'Escrow Protected: Payment is only released after you confirm the job is completed.',
               style: AppTypography.bodySm.copyWith(
-                  color: AppColors.onTertiaryFixed),
+                  color: AppColors.onTertiaryFixed,
+                  fontWeight: FontWeight.w500),
             )),
           ]),
         ),
@@ -477,7 +535,10 @@ class _ConfirmRow extends StatelessWidget {
       child: Row(children: [
         Text(label, style: Theme.of(context).textTheme.labelLarge),
         const Spacer(),
-        Text(value, style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
       ]),
     );
   }

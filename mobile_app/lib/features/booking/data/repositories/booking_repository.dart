@@ -9,6 +9,8 @@ abstract class BookingRepository {
   Future<bool> updateBookingStatus(int id, String status, {String? reason});
   Future<bool> negotiateBooking(int id, double price, String status);
   Future<List<Map<String, dynamic>>> getCategoryServices(int categoryId);
+  Future<bool> submitDispute({required int bookingId, required String reason});
+  Future<Map<String, dynamic>?> getBookingDispute(int bookingId);
 }
 
 class BookingRepositoryImpl implements BookingRepository {
@@ -115,4 +117,37 @@ class BookingRepositoryImpl implements BookingRepository {
       return [];
     }
   }
+
+  @override
+  Future<bool> submitDispute({required int bookingId, required String reason}) async {
+    try {
+      final response = await _apiClient.createDispute({
+        'booking_id': bookingId,
+        'reason': reason,
+      });
+      return response.status == 'success';
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      if (responseData is Map<String, dynamic>) {
+        throw responseData['error'] ?? responseData['message'] ?? 'Failed to submit dispute';
+      }
+      throw 'Server error submitting dispute';
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getBookingDispute(int bookingId) async {
+    try {
+      final response = await _apiClient.getDisputeByBooking(bookingId);
+      if (response.status == 'success') {
+        return response.data;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
+

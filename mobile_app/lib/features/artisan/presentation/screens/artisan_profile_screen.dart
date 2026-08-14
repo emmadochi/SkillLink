@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
@@ -24,7 +25,6 @@ class ArtisanProfileScreen extends ConsumerStatefulWidget {
 class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isSaved = false;
 
   @override
   void initState() {
@@ -51,155 +51,289 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: ref.watch(artisanProfileProvider(artisanId)).when(
-            data: (artisan) => CustomScrollView(
-              slivers: [
-                // ── Hero Header ──────────────────────────────────────────────
-                SliverAppBar(
-                  expandedHeight: 320,
-                  pinned: true,
-                  backgroundColor: AppColors.primary,
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                    onPressed: () => context.pop(),
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: Icon(
-                        artisan.isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
-                        color: Colors.white,
-                      ),
-                      onPressed: () async {
-                        final success = await ref.read(artisanRepositoryProvider).toggleSaveArtisan(artisan.userId);
-                        if (success) {
-                          ref.invalidate(artisanProfileProvider(artisan.userId));
-                          ref.invalidate(savedArtisansProvider);
-                        }
-                      },
+            data: (artisan) {
+              final isAvailable = artisan.isAvailable;
+              final hasPortfolio = artisan.portfolio != null && artisan.portfolio!.isNotEmpty;
+              final hasReviews = artisan.reviews != null && artisan.reviews!.isNotEmpty;
+              final Review? topReview = hasReviews ? artisan.reviews!.first : null;
+
+              return CustomScrollView(
+                slivers: [
+                  // ── Hero Header ──────────────────────────────────────────────
+                  SliverAppBar(
+                    expandedHeight: 320,
+                    pinned: true,
+                    backgroundColor: AppColors.primary,
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                      onPressed: () => context.pop(),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.share_outlined, color: Colors.white),
-                      onPressed: () {},
-                    ),
-                  ],
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // Portrait
-                        Image.network(
-                          UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                              color: AppColors.primaryContainer),
+                    actions: [
+                      IconButton(
+                        icon: Icon(
+                          artisan.isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+                          color: Colors.white,
                         ),
-                        // Gradient overlay
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.transparent,
-                                AppColors.primary.withOpacity(0.85),
-                              ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
+                        onPressed: () async {
+                          final success = await ref.read(artisanRepositoryProvider).toggleSaveArtisan(artisan.userId);
+                          if (success) {
+                            ref.invalidate(artisanProfileProvider(artisan.userId));
+                            ref.invalidate(savedArtisansProvider);
+                          }
+                        },
+                      ),
+                    ],
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // Cached Portrait
+                          CachedNetworkImage(
+                            imageUrl: UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => Container(
+                              color: AppColors.primaryContainer,
+                              child: const Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+                            ),
+                            errorWidget: (_, __, ___) => Container(
+                              color: AppColors.primaryContainer,
+                              child: const Icon(Icons.person, size: 80, color: Colors.white38),
                             ),
                           ),
+                          // Gradient overlay
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  AppColors.primary.withOpacity(0.92),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                          ),
+                          // Name & Badges Overlay
+                          Positioned(
+                            bottom: 20,
+                            left: 24,
+                            right: 24,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(children: [
+                                  Expanded(
+                                    child: Text(
+                                      artisan.user?.name ?? 'Artisan',
+                                      style: AppTypography.headlineSm.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  if (artisan.identityVerified || artisan.identityStatus == 'approved') ...[
+                                    const SizedBox(width: 6),
+                                    const Icon(Icons.verified, size: 20, color: Color(0xFF60A5FA)),
+                                  ],
+                                ]),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${artisan.bio ?? artisan.skill ?? 'Professional Artisan'} • ${artisan.experienceYears} yrs experience',
+                                  style: AppTypography.bodyMd.copyWith(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 10),
+                                Row(children: [
+                                  const Icon(Icons.star_rounded, size: 18, color: Color(0xFFFFB84D)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${artisan.rating.toStringAsFixed(1)} (${artisan.reviews?.length ?? 0} reviews)',
+                                    style: AppTypography.labelLg.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: isAvailable ? const Color(0xFF10B981) : Colors.grey,
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          isAvailable ? 'Available' : 'Busy',
+                                          style: AppTypography.labelSm.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ]),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── Stats row ────────────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                      child: Row(
+                        children: [
+                          _StatChip(label: 'Jobs', value: '${artisan.reviews?.length ?? 0}+'),
+                          _StatChip(label: 'Rating', value: '${artisan.rating.toStringAsFixed(1)} ★'),
+                          _StatChip(
+                            label: 'Rate',
+                            value: artisan.hourlyRate > 0 ? '₦${artisan.hourlyRate.toInt()}/hr' : '₦5k/hr',
+                          ),
+                          _StatChip(label: 'Response', value: '< 20m'),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── Above-the-fold Visual Highlights: Portfolio Strip ─────────
+                  if (hasPortfolio)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Verified Work Portfolio', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
+                                  GestureDetector(
+                                    onTap: () => _tabController.animateTo(1),
+                                    child: Text('View All', style: AppTypography.labelMd.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 100,
+                              child: ListView.separated(
+                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                scrollDirection: Axis.horizontal,
+                                itemCount: artisan.portfolio!.length,
+                                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                                itemBuilder: (context, idx) {
+                                  final item = artisan.portfolio![idx];
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: CachedNetworkImage(
+                                      imageUrl: UrlUtils.resolveImageUrl(item.imageUrl),
+                                      width: 120,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                      placeholder: (_, __) => Container(
+                                        width: 120,
+                                        height: 100,
+                                        color: AppColors.surfaceContainerHigh,
+                                        child: const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))),
+                                      ),
+                                      errorWidget: (_, __, ___) => Container(width: 120, color: AppColors.surfaceContainerHigh),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                        // Name overlay
-                        Positioned(
-                          bottom: 24,
-                          left: 24,
-                          right: 24,
-                          child: Column(
+                      ),
+                    ),
+
+                  // ── Above-the-fold Social Proof: Featured Review Snippet ───────
+                  if (topReview != null)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFFBEB),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFFDE68A)),
+                          ),
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(children: [
-                                Text(artisan.user?.name ?? 'Artisan',
-                                    style: AppTypography.headlineSm.copyWith(
-                                        color: Colors.white)),
-                                const SizedBox(width: 8),
-                                if (artisan.identityVerified || artisan.identityStatus == 'approved')
-                                  const Icon(Icons.verified,
-                                      size: 18, color: AppColors.tertiaryFixed),
-                              ]),
-                              const SizedBox(height: 4),
-                              Text('${artisan.bio ?? artisan.skill ?? 'Professional Artisan'} • ${artisan.experienceYears} yrs experience',
-                                  style: AppTypography.bodyMd.copyWith(
-                                      color: Colors.white70)),
-                              const SizedBox(height: 10),
-                              Row(children: [
-                                const Icon(Icons.star_rounded,
-                                    size: 16, color: Color(0xFFFFB84D)),
-                                const SizedBox(width: 4),
-                                Text('${artisan.rating} (${artisan.reviews?.length ?? 0} reviews)',
-                                    style: AppTypography.labelLg.copyWith(
-                                        color: Colors.white70)),
-                                const Spacer(),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade600,
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: Text('Available',
+                              const Icon(Icons.format_quote_rounded, color: Color(0xFFD97706), size: 24),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '"${topReview.comment ?? 'Excellent professional service and punctuality!'}"',
+                                      style: AppTypography.bodySm.copyWith(
+                                        fontStyle: FontStyle.italic,
+                                        color: const Color(0xFF78350F),
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '— ${topReview.customerName ?? 'Verified Customer'} (${topReview.rating}★)',
                                       style: AppTypography.labelSm.copyWith(
-                                          color: Colors.white)),
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF92400E),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ]),
+                              ),
                             ],
                           ),
                         ),
+                      ),
+                    ),
+
+                  // ── Tabs ─────────────────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: AppColors.primary,
+                      unselectedLabelColor: AppColors.outline,
+                      indicatorColor: AppColors.primary,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      labelStyle: AppTypography.labelLg.copyWith(
+                          fontWeight: FontWeight.w700),
+                      tabs: const [
+                        Tab(text: 'About'),
+                        Tab(text: 'Portfolio'),
+                        Tab(text: 'Reviews'),
                       ],
                     ),
                   ),
-                ),
 
-                // ── Stats row ────────────────────────────────────────────────
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
+                  SliverFillRemaining(
+                    child: TabBarView(
+                      controller: _tabController,
                       children: [
-                        _StatChip(label: 'Jobs', value: '0'),
-                        _StatChip(label: 'Rating', value: '${artisan.rating}'),
-                        _StatChip(label: 'Rate', value: '₦5k/hr'),
-                        _StatChip(label: 'Resp.', value: '< 30m'),
+                        _AboutTab(artisan: artisan),
+                        _PortfolioTab(portfolio: artisan.portfolio ?? []),
+                        _ReviewsTab(reviews: artisan.reviews ?? []),
                       ],
                     ),
                   ),
-                ),
-
-                // ── Tabs ─────────────────────────────────────────────────────
-                SliverToBoxAdapter(
-                  child: TabBar(
-                    controller: _tabController,
-                    labelColor: AppColors.primary,
-                    unselectedLabelColor: AppColors.outline,
-                    indicatorColor: AppColors.primary,
-                    indicatorSize: TabBarIndicatorSize.label,
-                    labelStyle: AppTypography.labelLg.copyWith(
-                        fontWeight: FontWeight.w600),
-                    tabs: const [
-                      Tab(text: 'About'),
-                      Tab(text: 'Portfolio'),
-                      Tab(text: 'Reviews'),
-                    ],
-                  ),
-                ),
-
-                SliverFillRemaining(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _AboutTab(artisan: artisan),
-                      _PortfolioTab(portfolio: artisan.portfolio ?? []),
-                      _ReviewsTab(reviews: artisan.reviews ?? []),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
             loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
             error: (err, __) => Scaffold(
               appBar: AppBar(title: const Text('Error')),
@@ -226,27 +360,28 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
             ),
           ),
       bottomNavigationBar: Container(
-        height: 100 + MediaQuery.of(context).padding.bottom,
+        height: 86 + MediaQuery.of(context).padding.bottom,
         decoration: BoxDecoration(
           color: AppColors.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 16,
               offset: const Offset(0, -4),
             ),
           ],
-          border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5))),
+          border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.4))),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Row(
               children: [
                 Expanded(
+                  flex: 2,
                   child: SkillLinkButton.outlined(
                     label: 'Message',
-                    icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20, color: AppColors.primary),
+                    icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18, color: AppColors.primary),
                     onPressed: () {
                       final artisan = ref.read(artisanProfileProvider(artisanId)).value;
                       final name = Uri.encodeComponent(artisan?.user?.name ?? 'Artisan');
@@ -257,9 +392,10 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                 ),
                 const SizedBox(width: 12),
                 Expanded(
+                  flex: 3,
                   child: SkillLinkButton.gradient(
-                    label: 'Book Now',
-                    icon: const Icon(Icons.calendar_month_outlined, size: 20, color: Colors.white),
+                    label: 'Book Service',
+                    icon: const Icon(Icons.calendar_month_outlined, size: 18, color: Colors.white),
                     onPressed: () => context.push('${AppRoutes.booking}/${widget.artisanId}'),
                   ),
                 ),
@@ -281,18 +417,21 @@ class _StatChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
           children: [
             Text(value,
-                style: AppTypography.titleMd.copyWith(color: AppColors.primary)),
-            const SizedBox(height: 3),
-            Text(label, style: AppTypography.labelSm),
+                style: AppTypography.titleSm.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                )),
+            const SizedBox(height: 2),
+            Text(label, style: AppTypography.labelSm.copyWith(fontSize: 10)),
           ],
         ),
       ),
@@ -311,29 +450,29 @@ class _AboutTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Bio', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
+          Text('Bio & Experience', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Text(
-            artisan.bio ?? 'No bio available.',
+            artisan.bio ?? 'Professional registered artisan ready to deliver quality craftsmanship.',
             style: AppTypography.bodyMd.copyWith(height: 1.6),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           Text('Service Location', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Row(children: [
-            const Icon(Icons.location_on_outlined, size: 16, color: AppColors.primary),
+            const Icon(Icons.location_on_outlined, size: 18, color: AppColors.primary),
             const SizedBox(width: 8),
             Text(artisan.locationName ?? 'Lagos, Nigeria', style: AppTypography.bodyMd),
           ]),
           if (artisan.businessAddress != null && artisan.businessAddress!.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text('Business Address', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            Text('Workshop Address', style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
             Text(artisan.businessAddress!, style: AppTypography.bodyMd),
           ],
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           _SecurityCard(artisan: artisan),
-          const SizedBox(height: 40), // Extra space for bottom bar
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -351,10 +490,10 @@ class _SecurityCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isVerified ? Colors.blue.shade50 : Colors.orange.shade50,
+        color: isVerified ? const Color(0xFFEFF6FF) : const Color(0xFFFFF7ED),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isVerified ? Colors.blue.shade200 : Colors.orange.shade200,
+          color: isVerified ? const Color(0xFFBFDBFE) : const Color(0xFFFED7AA),
         ),
       ),
       child: Column(
@@ -363,13 +502,13 @@ class _SecurityCard extends StatelessWidget {
           Row(children: [
             Icon(
               isVerified ? Icons.verified_user_rounded : Icons.gpp_maybe_rounded,
-              color: isVerified ? Colors.blue.shade700 : Colors.orange.shade700,
+              color: isVerified ? const Color(0xFF1D4ED8) : const Color(0xFFC2410C),
             ),
             const SizedBox(width: 12),
             Text(
-              isVerified ? 'Identity Verified' : 'Identity Verification Pending',
+              isVerified ? 'SkillLink Verified Artisan' : 'Identity Verification Pending',
               style: AppTypography.labelLg.copyWith(
-                color: isVerified ? Colors.blue.shade900 : Colors.orange.shade900,
+                color: isVerified ? const Color(0xFF1E3A8A) : const Color(0xFF7C2D12),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -377,10 +516,10 @@ class _SecurityCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             isVerified 
-              ? 'This artisan has provided a valid government-issued ID and has been cleared for professional service.'
-              : 'This artisan is currently undergoing identity verification. Exercise caution and verify details manually.',
+              ? 'This artisan has verified their national identity and is approved by SkillLink compliance.'
+              : 'This artisan is currently undergoing verification. Please follow platform safety guidelines.',
             style: AppTypography.bodySm.copyWith(
-              color: isVerified ? Colors.blue.shade800 : Colors.orange.shade800,
+              color: isVerified ? const Color(0xFF1E40AF) : const Color(0xFF9A3412),
             ),
           ),
         ],
@@ -402,7 +541,7 @@ class _PortfolioTab extends StatelessWidget {
           children: [
             Icon(Icons.collections_outlined, size: 48, color: AppColors.outlineVariant),
             const SizedBox(height: 16),
-            Text('No portfolio items yet', style: AppTypography.bodyMd),
+            Text('No portfolio items uploaded yet', style: AppTypography.bodyMd),
           ],
         ),
       );
@@ -419,10 +558,14 @@ class _PortfolioTab extends StatelessWidget {
       itemCount: portfolio.length,
       itemBuilder: (context, i) => ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.network(
-          UrlUtils.resolveImageUrl(portfolio[i].imageUrl),
+        child: CachedNetworkImage(
+          imageUrl: UrlUtils.resolveImageUrl(portfolio[i].imageUrl),
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) =>
+          placeholder: (_, __) => Container(
+            color: AppColors.surfaceContainerLow,
+            child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+          ),
+          errorWidget: (_, __, ___) =>
               Container(color: AppColors.surfaceContainerLow, child: const Icon(Icons.broken_image_outlined)),
         ),
       ),
@@ -443,7 +586,7 @@ class _ReviewsTab extends StatelessWidget {
           children: [
             Icon(Icons.rate_review_outlined, size: 48, color: AppColors.outlineVariant),
             const SizedBox(height: 16),
-            Text('No reviews yet', style: AppTypography.bodyMd),
+            Text('No customer reviews yet', style: AppTypography.bodyMd),
           ],
         ),
       );
@@ -463,12 +606,15 @@ class _ReviewsTab extends StatelessWidget {
               Row(children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundImage: review.customerAvatar != null && review.customerAvatar!.isNotEmpty
-                      ? NetworkImage(UrlUtils.resolveImageUrl(review.customerAvatar))
-                      : null,
-                  child: review.customerAvatar == null || review.customerAvatar!.isEmpty
-                      ? const Icon(Icons.person, size: 18, color: AppColors.outline)
-                      : null,
+                  child: ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: UrlUtils.resolveImageUrl(review.customerAvatar),
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => const Icon(Icons.person, size: 18, color: AppColors.outline),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(child: Column(

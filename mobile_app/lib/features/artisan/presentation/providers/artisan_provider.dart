@@ -6,7 +6,6 @@ import '../../../../core/network/dio_provider.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/local_cache_service.dart';
 
-
 part 'artisan_provider.g.dart';
 
 @riverpod
@@ -17,17 +16,16 @@ ArtisanRepository artisanRepository(ArtisanRepositoryRef ref) {
 }
 
 @Riverpod(keepAlive: true)
-
 Stream<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRating, String? query, String? skills}) async* {
   final cacheKey = 'artisans_${categoryId}_${query}_$skills';
   
-  // 1. Yield cached data immediately
+  // 1. Yield cached data immediately (0ms instant render)
   final cached = await LocalCacheService.get(cacheKey);
   if (cached != null && cached is List) {
     yield cached.map((e) => Artisan.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  // 2. Fetch fresh
+  // 2. Fetch fresh data in background
   try {
     final response = await ref.watch(artisanRepositoryProvider).getArtisans(
       categoryId: categoryId,
@@ -43,11 +41,45 @@ Stream<List<Artisan>> artisans(ArtisansRef ref, {int? categoryId, double? minRat
 }
 
 @Riverpod(keepAlive: true)
-Future<Artisan> artisanProfile(ArtisanProfileRef ref, int id) {
-  return ref.watch(artisanRepositoryProvider).getArtisanProfile(id);
+Stream<Artisan> artisanProfile(ArtisanProfileRef ref, int id) async* {
+  final cacheKey = 'artisan_profile_$id';
+
+  // 1. Yield cached profile immediately (0ms instant render)
+  final cached = await LocalCacheService.get(cacheKey);
+  if (cached != null && cached is Map<String, dynamic>) {
+    try {
+      yield Artisan.fromJson(cached);
+    } catch (_) {}
+  }
+
+  // 2. Fetch fresh profile in background
+  try {
+    final response = await ref.watch(artisanRepositoryProvider).getArtisanProfile(id);
+    yield response;
+  } catch (e) {
+    if (cached == null) {
+      rethrow;
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)
-Future<List<Artisan>> savedArtisans(SavedArtisansRef ref) {
-  return ref.watch(artisanRepositoryProvider).getSavedArtisans();
+Stream<List<Artisan>> savedArtisans(SavedArtisansRef ref) async* {
+  const cacheKey = 'saved_artisans';
+
+  // 1. Yield cached list immediately
+  final cached = await LocalCacheService.get(cacheKey);
+  if (cached != null && cached is List) {
+    try {
+      yield cached.map((e) => Artisan.fromJson(e as Map<String, dynamic>)).toList();
+    } catch (_) {}
+  }
+
+  // 2. Fetch fresh list in background
+  try {
+    final response = await ref.watch(artisanRepositoryProvider).getSavedArtisans();
+    yield response;
+  } catch (e) {
+    if (cached == null) yield [];
+  }
 }

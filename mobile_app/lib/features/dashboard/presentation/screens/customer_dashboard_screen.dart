@@ -8,6 +8,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
+import '../../../../shared/widgets/skilllink_empty_state.dart';
 import '../../../booking/presentation/providers/booking_provider.dart';
 import '../../../../core/utils/url_utils.dart';
 
@@ -96,10 +97,17 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
               ),
 
               if (activeBookings.isEmpty)
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.all(24.0),
-                    child: Center(child: Text('No active bookings')),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: SkillLinkEmptyState(
+                      icon: Icons.calendar_month_outlined,
+                      title: 'No Active Bookings',
+                      message: 'You have no ongoing appointments. Need something fixed?',
+                      buttonLabel: 'Find an Artisan',
+                      buttonIcon: Icons.search_rounded,
+                      onButtonPressed: () => context.push(AppRoutes.home),
+                    ),
                   ),
                 )
               else

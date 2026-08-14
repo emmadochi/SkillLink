@@ -12,6 +12,8 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/presentation/providers/user_provider.dart';
+import '../../features/booking/presentation/providers/booking_provider.dart';
+import '../../features/chat/presentation/providers/chat_provider.dart';
 
 class AppShellRoute {
   static final route = StatefulShellRoute.indexedStack(
@@ -128,7 +130,7 @@ class _AppShell extends ConsumerWidget {
   }
 }
 
-class _GlassBottomNav extends StatelessWidget {
+class _GlassBottomNav extends ConsumerWidget {
   final int selectedIndex;
   final String? role;
   final ValueChanged<int> onTap;
@@ -140,11 +142,23 @@ class _GlassBottomNav extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch live counters for badges
+    final bookings = ref.watch(bookingHistoryProvider).value ?? [];
+    final chats = ref.watch(chatHistoryProvider).value ?? [];
+
+    int activeBookingsCount = 0;
+
+    if (role == 'artisan') {
+      activeBookingsCount = bookings.where((b) => b.status == 'pending').length;
+    } else {
+      activeBookingsCount = bookings.where((b) => b.status != 'completed' && b.status != 'cancelled').length;
+    }
+
     final List<_NavItem> items;
     if (role == 'artisan') {
       items = [
-        _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
+        _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard', badgeCount: activeBookingsCount),
         _NavItem(icon: Icons.chat_bubble_rounded, label: 'Messages'),
         _NavItem(icon: Icons.notifications_rounded, label: 'Alerts'),
         _NavItem(icon: Icons.person_rounded, label: 'Profile'),
@@ -152,7 +166,7 @@ class _GlassBottomNav extends StatelessWidget {
     } else {
       items = [
         _NavItem(icon: Icons.home_rounded, label: 'Home'),
-        _NavItem(icon: Icons.calendar_month_rounded, label: 'Bookings'),
+        _NavItem(icon: Icons.calendar_month_rounded, label: 'Bookings', badgeCount: activeBookingsCount),
         _NavItem(icon: Icons.chat_bubble_rounded, label: 'Chat'),
         _NavItem(icon: Icons.person_rounded, label: 'Profile'),
       ];
@@ -162,7 +176,7 @@ class _GlassBottomNav extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       height: 72,
       decoration: BoxDecoration(
-        color: AppColors.glassBackground.withOpacity(0.8),
+        color: AppColors.glassBackground.withOpacity(0.85),
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
@@ -205,6 +219,8 @@ class _GlassBottomNav extends StatelessWidget {
                     Row(
                       children: List.generate(items.length, (i) {
                         final selected = selectedIndex == i;
+                        final item = items[i];
+
                         return Expanded(
                           child: GestureDetector(
                             onTap: () => onTap(i),
@@ -215,14 +231,40 @@ class _GlassBottomNav extends StatelessWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    items[i].icon,
-                                    color: selected ? AppColors.primary : AppColors.outline,
-                                    size: 24,
+                                  Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Icon(
+                                        item.icon,
+                                        color: selected ? AppColors.primary : AppColors.outline,
+                                        size: 24,
+                                      ),
+                                      if (item.badgeCount > 0)
+                                        Positioned(
+                                          top: -4,
+                                          right: -8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF97316),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(color: Colors.white, width: 1.5),
+                                            ),
+                                            child: Text(
+                                              '${item.badgeCount}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    items[i].label,
+                                    item.label,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: AppTypography.labelSm.copyWith(
@@ -252,5 +294,6 @@ class _GlassBottomNav extends StatelessWidget {
 class _NavItem {
   final IconData icon;
   final String label;
-  _NavItem({required this.icon, required this.label});
+  final int badgeCount;
+  _NavItem({required this.icon, required this.label, this.badgeCount = 0});
 }

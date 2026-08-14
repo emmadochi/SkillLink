@@ -223,7 +223,7 @@ class _ArtisansProviderElement extends StreamProviderElement<List<Artisan>>
   String? get skills => (origin as ArtisansProvider).skills;
 }
 
-String _$artisanProfileHash() => r'cd01d36c615fbed149c80633c95ab3aa352886a8';
+String _$artisanProfileHash() => r'43732c4b8cc7024b17edef244350d546a9ffd5ef';
 
 /// See also [artisanProfile].
 @ProviderFor(artisanProfile)
@@ -268,7 +268,7 @@ class ArtisanProfileFamily extends Family<AsyncValue<Artisan>> {
 }
 
 /// See also [artisanProfile].
-class ArtisanProfileProvider extends FutureProvider<Artisan> {
+class ArtisanProfileProvider extends StreamProvider<Artisan> {
   /// See also [artisanProfile].
   ArtisanProfileProvider(
     int id,
@@ -303,7 +303,7 @@ class ArtisanProfileProvider extends FutureProvider<Artisan> {
 
   @override
   Override overrideWith(
-    FutureOr<Artisan> Function(ArtisanProfileRef provider) create,
+    Stream<Artisan> Function(ArtisanProfileRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -320,7 +320,7 @@ class ArtisanProfileProvider extends FutureProvider<Artisan> {
   }
 
   @override
-  FutureProviderElement<Artisan> createElement() {
+  StreamProviderElement<Artisan> createElement() {
     return _ArtisanProfileProviderElement(this);
   }
 
@@ -340,12 +340,12 @@ class ArtisanProfileProvider extends FutureProvider<Artisan> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin ArtisanProfileRef on FutureProviderRef<Artisan> {
+mixin ArtisanProfileRef on StreamProviderRef<Artisan> {
   /// The parameter `id` of this provider.
   int get id;
 }
 
-class _ArtisanProfileProviderElement extends FutureProviderElement<Artisan>
+class _ArtisanProfileProviderElement extends StreamProviderElement<Artisan>
     with ArtisanProfileRef {
   _ArtisanProfileProviderElement(super.provider);
 
@@ -353,11 +353,11 @@ class _ArtisanProfileProviderElement extends FutureProviderElement<Artisan>
   int get id => (origin as ArtisanProfileProvider).id;
 }
 
-String _$savedArtisansHash() => r'84000ed8079444141fedd5ca0dd5dfa50bbd42fe';
+String _$savedArtisansHash() => r'7ca6e6828913a76f9ae38db3098395e8813690c8';
 
 /// See also [savedArtisans].
 @ProviderFor(savedArtisans)
-final savedArtisansProvider = FutureProvider<List<Artisan>>.internal(
+final savedArtisansProvider = StreamProvider<List<Artisan>>.internal(
   savedArtisans,
   name: r'savedArtisansProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -369,6 +369,6 @@ final savedArtisansProvider = FutureProvider<List<Artisan>>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef SavedArtisansRef = FutureProviderRef<List<Artisan>>;
+typedef SavedArtisansRef = StreamProviderRef<List<Artisan>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

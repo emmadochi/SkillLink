@@ -121,47 +121,29 @@ class Artisan {
      * Get artisan full profile details.
      */
     public function getProfile($id, $currentUserId = null) {
-        // First get basic user info
-        $uQuery = "SELECT id as user_id, name, email, phone, avatar_url, role FROM users WHERE id = :id";
-        $uStmt = $this->conn->prepare($uQuery);
-        $uStmt->bindParam(':id', $id);
-        $uStmt->execute();
-        $user = $uStmt->fetch();
-
-        if (!$user) return null;
-
-        // Then try to get artisan specific info
-        $aQuery = "SELECT a.*,
-                  (SELECT status FROM artisan_verifications WHERE artisan_id = a.user_id ORDER BY created_at DESC LIMIT 1) as identity_status
-                  FROM " . $this->table . " a
-                  WHERE a.user_id = :id";
+        $query = "SELECT u.id as user_id, u.name, u.email, u.phone, u.avatar_url, u.role,
+                         a.bio, a.skill, a.category_id, a.experience_years, a.average_rating,
+                         a.location_name, a.business_address, a.guarantor_name, a.guarantor_phone,
+                         a.identity_verified, a.verification_status, a.is_available, a.hourly_rate,
+                         (SELECT status FROM artisan_verifications WHERE artisan_id = u.id ORDER BY created_at DESC LIMIT 1) as identity_status
+                  FROM users u
+                  LEFT JOIN " . $this->table . " a ON a.user_id = u.id
+                  WHERE u.id = :id LIMIT 1";
         
-        $aStmt = $this->conn->prepare($aQuery);
-        $aStmt->bindParam(':id', $id);
-        $aStmt->execute();
-        $artisan = $aStmt->fetch();
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        $row = $stmt->fetch();
 
-        $profile = $user;
-        if ($artisan) {
-            $profile = array_merge($profile, $artisan);
-        } else {
-            // Default values for a user who isn't (yet) an artisan
-            $profile['bio'] = null;
-            $profile['skill'] = $user['role'] === 'artisan' ? 'Artisan' : 'Customer';
-            $profile['experience_years'] = 0;
-            $profile['average_rating'] = 0.0;
-            $profile['hourly_rate'] = 0.0;
-            $profile['location_name'] = null;
-            $profile['identity_verified'] = false;
-            $profile['identity_status'] = null;
-        }
+        if (!$row) return null;
 
+        $profile = $row;
         $profile['user'] = [
-            'id' => $user['user_id'],
-            'name' => $user['name'],
-            'email' => $user['email'],
-            'phone' => $user['phone'],
-            'avatar_url' => $user['avatar_url']
+            'id' => (int)$row['user_id'],
+            'name' => $row['name'],
+            'email' => $row['email'],
+            'phone' => $row['phone'],
+            'avatar_url' => $row['avatar_url']
         ];
         
         // Get portfolio, reviews & sub-services

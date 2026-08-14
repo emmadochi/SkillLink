@@ -12,8 +12,7 @@ class AppTheme {
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.surface,
 
-      // ── Color Scheme ─────────────────────────────────────────────────
-      colorScheme: ColorScheme(
+      colorScheme: const ColorScheme(
         brightness: Brightness.light,
         primary: AppColors.primary,
         onPrimary: AppColors.onPrimary,
@@ -36,7 +35,6 @@ class AppTheme {
         outlineVariant: AppColors.outlineVariant,
       ),
 
-      // ── App Bar ───────────────────────────────────────────────────────
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -49,7 +47,6 @@ class AppTheme {
         centerTitle: false,
       ),
 
-      // ── Elevated Button (Pill-shaped, gradient via custom widget) ─────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -61,7 +58,6 @@ class AppTheme {
         ),
       ),
 
-      // ── Text Button ───────────────────────────────────────────────────
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.tertiary,
@@ -69,63 +65,15 @@ class AppTheme {
         ),
       ),
 
-      // ── Input Decoration ──────────────────────────────────────────────
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.surfaceVariant, // fallback from highest
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: AppColors.primary.withOpacity(0.40),
-            width: 1,
-          ),
-        ),
-        hintStyle: AppTypography.bodyMd.copyWith(color: AppColors.outline),
-        labelStyle: AppTypography.bodyMd,
-      ),
-
-      // ── Card Theme (no borders — tonal layering only) ─────────────────
       cardTheme: CardThemeData(
         color: AppColors.surfaceContainerLowest,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24), // xl = 1.5rem ≈ 24px
+          borderRadius: BorderRadius.circular(24),
         ),
       ),
 
-      // ── Bottom Navigation ─────────────────────────────────────────────
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surfaceContainerLowest,
-        selectedItemColor: AppColors.tertiary,
-        unselectedItemColor: AppColors.outline,
-        elevation: 0,
-        type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.w700),
-      ),
-
-      // ── Chip theme ────────────────────────────────────────────────────
-      chipTheme: ChipThemeData(
-        backgroundColor: AppColors.surfaceContainerLow,
-        selectedColor: AppColors.secondaryContainer,
-        labelStyle: AppTypography.labelMd,
-        side: BorderSide.none,
-        shape: const StadiumBorder(),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      ),
-
-      // ── Divider ───────────────────────────────────────────────────────
-      dividerTheme: const DividerThemeData(
-        color: Colors.transparent, // "No-Line Rule"
-        thickness: 0,
-      ),
-
-      // ── Text Theme ────────────────────────────────────────────────────
       textTheme: TextTheme(
         displayLarge: AppTypography.displayLg,
         displayMedium: AppTypography.displayMd,
@@ -141,6 +89,86 @@ class AppTheme {
         labelLarge: AppTypography.labelLg,
         labelMedium: AppTypography.labelMd,
         labelSmall: AppTypography.labelSm,
+      ),
+    );
+  }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: AppColors.darkSurface,
+
+      colorScheme: const ColorScheme(
+        brightness: Brightness.dark,
+        primary: Color(0xFF60A5FA),
+        onPrimary: Color(0xFF000C47),
+        primaryContainer: Color(0xFF1E3A8A),
+        onPrimaryContainer: Colors.white,
+        secondary: Color(0xFF94A3B8),
+        onSecondary: Color(0xFF0B101B),
+        secondaryContainer: Color(0xFF334155),
+        onSecondaryContainer: Colors.white,
+        tertiary: AppColors.tertiary,
+        onTertiary: Colors.white,
+        tertiaryContainer: Color(0xFF7C2D12),
+        onTertiaryContainer: Color(0xFFFFDDB8),
+        error: Color(0xFFF87171),
+        onError: Color(0xFF450A0A),
+        surface: AppColors.darkSurface,
+        onSurface: AppColors.darkOnSurface,
+        onSurfaceVariant: AppColors.darkOnSurfaceVariant,
+        outline: Color(0xFF64748B),
+        outlineVariant: Color(0xFF334155),
+      ),
+
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        iconTheme: IconThemeData(color: AppColors.darkOnSurface),
+        centerTitle: false,
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF3B82F6),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: const StadiumBorder(),
+          textStyle: AppTypography.titleMd,
+        ),
+      ),
+
+      cardTheme: CardThemeData(
+        color: AppColors.darkSurfaceContainerLowest,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ),
+
+      textTheme: TextTheme(
+        displayLarge: AppTypography.displayLg.copyWith(color: AppColors.darkOnSurface),
+        displayMedium: AppTypography.displayMd.copyWith(color: AppColors.darkOnSurface),
+        headlineLarge: AppTypography.headlineLg.copyWith(color: AppColors.darkOnSurface),
+        headlineMedium: AppTypography.headlineMd.copyWith(color: AppColors.darkOnSurface),
+        headlineSmall: AppTypography.headlineSm.copyWith(color: AppColors.darkOnSurface),
+        titleLarge: AppTypography.titleLg.copyWith(color: const Color(0xFF93C5FD)),
+        titleMedium: AppTypography.titleMd.copyWith(color: AppColors.darkOnSurface),
+        titleSmall: AppTypography.titleSm.copyWith(color: AppColors.darkOnSurface),
+        bodyLarge: AppTypography.bodyLg.copyWith(color: AppColors.darkOnSurface),
+        bodyMedium: AppTypography.bodyMd.copyWith(color: AppColors.darkOnSurface),
+        bodySmall: AppTypography.bodySm.copyWith(color: AppColors.darkOnSurfaceVariant),
+        labelLarge: AppTypography.labelLg.copyWith(color: AppColors.darkOnSurfaceVariant),
+        labelMedium: AppTypography.labelMd.copyWith(color: AppColors.darkOnSurfaceVariant),
+        labelSmall: AppTypography.labelSm.copyWith(color: AppColors.darkOnSurfaceVariant),
       ),
     );
   }

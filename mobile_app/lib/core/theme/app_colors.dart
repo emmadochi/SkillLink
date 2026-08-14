@@ -28,7 +28,7 @@ class AppColors {
   static const Color error             = Color(0xFFBA1A1A);
   static const Color onError           = Color(0xFFFFFFFF);
 
-  // ── Surface Hierarchy (Tonal Layering) ───────────────────────────────
+  // ── Surface Hierarchy (Light Mode) ───────────────────────────────────
   static const Color surface                  = Color(0xFFF6FAFE);
   static const Color surfaceVariant           = Color(0xFFDFE3E7);
   static const Color surfaceContainerLowest   = Color(0xFFFFFFFF);
@@ -37,11 +37,21 @@ class AppColors {
   static const Color surfaceContainerHigh     = Color(0xFFDDE1E6);
   static const Color surfaceContainerHighest  = Color(0xFFD7DBE0);
 
-  // ── Text / On-Surface ─────────────────────────────────────────────
-  static const Color onSurface         = Color(0xFF171C1F); // never pure #000
+  // ── Dark Mode Hierarchy ──────────────────────────────────────────────
+  static const Color darkSurface                 = Color(0xFF0B101B);
+  static const Color darkSurfaceVariant          = Color(0xFF1E293B);
+  static const Color darkSurfaceContainerLowest  = Color(0xFF131A29);
+  static const Color darkSurfaceContainerLow     = Color(0xFF182235);
+  static const Color darkSurfaceContainer        = Color(0xFF1F2B42);
+  static const Color darkSurfaceContainerHigh    = Color(0xFF283652);
+  static const Color darkOnSurface               = Color(0xFFF1F5F9);
+  static const Color darkOnSurfaceVariant        = Color(0xFF94A3B8);
+
+  // ── Text / On-Surface ────────────────────────────────────────────────
+  static const Color onSurface         = Color(0xFF171C1F);
   static const Color onSurfaceVariant  = Color(0xFF40484C);
   static const Color outline           = Color(0xFF74777E);
-  static const Color outlineVariant    = Color(0xFFC3C6CE); // at 15% for ghost
+  static const Color outlineVariant    = Color(0xFFC3C6CE);
 
   // ── Gradient helpers ─────────────────────────────────────────────────
   static const LinearGradient heroGradient = LinearGradient(

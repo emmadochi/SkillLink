@@ -120,6 +120,9 @@ class BookingController extends Controller {
 
         try {
             $bookingModel = new Booking();
+            // Automatically clean up any expired pending bookings
+            $bookingModel->expirePendingBookings(24);
+
             $role = $tokenData['role'] ?? 'customer';
             $bookings = $bookingModel->getByUser($tokenData['id'], $role);
 
@@ -129,6 +132,28 @@ class BookingController extends Controller {
             ]);
         } catch (\Exception $e) {
             $this->error('Failed to load history: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/booking/expirePending
+     * Public or cron endpoint to expire inactive pending bookings.
+     */
+    public function expirePending() {
+        try {
+            $hours = intval($_GET['hours'] ?? 24);
+            if ($hours <= 0) $hours = 24;
+
+            $bookingModel = new Booking();
+            $result = $bookingModel->expirePendingBookings($hours);
+
+            $this->json([
+                'status' => 'success',
+                'message' => 'Processed pending booking expirations',
+                'data' => $result
+            ]);
+        } catch (\Throwable $e) {
+            $this->error('Failed to expire pending bookings: ' . $e->getMessage(), 500);
         }
     }
 
@@ -163,7 +188,7 @@ class BookingController extends Controller {
                         'user_id' => $recipientId,
                         'type' => 'booking',
                         'title' => 'Booking ' . ucfirst($body['status']),
-                        'message' => 'Your booking ' . $booking['booking_number'] . ' has been ' . $body['status'],
+                        'message' => 'Your booking #' . $booking['booking_number'] . ' has been ' . $body['status'] . ($reason ? " (Reason: $reason)" : ''),
                         'related_id' => $body['id']
                     ]);
                 }
@@ -180,3 +205,4 @@ class BookingController extends Controller {
         }
     }
 }
+

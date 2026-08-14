@@ -129,4 +129,64 @@ class Booking {
         $stmt->execute();
         return $stmt->fetch();
     }
+
+    /**
+     * Auto-cancel / expire pending bookings that have had no response for > $inactivityHours or scheduled_at has passed.
+     */
+    public function expirePendingBookings($inactivityHours = 24) {
+        try {
+            $query = "SELECT id, booking_number, customer_id, artisan_id, scheduled_at, created_at 
+                      FROM " . $this->table . " 
+                      WHERE status = 'pending' 
+                      AND (created_at <= DATE_SUB(NOW(), INTERVAL :hours HOUR) OR (scheduled_at IS NOT NULL AND scheduled_at < NOW()))";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':hours', $inactivityHours, PDO::PARAM_INT);
+            $stmt->execute();
+            $expired = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($expired)) {
+                return ['count' => 0, 'expired' => []];
+            }
+
+            $notifModel = new Notification();
+            $cancelStmt = $this->conn->prepare(
+                "UPDATE " . $this->table . " 
+                 SET status = 'cancelled', 
+                     cancellation_reason = 'Auto-cancelled: No response from artisan within 24 hours (inactivity timeout)' 
+                 WHERE id = :id AND status = 'pending'"
+            );
+
+            $expiredList = [];
+            foreach ($expired as $b) {
+                $cancelStmt->bindParam(':id', $b['id'], PDO::PARAM_INT);
+                if ($cancelStmt->execute()) {
+                    $expiredList[] = $b['booking_number'];
+
+                    // Notify customer
+                    $notifModel->create([
+                        'user_id' => $b['customer_id'],
+                        'type' => 'booking',
+                        'title' => 'Booking Auto-Cancelled',
+                        'message' => 'Your booking #' . $b['booking_number'] . ' was cancelled because the artisan did not respond within 24 hours.',
+                        'related_id' => $b['id']
+                    ]);
+
+                    // Notify artisan
+                    $notifModel->create([
+                        'user_id' => $b['artisan_id'],
+                        'type' => 'booking',
+                        'title' => 'Booking Request Expired',
+                        'message' => 'Booking request #' . $b['booking_number'] . ' expired due to inactivity.',
+                        'related_id' => $b['id']
+                    ]);
+                }
+            }
+
+            return ['count' => count($expiredList), 'expired' => $expiredList];
+        } catch (\Throwable $e) {
+            return ['count' => 0, 'expired' => [], 'error' => $e->getMessage()];
+        }
+    }
 }
+

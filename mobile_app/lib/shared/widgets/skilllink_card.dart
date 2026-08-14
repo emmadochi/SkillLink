@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 
 /// SkillLinkCard — xl rounding (24px), tonal lift, ambient shadow.
@@ -101,12 +102,17 @@ class SkillLinkArtisanCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(24)),
-                  child: Image.network(
-                    imageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
                     height: 140,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    placeholder: (_, __) => Container(
+                      height: 140,
+                      color: AppColors.surfaceContainerLow,
+                      child: const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
                       height: 140,
                       color: AppColors.surfaceContainerLow,
                       child: const Icon(Icons.person,

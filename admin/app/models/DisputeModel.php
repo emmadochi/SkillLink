@@ -78,7 +78,33 @@ class DisputeModel {
             "UPDATE disputes SET status = ?, resolution = ? WHERE id = ?"
         );
         $stmt->bind_param('ssi', $status, $resolution, $id);
-        $stmt->execute();
+        $res = $stmt->execute();
+
+        if ($res) {
+            // Retrieve booking & user info to notify parties
+            $dStmt = $this->db->prepare("SELECT d.booking_id, b.booking_number, b.customer_id, b.artisan_id 
+                                         FROM disputes d 
+                                         JOIN bookings b ON b.id = d.booking_id 
+                                         WHERE d.id = ?");
+            $dStmt->bind_param('i', $id);
+            $dStmt->execute();
+            $row = $dStmt->get_result()->fetch_assoc();
+            if ($row) {
+                $notifSql = "INSERT INTO notifications (user_id, type, title, message, related_id) VALUES (?, 'booking', ?, ?, ?)";
+                $nStmt = $this->db->prepare($notifSql);
+                $title = "Dispute Resolved";
+                $msg = "Dispute on booking #" . $row['booking_number'] . " was resolved by Admin: " . $resolution;
+                
+                // Notify Customer
+                $nStmt->bind_param('issi', $row['customer_id'], $title, $msg, $row['booking_id']);
+                $nStmt->execute();
+
+                // Notify Artisan
+                $nStmt->bind_param('issi', $row['artisan_id'], $title, $msg, $row['booking_id']);
+                $nStmt->execute();
+            }
+        }
+
         return $stmt->affected_rows > 0;
     }
 
@@ -86,7 +112,7 @@ class DisputeModel {
         $status = 'closed';
         $stmt = $this->db->prepare("UPDATE disputes SET status = ? WHERE id = ?");
         $stmt->bind_param('si', $status, $id);
-        $stmt->execute();
-        return $stmt->affected_rows > 0;
+        return $stmt->execute();
     }
 }
+

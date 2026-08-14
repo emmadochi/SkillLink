@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
+import '../../../../shared/widgets/skilllink_empty_state.dart';
 import '../providers/artisan_provider.dart';
 import '../../../../core/utils/url_utils.dart';
 
@@ -25,17 +26,13 @@ class SavedArtisansScreen extends ConsumerWidget {
       body: savedAsync.when(
         data: (artisans) {
           if (artisans.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.bookmark_border_rounded, size: 64, color: AppColors.outlineVariant),
-                  const SizedBox(height: 16),
-                  Text('No saved artisans yet', style: AppTypography.titleSm),
-                  const SizedBox(height: 8),
-                  Text('Artisans you save will appear here', style: AppTypography.labelMd.copyWith(color: AppColors.outline)),
-                ],
-              ),
+            return SkillLinkEmptyState(
+              icon: Icons.bookmark_border_rounded,
+              title: 'No Saved Artisans Yet',
+              message: 'Bookmark trusted professionals you want to work with again for quick access.',
+              buttonLabel: 'Explore Artisans',
+              buttonIcon: Icons.search_rounded,
+              onButtonPressed: () => context.push(AppRoutes.artisanListing),
             );
           }
 
@@ -51,13 +48,24 @@ class SavedArtisansScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
-                        width: 64,
-                        height: 64,
+                      borderRadius: BorderRadius.circular(16),
+                      child: CachedNetworkImage(
+                        imageUrl: UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
+                        width: 68,
+                        height: 68,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(color: AppColors.surfaceContainerHigh, child: const Icon(Icons.person)),
+                        placeholder: (_, __) => Container(
+                          width: 68,
+                          height: 68,
+                          color: AppColors.surfaceContainerHigh,
+                          child: const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))),
+                        ),
+                        errorWidget: (_, __, ___) => Container(
+                          width: 68,
+                          height: 68,
+                          color: AppColors.surfaceContainerHigh,
+                          child: const Icon(Icons.person, color: AppColors.outline),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -65,19 +73,61 @@ class SavedArtisansScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(artisan.user?.name ?? 'Artisan', style: AppTypography.titleSm),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  artisan.user?.name ?? 'Artisan',
+                                  style: AppTypography.titleSm.copyWith(fontWeight: FontWeight.bold),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (artisan.identityVerified || artisan.identityStatus == 'approved') ...[
+                                const SizedBox(width: 4),
+                                const Icon(Icons.verified, size: 15, color: AppColors.primary),
+                              ],
+                            ],
+                          ),
                           const SizedBox(height: 4),
-                          Text(artisan.skill ?? 'Professional', style: AppTypography.labelMd.copyWith(color: AppColors.outline)),
+                          Text(
+                            artisan.skill ?? 'Professional Artisan',
+                            style: AppTypography.labelMd.copyWith(color: AppColors.outline),
+                          ),
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(Icons.star_rounded, size: 14, color: Color(0xFFFFB84D)),
-                              const SizedBox(width: 4),
-                              Text('${artisan.rating}', style: AppTypography.labelSm),
-                              const SizedBox(width: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFB84D).withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.star_rounded, size: 13, color: Color(0xFFFFB84D)),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      artisan.rating.toStringAsFixed(1),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF996B00),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
                               const Icon(Icons.location_on_rounded, size: 14, color: AppColors.outline),
-                              const SizedBox(width: 4),
-                              Expanded(child: Text(artisan.locationName ?? 'Lagos', style: AppTypography.labelSm, overflow: TextOverflow.ellipsis)),
+                              const SizedBox(width: 3),
+                              Expanded(
+                                child: Text(
+                                  artisan.locationName ?? 'Nearby',
+                                  style: AppTypography.labelSm.copyWith(color: AppColors.outline),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -91,7 +141,14 @@ class SavedArtisansScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, __) => Center(child: Text('Error: $e')),
+        error: (e, __) => SkillLinkEmptyState(
+          icon: Icons.error_outline_rounded,
+          title: 'Unable to Load Saved Artisans',
+          message: 'Error: $e',
+          buttonLabel: 'Retry',
+          onButtonPressed: () => ref.invalidate(savedArtisansProvider),
+          accentColor: AppColors.error,
+        ),
       ),
     );
   }

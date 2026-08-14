@@ -167,7 +167,18 @@ class ApiClient {
     return _safeParse(response.data, (json) => json as Map<String, dynamic>);
   }
 
+  Future<ApiResponse<Map<String, dynamic>>> createDispute(Map<String, dynamic> body) async {
+    final response = await dio.post('dispute/create', data: body);
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> getDisputeByBooking(int bookingId) async {
+    final response = await dio.get('dispute/booking/$bookingId');
+    return _safeParse(response.data, (json) => json as Map<String, dynamic>);
+  }
+
   ApiResponse<T> _safeParse<T>(dynamic data, T Function(Object? json) fromJsonT) {
+
     if (data is Map<String, dynamic>) {
       try {
         return ApiResponse.fromJson(data, fromJsonT);
