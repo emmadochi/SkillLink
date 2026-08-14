@@ -25,7 +25,12 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
   @override
   void initState() {
     super.initState();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    Future.microtask(() {
+      if (mounted) {
+        ref.invalidate(bookingHistoryProvider);
+      }
+    });
+    _refreshTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       if (mounted) {
         ref.invalidate(bookingHistoryProvider);
       }

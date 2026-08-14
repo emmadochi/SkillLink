@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/skilllink_button.dart';
+import '../providers/booking_provider.dart';
 
-class BookingConfirmationScreen extends StatelessWidget {
+class BookingConfirmationScreen extends ConsumerWidget {
   const BookingConfirmationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -35,7 +37,7 @@ class BookingConfirmationScreen extends StatelessWidget {
                   style: AppTypography.headlineMd),
               const SizedBox(height: 12),
               Text(
-                'Emmanuel Okafor has been notified and will confirm shortly. You\'ll receive an update within 30 minutes.',
+                'The artisan has been notified and will confirm shortly. You\'ll receive an update within 30 minutes.',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMd.copyWith(
                     color: AppColors.outline, height: 1.6),
@@ -46,13 +48,19 @@ class BookingConfirmationScreen extends StatelessWidget {
                 width: double.infinity,
                 icon: const Icon(Icons.track_changes_rounded,
                     size: 16, color: Colors.white),
-                onPressed: () => context.go(AppRoutes.customerDashboard),
+                onPressed: () {
+                  ref.invalidate(bookingHistoryProvider);
+                  context.go(AppRoutes.customerDashboard);
+                },
               ),
               const SizedBox(height: 16),
               SkillLinkButton.outlined(
                 label: 'Back to Home',
                 width: double.infinity,
-                onPressed: () => context.go(AppRoutes.home),
+                onPressed: () {
+                  ref.invalidate(bookingHistoryProvider);
+                  context.go(AppRoutes.home);
+                },
               ),
             ],
           ),

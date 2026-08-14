@@ -23,6 +23,7 @@ class BookingRepositoryImpl implements BookingRepository {
     try {
       final response = await _apiClient.createBooking(data);
       if (response.status == 'success' && response.data != null) {
+        await LocalCacheService.clear('booking_history');
         return response.data!;
       } else {
         throw response.message ?? 'Booking failed';
@@ -66,7 +67,11 @@ class BookingRepositoryImpl implements BookingRepository {
         'status': status,
         if (reason != null) 'reason': reason,
       });
-      return response.status == 'success';
+      if (response.status == 'success') {
+        await LocalCacheService.clear('booking_history');
+        return true;
+      }
+      return false;
     } on DioException catch (e) {
       final responseData = e.response?.data;
       if (responseData is Map<String, dynamic>) {
@@ -86,7 +91,11 @@ class BookingRepositoryImpl implements BookingRepository {
         'price': price,
         'status': status,
       });
-      return response.status == 'success';
+      if (response.status == 'success') {
+        await LocalCacheService.clear('booking_history');
+        return true;
+      }
+      return false;
     } on DioException catch (e) {
       final responseData = e.response?.data;
       if (responseData is Map<String, dynamic>) {

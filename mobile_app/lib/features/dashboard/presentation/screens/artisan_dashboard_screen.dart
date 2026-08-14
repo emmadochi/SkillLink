@@ -23,8 +23,13 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
   @override
   void initState() {
     super.initState();
-    // Set up auto-refresh every 30 seconds for new job requests
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    Future.microtask(() {
+      if (mounted) {
+        ref.invalidate(bookingHistoryProvider);
+      }
+    });
+    // Set up auto-refresh every 15 seconds for new job requests
+    _refreshTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       if (mounted) {
         ref.invalidate(bookingHistoryProvider);
       }

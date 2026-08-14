@@ -237,6 +237,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             'price': artisan?.hourlyRate != null && artisan!.hourlyRate > 0 ? artisan.hourlyRate : 5000,
                             'offer_price': double.tryParse(_offerCtrl.text),
                           });
+                          ref.invalidate(bookingHistoryProvider);
                           if (mounted) {
                             context.go(AppRoutes.bookingConfirmation);
                           }
