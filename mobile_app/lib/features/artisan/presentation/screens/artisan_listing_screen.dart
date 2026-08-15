@@ -25,10 +25,10 @@ class ArtisanListingScreen extends ConsumerStatefulWidget {
 }
 
 class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
-  String _sortBy = 'Rating';
+  String _sortBy = 'AI Match';
   final _searchCtrl = TextEditingController();
 
-  static const _filters = ['Rating', 'Price: Low', 'Price: High', 'Nearest'];
+  static const _filters = ['AI Match', 'Rating', 'Price: Low', 'Price: High', 'Nearest'];
 
   @override
   void dispose() {
@@ -141,12 +141,24 @@ class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
 
                     // Sort client-side if needed
                     final sortedList = List<Artisan>.from(artisans);
-                    if (_sortBy == 'Rating') {
+                    if (_sortBy == 'AI Match') {
+                      sortedList.sort((a, b) {
+                        final scoreA = a.matchPercentage ?? (a.rating * 18 + (a.isAvailable ? 10 : 0)).round();
+                        final scoreB = b.matchPercentage ?? (b.rating * 18 + (b.isAvailable ? 10 : 0)).round();
+                        return scoreB.compareTo(scoreA);
+                      });
+                    } else if (_sortBy == 'Rating') {
                       sortedList.sort((a, b) => b.rating.compareTo(a.rating));
                     } else if (_sortBy == 'Price: Low') {
                       sortedList.sort((a, b) => a.hourlyRate.compareTo(b.hourlyRate));
                     } else if (_sortBy == 'Price: High') {
                       sortedList.sort((a, b) => b.hourlyRate.compareTo(a.hourlyRate));
+                    } else if (_sortBy == 'Nearest') {
+                      sortedList.sort((a, b) {
+                        final distA = a.distanceKm ?? 999999.0;
+                        final distB = b.distanceKm ?? 999999.0;
+                        return distA.compareTo(distB);
+                      });
                     }
 
                     return ListView.builder(
@@ -263,6 +275,23 @@ class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
                                         ),
                                         const SizedBox(height: 3),
 
+                                        // AI Match Tag Badge
+                                        if (artisan.matchTag != null || _sortBy == 'AI Match') ...[
+                                          Container(
+                                            margin: const EdgeInsets.only(bottom: 4),
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFECFDF5),
+                                              borderRadius: BorderRadius.circular(6),
+                                              border: Border.all(color: const Color(0xFFA7F3D0)),
+                                            ),
+                                            child: Text(
+                                              artisan.matchTag ?? '${(artisan.rating * 18 + (artisan.isAvailable ? 10 : 0)).round()}% Match • Recommended',
+                                              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF065F46)),
+                                            ),
+                                          ),
+                                        ],
+
                                         // Skill / Category
                                         Text(
                                           artisan.skill ?? artisan.bio ?? 'Professional Artisan',
@@ -305,6 +334,31 @@ class _ArtisanListingScreenState extends ConsumerState<ArtisanListingScreen> {
                                               '${artisan.experienceYears} yrs exp',
                                               style: AppTypography.labelSm.copyWith(color: AppColors.outline),
                                             ),
+                                            if (artisan.distanceKm != null) ...[
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.surfaceTint.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(Icons.near_me_rounded, size: 11, color: AppColors.surfaceTint),
+                                                    const SizedBox(width: 2),
+                                                    Text(
+                                                      '${artisan.distanceKm!.toStringAsFixed(1)}km',
+                                                      style: const TextStyle(
+                                                        fontSize: 10,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: AppColors.surfaceTint,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                         const SizedBox(height: 6),

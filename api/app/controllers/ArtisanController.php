@@ -19,7 +19,10 @@ class ArtisanController extends Controller {
             'category_id' => $_GET['category'] ?? null,
             'min_rating' => $_GET['rating'] ?? null,
             'query' => $_GET['q'] ?? null,
-            'skills' => $_GET['skills'] ?? null
+            'skills' => $_GET['skills'] ?? null,
+            'lat' => $_GET['lat'] ?? null,
+            'lng' => $_GET['lng'] ?? null,
+            'sort_by' => $_GET['sort_by'] ?? $_GET['sort'] ?? null
         ];
 
         try {
@@ -28,10 +31,40 @@ class ArtisanController extends Controller {
 
             $this->json([
                 'status' => 'success',
+                'count' => count($artisans),
                 'data' => $artisans
             ]);
         } catch (\Throwable $e) {
             $this->error('Failed to search artisans: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * GET /api/v1/artisan/recommendations?lat=...&lng=...&category=...
+     */
+    public function recommendations() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            $this->error('Method not allowed', 405);
+        }
+
+        $filters = [
+            'category_id' => $_GET['category'] ?? $_GET['category_id'] ?? null,
+            'lat' => $_GET['lat'] ?? null,
+            'lng' => $_GET['lng'] ?? null,
+            'limit' => $_GET['limit'] ?? 10
+        ];
+
+        try {
+            $artisanModel = new Artisan();
+            $recommendations = $artisanModel->getRecommendations($filters);
+
+            $this->json([
+                'status' => 'success',
+                'count' => count($recommendations),
+                'data' => $recommendations
+            ]);
+        } catch (\Throwable $e) {
+            $this->error('Failed to get recommendations: ' . $e->getMessage(), 500);
         }
     }
 
@@ -287,6 +320,56 @@ class ArtisanController extends Controller {
             ]);
         } catch (\Throwable $e) {
             $this->error('Error loading saved artisans: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/artisan/updateLiveLocation
+     * Artisan posts their current GPS coordinates while en-route / on the job.
+     */
+    public function updateLiveLocation() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Method not allowed', 405);
+        }
+
+        $this->requireAuth();
+        $user = $this->getCurrentUser();
+
+        if (($user['role'] ?? '') !== 'artisan') {
+            $this->error('Only artisans can broadcast live coordinates', 403);
+        }
+
+        $body = $this->getBody();
+        $lat = isset($body['latitude']) ? floatval($body['latitude']) : (isset($body['lat']) ? floatval($body['lat']) : null);
+        $lng = isset($body['longitude']) ? floatval($body['longitude']) : (isset($body['lng']) ? floatval($body['lng']) : null);
+        $heading = isset($body['heading']) ? floatval($body['heading']) : null;
+        $speed = isset($body['speed']) ? floatval($body['speed']) : null;
+
+        if ($lat === null || $lng === null) {
+            $this->error('Latitude and longitude are required');
+        }
+
+        try {
+            $artisanModel = new Artisan();
+            $updated = $artisanModel->updateLiveLocation($user['id'], $lat, $lng, $heading, $speed);
+
+            if ($updated) {
+                $this->json([
+                    'status' => 'success',
+                    'message' => 'Live location updated successfully',
+                    'data' => [
+                        'latitude' => $lat,
+                        'longitude' => $lng,
+                        'heading' => $heading,
+                        'speed' => $speed,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]
+                ]);
+            } else {
+                $this->error('Failed to update live location', 500);
+            }
+        } catch (\Throwable $e) {
+            $this->error('Live location update error: ' . $e->getMessage(), 500);
         }
     }
 }

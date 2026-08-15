@@ -4,11 +4,21 @@ import '../../../../core/network/local_cache_service.dart';
 import 'package:dio/dio.dart';
 
 abstract class ArtisanRepository {
-  Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query, String? skills});
+  Future<List<Artisan>> getArtisans({
+    int? categoryId,
+    double? minRating,
+    String? query,
+    String? skills,
+    double? lat,
+    double? lng,
+    String? sortBy,
+  });
+  Future<List<Artisan>> getRecommendedArtisans({int? categoryId, double? lat, double? lng, int limit = 10});
   Future<Artisan> getArtisanProfile(int id);
   Future<bool> updateArtisanProfile(Map<String, dynamic> data);
   Future<bool> toggleSaveArtisan(int id);
   Future<List<Artisan>> getSavedArtisans();
+  Future<bool> updateLiveLocation({required double latitude, required double longitude, double? heading, double? speed});
 }
 
 class ArtisanRepositoryImpl implements ArtisanRepository {
@@ -17,8 +27,31 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
   ArtisanRepositoryImpl(this._apiClient);
 
   @override
-  Future<List<Artisan>> getArtisans({int? categoryId, double? minRating, String? query, String? skills}) async {
-    final cacheKey = 'artisans_${categoryId}_${query}_$skills';
+  Future<List<Artisan>> getRecommendedArtisans({int? categoryId, double? lat, double? lng, int limit = 10}) async {
+    try {
+      final response = await _apiClient.getRecommendedArtisans(
+        categoryId: categoryId,
+        lat: lat,
+        lng: lng,
+        limit: limit,
+      );
+      return response.data ?? [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Artisan>> getArtisans({
+    int? categoryId,
+    double? minRating,
+    String? query,
+    String? skills,
+    double? lat,
+    double? lng,
+    String? sortBy,
+  }) async {
+    final cacheKey = 'artisans_${categoryId}_${query}_${skills}_${lat}_${lng}_$sortBy';
     
     try {
       final response = await _apiClient.getArtisans(
@@ -26,6 +59,9 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
         minRating: minRating,
         query: query,
         skills: skills,
+        lat: lat,
+        lng: lng,
+        sortBy: sortBy,
       );
 
       if (response.status == 'success' && response.data != null) {
@@ -107,6 +143,26 @@ class ArtisanRepositoryImpl implements ArtisanRepository {
         return cached.map((e) => Artisan.fromJson(e as Map<String, dynamic>)).toList();
       }
       return [];
+    }
+  }
+
+  @override
+  Future<bool> updateLiveLocation({
+    required double latitude,
+    required double longitude,
+    double? heading,
+    double? speed,
+  }) async {
+    try {
+      final response = await _apiClient.updateArtisanLiveLocation(
+        latitude: latitude,
+        longitude: longitude,
+        heading: heading,
+        speed: speed,
+      );
+      return response.status == 'success';
+    } catch (_) {
+      return false;
     }
   }
 }

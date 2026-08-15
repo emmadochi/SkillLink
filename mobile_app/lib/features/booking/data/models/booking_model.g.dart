@@ -26,6 +26,7 @@ Booking _$BookingFromJson(Map<String, dynamic> json) => Booking(
       offerPrice: Booking._toDouble(json['offer_price']),
       counterPrice: Booking._toDouble(json['counter_price']),
       negotiationStatus: json['negotiation_status'] as String?,
+      negotiationNote: json['negotiation_note'] as String?,
       isNegotiated: json['is_negotiated'] == null
           ? false
           : Booking._toBool(json['is_negotiated']),
@@ -47,6 +48,7 @@ Map<String, dynamic> _$BookingToJson(Booking instance) => <String, dynamic>{
       'offer_price': instance.offerPrice,
       'counter_price': instance.counterPrice,
       'negotiation_status': instance.negotiationStatus,
+      'negotiation_note': instance.negotiationNote,
       'is_negotiated': instance.isNegotiated,
       'partner_name': instance.partnerName,
       'partner_avatar': instance.partnerAvatar,

@@ -303,12 +303,87 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
           ),
 
-          // ── Featured Artisans ─────────────────────────────────────────
+          // ── AI Matchmaker Recommendations ──────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
               child: Row(children: [
-                const Icon(Icons.auto_awesome_rounded, size: 20, color: Color(0xFFFFB84D)),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFECFDF5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.auto_awesome_rounded, size: 18, color: Color(0xFF059669)),
+                ),
+                const SizedBox(width: 8),
+                Text('AI Matchmaker • For You',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => context.push('${AppRoutes.artisanListing}?sort=AI%20Match'),
+                  child: Text('Explore All',
+                      style: AppTypography.labelLg.copyWith(
+                          color: const Color(0xFF059669),
+                          fontWeight: FontWeight.bold)),
+                ),
+              ]),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 340,
+              child: ref.watch(recommendedArtisansProvider(null)).when(
+                    data: (artisans) {
+                      if (artisans.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: artisans.length > 6 ? 6 : artisans.length,
+                        itemBuilder: (context, i) {
+                          final artisan = artisans[i];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 16),
+                            child: SkillLinkArtisanCard(
+                              name: artisan.user?.name ?? 'Artisan',
+                              craft: artisan.skill ?? artisan.bio ?? 'Professional Artisan',
+                              imageUrl: UrlUtils.resolveImageUrl(artisan.user?.avatarUrl),
+                              rating: artisan.rating.toDouble(),
+                              price: '₦${NumberFormat('#,###').format(artisan.hourlyRate > 0 ? artisan.hourlyRate : 5000)}/hr',
+                              location: artisan.locationName ?? 'Lagos',
+                              isVerified: true,
+                              badgeText: artisan.matchTag ?? '${artisan.matchPercentage ?? 98}% Match',
+                              onTap: () => context.push(
+                                  '${AppRoutes.artisanProfile}/${artisan.userId}'),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    loading: () => ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 3,
+                        itemBuilder: (context, i) => const Padding(
+                          padding: EdgeInsets.only(right: 16),
+                          child: ShimmerLoading(child: ShimmerBox(width: 200, height: 300)),
+                        ),
+                      ),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+            ),
+          ),
+
+          // ── Featured Artisans ─────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              child: Row(children: [
+                const Icon(Icons.star_rounded, size: 20, color: Color(0xFFFFB84D)),
                 const SizedBox(width: 8),
                 Text('Featured Artisans',
                     style: Theme.of(context).textTheme.titleMedium),

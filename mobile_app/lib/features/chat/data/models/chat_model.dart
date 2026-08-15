@@ -10,7 +10,13 @@ class ChatMessage {
   @JsonKey(name: 'receiver_id')
   final int receiverId;
   final String message;
-  @JsonKey(name: 'is_read')
+  @JsonKey(name: 'message_type', defaultValue: 'text')
+  final String messageType;
+  @JsonKey(name: 'media_url')
+  final String? mediaUrl;
+  @JsonKey(name: 'media_duration')
+  final int? mediaDuration;
+  @JsonKey(name: 'is_read', defaultValue: 0)
   final int isRead;
   @JsonKey(name: 'created_at')
   final String createdAt;
@@ -20,7 +26,10 @@ class ChatMessage {
     required this.senderId,
     required this.receiverId,
     required this.message,
-    required this.isRead,
+    this.messageType = 'text',
+    this.mediaUrl,
+    this.mediaDuration,
+    this.isRead = 0,
     required this.createdAt,
   });
 
@@ -38,6 +47,8 @@ class ChatConversation {
   final String? partnerAvatar;
   @JsonKey(name: 'last_message')
   final String? lastMessage;
+  @JsonKey(name: 'last_message_type', defaultValue: 'text')
+  final String? lastMessageType;
   @JsonKey(name: 'last_time')
   final String? lastTime;
 
@@ -46,6 +57,7 @@ class ChatConversation {
     required this.partnerName,
     this.partnerAvatar,
     this.lastMessage,
+    this.lastMessageType = 'text',
     this.lastTime,
   });
 

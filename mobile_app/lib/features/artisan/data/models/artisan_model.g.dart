@@ -18,6 +18,11 @@ Artisan _$ArtisanFromJson(Map<String, dynamic> json) => Artisan(
           : Artisan._toDouble(json['average_rating']),
       locationName: json['location_name'] as String?,
       businessAddress: json['business_address'] as String?,
+      latitude: Artisan._toDoubleNullable(json['latitude']),
+      longitude: Artisan._toDoubleNullable(json['longitude']),
+      liveLatitude: Artisan._toDoubleNullable(json['live_latitude']),
+      liveLongitude: Artisan._toDoubleNullable(json['live_longitude']),
+      distanceKm: Artisan._toDoubleNullable(json['distance_km']),
       guarantorName: json['guarantor_name'] as String?,
       guarantorPhone: json['guarantor_phone'] as String?,
       identityVerified: json['identity_verified'] == null
@@ -44,6 +49,8 @@ Artisan _$ArtisanFromJson(Map<String, dynamic> json) => Artisan(
       subServices: (json['sub_services'] as List<dynamic>?)
           ?.map((e) => e as Map<String, dynamic>)
           .toList(),
+      matchPercentage: (json['match_percentage'] as num?)?.toInt(),
+      matchTag: json['match_tag'] as String?,
     );
 
 Map<String, dynamic> _$ArtisanToJson(Artisan instance) => <String, dynamic>{
@@ -66,6 +73,8 @@ Map<String, dynamic> _$ArtisanToJson(Artisan instance) => <String, dynamic>{
       'reviews': instance.reviews,
       'is_saved': instance.isSaved,
       'sub_services': instance.subServices,
+      'match_percentage': instance.matchPercentage,
+      'match_tag': instance.matchTag,
     };
 
 ArtisanMiniUser _$ArtisanMiniUserFromJson(Map<String, dynamic> json) =>

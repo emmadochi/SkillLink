@@ -33,6 +33,8 @@ class Booking {
   final double? counterPrice;
   @JsonKey(name: 'negotiation_status')
   final String? negotiationStatus;
+  @JsonKey(name: 'negotiation_note')
+  final String? negotiationNote;
   @JsonKey(name: 'is_negotiated', fromJson: _toBool)
   final bool isNegotiated;
 
@@ -71,6 +73,7 @@ class Booking {
     this.offerPrice,
     this.counterPrice,
     this.negotiationStatus,
+    this.negotiationNote,
     this.isNegotiated = false,
   });
 

@@ -8,6 +8,9 @@
     <!-- Design System -->
     <link rel="stylesheet" href="<?php echo admin_url('public/css/admin.css'); ?>">
     
+    <!-- Leaflet.js Mapping Engine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <!-- Favicon (Fallback) -->
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/000000/worker-male.png">
 </head>
@@ -33,6 +36,13 @@
                         <a href="<?php echo admin_url(); ?>" class="nav-link <?php echo $active_section === 'dashboard' ? 'active' : ''; ?>">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                             Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo admin_url('operations'); ?>" class="nav-link <?php echo $active_section === 'operations' ? 'active' : ''; ?>" style="position: relative;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            Live Operations
+                            <span class="live-pill">LIVE</span>
                         </a>
                     </li>
                     <li>
@@ -126,6 +136,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="<?php echo admin_url('public/js/admin.js'); ?>"></script>
 </body>
 </html>

@@ -7,6 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/skilllink_card.dart';
 import '../../../booking/presentation/providers/booking_provider.dart';
 import '../../../artisan/presentation/providers/artisan_provider.dart';
+import '../../../artisan/presentation/screens/artisan_wallet_screen.dart';
 import '../../../../core/utils/url_utils.dart';
 
 class ArtisanDashboardScreen extends ConsumerStatefulWidget {
@@ -111,8 +112,41 @@ class _ArtisanDashboardScreenState extends ConsumerState<ArtisanDashboardScreen>
                       ]),
                       const SizedBox(height: 20),
                       Row(children: [
-                        _DashStat(value: '₦${(totalEarnings / 1000).toStringAsFixed(1)}k', label: 'Earnings'),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const ArtisanWalletScreen()),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.account_balance_wallet_rounded, color: Colors.amberAccent, size: 24),
+                                  const SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('₦${(totalEarnings / 1000).toStringAsFixed(1)}k', 
+                                        style: AppTypography.titleSm.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                                      Text('Wallet & Payouts →', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 10, fontWeight: FontWeight.w600)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         _DashStat(value: '$completedJobs', label: 'Completed\nJobs'),
+                        const SizedBox(width: 8),
                         _DashStat(value: '${activeJobs.length}', label: 'Active\nJobs'),
                       ]),
                     ],

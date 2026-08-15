@@ -22,9 +22,19 @@ class Database {
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch(PDOException $exception) {
-            // Log error and throw exception for the controller to handle
-            error_log("Database Connection Error: " . $exception->getMessage());
-            throw new \Exception("Database connection failed. Please try again later.");
+            // Attempt fallback to root on localhost (XAMPP default)
+            try {
+                $rootPdo = new PDO("mysql:host=" . $this->host, "root", "");
+                $rootPdo->exec("CREATE DATABASE IF NOT EXISTS `{$this->db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                
+                $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, "root", "");
+                $this->conn->exec("set names utf8mb4");
+                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            } catch (\PDOException $fallbackEx) {
+                error_log("Database Connection Error: " . $exception->getMessage() . " Fallback error: " . $fallbackEx->getMessage());
+                throw new \Exception("Database connection failed. Please try again later.");
+            }
         }
 
         return $this->conn;

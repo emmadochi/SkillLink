@@ -3,7 +3,8 @@ import '../models/chat_model.dart';
 
 abstract class ChatRepository {
   Future<List<ChatMessage>> getConversation(int partnerId);
-  Future<bool> sendMessage(int receiverId, String message);
+  Future<bool> sendMessage(int receiverId, String message, {String messageType = 'text', String? mediaUrl, int? mediaDuration});
+  Future<Map<String, dynamic>?> uploadMedia(String filePath);
   Future<List<ChatConversation>> getChatHistory();
 }
 
@@ -19,12 +20,24 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<bool> sendMessage(int receiverId, String message) async {
+  Future<bool> sendMessage(int receiverId, String message, {String messageType = 'text', String? mediaUrl, int? mediaDuration}) async {
     final response = await _apiClient.sendMessage({
       'receiver_id': receiverId,
       'message': message,
+      'message_type': messageType,
+      if (mediaUrl != null) 'media_url': mediaUrl,
+      if (mediaDuration != null) 'media_duration': mediaDuration,
     });
     return response.status == 'success';
+  }
+
+  @override
+  Future<Map<String, dynamic>?> uploadMedia(String filePath) async {
+    final response = await _apiClient.uploadChatMedia(filePath);
+    if (response.status == 'success' && response.data != null) {
+      return response.data;
+    }
+    return null;
   }
 
   @override

@@ -61,6 +61,7 @@ class SkillLinkArtisanCard extends StatelessWidget {
   final String price;
   final String location;
   final bool isVerified;
+  final String? badgeText;
   final VoidCallback? onTap;
 
   const SkillLinkArtisanCard({
@@ -72,6 +73,7 @@ class SkillLinkArtisanCard extends StatelessWidget {
     required this.price,
     required this.location,
     this.isVerified = false,
+    this.badgeText,
     this.onTap,
   });
 
@@ -120,16 +122,17 @@ class SkillLinkArtisanCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Premium "Top Rated" Label
-                if (rating >= 4.5)
+                // Premium Badge (AI Match or Top Rated)
+                if (badgeText != null || rating >= 4.5)
                   Positioned(
                     top: 12,
                     left: 12,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: badgeText != null ? const Color(0xFFECFDF5) : Colors.white.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(100),
+                        border: badgeText != null ? Border.all(color: const Color(0xFFA7F3D0)) : null,
                         boxShadow: [
                           BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)
                         ],
@@ -137,13 +140,17 @@ class SkillLinkArtisanCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFB84D)),
+                          Icon(
+                            badgeText != null ? Icons.auto_awesome_rounded : Icons.star_rounded, 
+                            size: 12, 
+                            color: badgeText != null ? const Color(0xFF059669) : const Color(0xFFFFB84D)
+                          ),
                           const SizedBox(width: 4),
-                          Text('TOP RATED', 
+                          Text(badgeText ?? 'TOP RATED', 
                             style: TextStyle(
                               fontSize: 9, 
                               fontWeight: FontWeight.w800, 
-                              color: Colors.black.withOpacity(0.8),
+                              color: badgeText != null ? const Color(0xFF065F46) : Colors.black.withOpacity(0.8),
                               letterSpacing: 0.5,
                             )),
                         ],

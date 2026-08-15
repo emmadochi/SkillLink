@@ -18,11 +18,22 @@ class Artisan {
 
   static int _toInt(dynamic val) => val is String ? (int.tryParse(val) ?? 0) : (val as int? ?? 0);
   static double _toDouble(dynamic val) => val is String ? (double.tryParse(val) ?? 0.0) : (val is int ? val.toDouble() : (val as double? ?? 0.0));
+  static double? _toDoubleNullable(dynamic val) => val == null ? null : (val is String ? double.tryParse(val) : (val is num ? val.toDouble() : null));
   static bool _toBool(dynamic val) => val is bool ? val : (val == 1 || val == '1' || val == 'true');
   @JsonKey(name: 'location_name')
   final String? locationName;
   @JsonKey(name: 'business_address')
   final String? businessAddress;
+  @JsonKey(name: 'latitude', fromJson: _toDoubleNullable)
+  final double? latitude;
+  @JsonKey(name: 'longitude', fromJson: _toDoubleNullable)
+  final double? longitude;
+  @JsonKey(name: 'live_latitude', fromJson: _toDoubleNullable)
+  final double? liveLatitude;
+  @JsonKey(name: 'live_longitude', fromJson: _toDoubleNullable)
+  final double? liveLongitude;
+  @JsonKey(name: 'distance_km', fromJson: _toDoubleNullable)
+  final double? distanceKm;
   @JsonKey(name: 'guarantor_name')
   final String? guarantorName;
   @JsonKey(name: 'guarantor_phone')
@@ -44,7 +55,10 @@ class Artisan {
   final bool isSaved;
   @JsonKey(name: 'sub_services')
   final List<Map<String, dynamic>>? subServices;
-
+  @JsonKey(name: 'match_percentage')
+  final int? matchPercentage;
+  @JsonKey(name: 'match_tag')
+  final String? matchTag;
 
   Artisan({
     required this.userId,
@@ -54,6 +68,11 @@ class Artisan {
     this.rating = 0.0,
     this.locationName,
     this.businessAddress,
+    this.latitude,
+    this.longitude,
+    this.liveLatitude,
+    this.liveLongitude,
+    this.distanceKm,
     this.guarantorName,
     this.guarantorPhone,
     this.identityVerified = false,
@@ -66,8 +85,9 @@ class Artisan {
     this.reviews,
     this.isSaved = false,
     this.subServices,
+    this.matchPercentage,
+    this.matchTag,
   });
-
 
   factory Artisan.fromJson(Map<String, dynamic> json) => _$ArtisanFromJson(json);
 

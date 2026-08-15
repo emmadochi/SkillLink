@@ -43,8 +43,11 @@ CREATE TABLE IF NOT EXISTS `artisans` (
     `identity_verified` BOOLEAN DEFAULT FALSE,
     `average_rating` DECIMAL(3, 2) DEFAULT 0.00,
     `total_reviews` INT DEFAULT 0,
+    `category_id` INT DEFAULT NULL,
+    `hourly_rate` DECIMAL(10, 2) DEFAULT 0.00,
     `is_available` BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3.1 Artisan Verifications (Security/Tracking)

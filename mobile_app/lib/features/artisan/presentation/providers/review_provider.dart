@@ -27,6 +27,9 @@ class ReviewController extends _$ReviewController {
     required int bookingId,
     required int rating,
     String? comment,
+    List<String>? qualityTags,
+    String? beforePhotoUrl,
+    String? afterPhotoUrl,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -34,6 +37,9 @@ class ReviewController extends _$ReviewController {
         bookingId: bookingId,
         rating: rating,
         comment: comment,
+        qualityTags: qualityTags,
+        beforePhotoUrl: beforePhotoUrl,
+        afterPhotoUrl: afterPhotoUrl,
       );
       if (success) {
         state = const AsyncValue.data(null);

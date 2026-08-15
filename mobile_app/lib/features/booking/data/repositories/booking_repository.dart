@@ -7,7 +7,7 @@ abstract class BookingRepository {
   Future<Map<String, dynamic>> createBooking(Map<String, dynamic> data);
   Future<List<Booking>> getBookingHistory();
   Future<bool> updateBookingStatus(int id, String status, {String? reason});
-  Future<bool> negotiateBooking(int id, double price, String status);
+  Future<bool> negotiateBooking(int id, double price, String action, {String? note});
   Future<List<Map<String, dynamic>>> getCategoryServices(int categoryId);
   Future<bool> submitDispute({required int bookingId, required String reason});
   Future<Map<String, dynamic>?> getBookingDispute(int bookingId);
@@ -84,12 +84,13 @@ class BookingRepositoryImpl implements BookingRepository {
   }
 
   @override
-  Future<bool> negotiateBooking(int id, double price, String status) async {
+  Future<bool> negotiateBooking(int id, double price, String action, {String? note}) async {
     try {
       final response = await _apiClient.negotiate({
         'id': id,
         'price': price,
-        'status': status,
+        'action': action,
+        if (note != null && note.isNotEmpty) 'note': note,
       });
       if (response.status == 'success') {
         await LocalCacheService.clear('booking_history');
@@ -159,4 +160,3 @@ class BookingRepositoryImpl implements BookingRepository {
     }
   }
 }
-

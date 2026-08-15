@@ -83,3 +83,9 @@ Stream<List<Artisan>> savedArtisans(SavedArtisansRef ref) async* {
     if (cached == null) yield [];
   }
 }
+
+final recommendedArtisansProvider = FutureProvider.family<List<Artisan>, int?>((ref, categoryId) async {
+  final repo = ref.watch(artisanRepositoryProvider);
+  return repo.getRecommendedArtisans(categoryId: categoryId, limit: 8);
+});
+

@@ -41,13 +41,47 @@ class Artisan {
         } catch (\PDOException $e) {
             // Ignore if already exists or other non-critical errors
         }
+
+        // Ensure live tracking columns exist on artisans table
+        $columnsToAdd = [
+            "ALTER TABLE artisans ADD COLUMN IF NOT EXISTS live_latitude DECIMAL(10, 8) DEFAULT NULL",
+            "ALTER TABLE artisans ADD COLUMN IF NOT EXISTS live_longitude DECIMAL(11, 8) DEFAULT NULL",
+            "ALTER TABLE artisans ADD COLUMN IF NOT EXISTS last_location_update TIMESTAMP NULL DEFAULT NULL",
+            "ALTER TABLE artisans ADD COLUMN IF NOT EXISTS heading DECIMAL(5, 2) DEFAULT NULL",
+            "ALTER TABLE artisans ADD COLUMN IF NOT EXISTS speed DECIMAL(5, 2) DEFAULT NULL"
+        ];
+
+        foreach ($columnsToAdd as $alterSql) {
+            try {
+                $this->conn->exec($alterSql);
+            } catch (\PDOException $e) {
+                // Ignore if already exists
+            }
+        }
     }
 
     /**
-     * Search artisans by category, location, and rating.
+     * Search artisans by category, location, rating, and calculate Haversine distance.
      */
     public function search($filters = []) {
-        $query = "SELECT u.id as user_id, u.name, u.avatar_url, a.bio, a.skill, a.category_id, a.average_rating, a.experience_years, a.location_name, a.hourly_rate
+        $userLat = isset($filters['lat']) && is_numeric($filters['lat']) ? floatval($filters['lat']) : null;
+        $userLng = isset($filters['lng']) && is_numeric($filters['lng']) ? floatval($filters['lng']) : null;
+        $hasCoords = ($userLat !== null && $userLng !== null && ($userLat != 0.0 || $userLng != 0.0));
+
+        $distanceSelect = "";
+        if ($hasCoords) {
+            $distanceSelect = ", (6371 * acos(LEAST(1.0, GREATEST(-1.0, 
+                cos(radians(:user_lat)) * cos(radians(IFNULL(IFNULL(a.live_latitude, a.latitude), 0))) * 
+                cos(radians(IFNULL(IFNULL(a.live_longitude, a.longitude), 0)) - radians(:user_lng)) + 
+                sin(radians(:user_lat)) * sin(radians(IFNULL(IFNULL(a.live_latitude, a.latitude), 0)))
+            )))) AS distance_km";
+        } else {
+            $distanceSelect = ", NULL AS distance_km";
+        }
+
+        $query = "SELECT u.id as user_id, u.name, u.avatar_url, a.bio, a.skill, a.category_id, a.average_rating, 
+                         a.experience_years, a.location_name, a.hourly_rate, a.latitude, a.longitude,
+                         a.live_latitude, a.live_longitude, a.last_location_update $distanceSelect
                   FROM " . $this->table . " a
                   JOIN users u ON u.id = a.user_id
                   WHERE (a.verification_status = 'approved' OR a.verification_status = 'verified') 
@@ -77,9 +111,24 @@ class Artisan {
             }
         }
 
-        $query .= " ORDER BY a.average_rating DESC";
+        // Sorting
+        $sortBy = strtolower($filters['sort_by'] ?? $filters['sort'] ?? '');
+        if ($sortBy === 'nearest' && $hasCoords) {
+            $query .= " ORDER BY distance_km ASC, a.average_rating DESC";
+        } elseif ($sortBy === 'price_low' || $sortBy === 'price: low') {
+            $query .= " ORDER BY a.hourly_rate ASC";
+        } elseif ($sortBy === 'price_high' || $sortBy === 'price: high') {
+            $query .= " ORDER BY a.hourly_rate DESC";
+        } else {
+            $query .= " ORDER BY a.average_rating DESC";
+        }
         
         $stmt = $this->conn->prepare($query);
+
+        if ($hasCoords) {
+            $stmt->bindParam(':user_lat', $userLat);
+            $stmt->bindParam(':user_lng', $userLng);
+        }
 
         if (!empty($filters['category_id'])) {
             $stmt->bindParam(':cat_id', $filters['category_id']);
@@ -105,6 +154,7 @@ class Artisan {
         $artisans = $stmt->fetchAll();
 
         return array_map(function($a) {
+            $a['distance_km'] = isset($a['distance_km']) && $a['distance_km'] !== null ? round(floatval($a['distance_km']), 1) : null;
             $a['user'] = [
                 'id' => (int)($a['user_id'] ?? 0),
                 'name' => $a['name'] ?? 'Artisan',
@@ -293,6 +343,146 @@ class Artisan {
         }
         
         return true;
+    }
+
+    /**
+     * Update live GPS coordinates of an artisan during active service / transit.
+     */
+    public function updateLiveLocation($artisanId, $lat, $lng, $heading = null, $speed = null) {
+        $query = "UPDATE " . $this->table . " 
+                  SET live_latitude = :lat, 
+                      live_longitude = :lng, 
+                      heading = :heading, 
+                      speed = :speed, 
+                      last_location_update = CURRENT_TIMESTAMP 
+                  WHERE user_id = :aid";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':lat', $lat);
+        $stmt->bindParam(':lng', $lng);
+        $stmt->bindParam(':heading', $heading);
+        $stmt->bindParam(':speed', $speed);
+        $stmt->bindParam(':aid', $artisanId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Fetch live location of an artisan.
+     */
+    public function getLiveLocation($artisanId) {
+        $query = "SELECT a.user_id, u.name, u.avatar_url, u.phone,
+                         a.latitude as base_latitude, a.longitude as base_longitude,
+                         a.live_latitude, a.live_longitude, a.heading, a.speed,
+                         a.last_location_update, a.location_name, a.is_available
+                  FROM " . $this->table . " a
+                  JOIN users u ON u.id = a.user_id
+                  WHERE a.user_id = :aid";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':aid', $artisanId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
+    /**
+     * AI-Powered Artisan Recommendation & Proximity Matchmaker
+     * Multi-factor scoring: Distance Decay + Bayesian Quality + Reliability & Availability
+     */
+    public function getRecommendations($filters = []) {
+        $userLat = isset($filters['lat']) && is_numeric($filters['lat']) ? floatval($filters['lat']) : null;
+        $userLng = isset($filters['lng']) && is_numeric($filters['lng']) ? floatval($filters['lng']) : null;
+        $categoryId = !empty($filters['category_id']) ? intval($filters['category_id']) : null;
+        $limit = isset($filters['limit']) ? intval($filters['limit']) : 10;
+
+        $hasCoords = ($userLat !== null && $userLng !== null && ($userLat != 0.0 || $userLng != 0.0));
+
+        $distanceSelect = "";
+        if ($hasCoords) {
+            $distanceSelect = ", (6371 * acos(LEAST(1.0, GREATEST(-1.0, 
+                cos(radians(:user_lat)) * cos(radians(IFNULL(IFNULL(a.live_latitude, a.latitude), 0))) * 
+                cos(radians(IFNULL(IFNULL(a.live_longitude, a.longitude), 0)) - radians(:user_lng)) + 
+                sin(radians(:user_lat)) * sin(radians(IFNULL(IFNULL(a.live_latitude, a.latitude), 0)))
+            )))) AS distance_km";
+        } else {
+            $distanceSelect = ", NULL AS distance_km";
+        }
+
+        $query = "SELECT u.id as user_id, u.name, u.avatar_url, a.bio, a.skill, a.category_id, c.name as category_name,
+                         a.average_rating, a.total_reviews, a.experience_years, a.location_name, a.hourly_rate,
+                         a.latitude, a.longitude, a.live_latitude, a.live_longitude, a.is_available $distanceSelect
+                  FROM " . $this->table . " a
+                  JOIN users u ON u.id = a.user_id
+                  LEFT JOIN categories c ON c.id = a.category_id
+                  WHERE (a.verification_status = 'approved' OR a.verification_status = 'verified')";
+
+        if ($categoryId) {
+            $query .= " AND a.category_id = :cat_id";
+        }
+
+        $stmt = $this->conn->prepare($query);
+        if ($hasCoords) {
+            $stmt->bindParam(':user_lat', $userLat);
+            $stmt->bindParam(':user_lng', $userLng);
+        }
+        if ($categoryId) {
+            $stmt->bindParam(':cat_id', $categoryId);
+        }
+
+        $stmt->execute();
+        $artisans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Compute AI Match Score for each artisan
+        foreach ($artisans as &$artisan) {
+            $rating = floatval($artisan['average_rating'] ?? 5.0);
+            $reviews = intval($artisan['total_reviews'] ?? 0);
+            $exp = intval($artisan['experience_years'] ?? 2);
+            $dist = isset($artisan['distance_km']) && $artisan['distance_km'] !== null ? floatval($artisan['distance_km']) : 10.0;
+            $isAvail = intval($artisan['is_available'] ?? 1);
+
+            // 1. Proximity score (0-40 pts)
+            $distScore = 40.0;
+            if ($dist > 30) $distScore = 15.0;
+            elseif ($dist > 15) $distScore = 25.0;
+            elseif ($dist > 5) $distScore = 32.0;
+            elseif ($dist <= 5) $distScore = 40.0;
+
+            // 2. Quality & Rating score (0-30 pts)
+            $qualityScore = ($rating / 5.0) * 30.0;
+
+            // 3. Experience & Trust volume (0-15 pts)
+            $trustScore = min(15.0, ($reviews * 1.5) + ($exp * 0.8));
+
+            // 4. Availability & Reliability boost (0-15 pts)
+            $availScore = ($isAvail == 1) ? 15.0 : 5.0;
+
+            $totalScore = round($distScore + $qualityScore + $trustScore + $availScore);
+            if ($totalScore > 99) $totalScore = 99;
+            if ($totalScore < 60) $totalScore = 60;
+
+            $artisan['match_percentage'] = $totalScore;
+            
+            // Generate smart recommendation tags
+            if ($dist <= 5 && $rating >= 4.7) {
+                $artisan['match_tag'] = "{$totalScore}% Match • Top Rated Nearby";
+            } elseif ($dist <= 5) {
+                $artisan['match_tag'] = "{$totalScore}% Match • Nearest Pro";
+            } elseif ($rating >= 4.8) {
+                $artisan['match_tag'] = "{$totalScore}% Match • Master Craftsman";
+            } elseif ($artisan['hourly_rate'] > 0 && $artisan['hourly_rate'] <= 6000) {
+                $artisan['match_tag'] = "{$totalScore}% Match • Great Value";
+            } else {
+                $artisan['match_tag'] = "{$totalScore}% Match • Highly Recommended";
+            }
+        }
+        unset($artisan);
+
+        // Sort descending by match score
+        usort($artisans, function($a, $b) {
+            return $b['match_percentage'] <=> $a['match_percentage'];
+        });
+
+        return array_slice($artisans, 0, $limit);
     }
 }
 

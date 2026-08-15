@@ -7,7 +7,11 @@ abstract class ReviewRepository {
     required int bookingId,
     required int rating,
     String? comment,
+    List<String>? qualityTags,
+    String? beforePhotoUrl,
+    String? afterPhotoUrl,
   });
+  Future<String?> uploadReviewPhoto(String filePath);
 }
 
 class ReviewRepositoryImpl implements ReviewRepository {
@@ -29,12 +33,27 @@ class ReviewRepositoryImpl implements ReviewRepository {
     required int bookingId,
     required int rating,
     String? comment,
+    List<String>? qualityTags,
+    String? beforePhotoUrl,
+    String? afterPhotoUrl,
   }) async {
     final response = await _apiClient.submitReview({
       'booking_id': bookingId,
       'rating': rating,
-      'comment': comment,
+      if (comment != null && comment.isNotEmpty) 'comment': comment,
+      if (qualityTags != null && qualityTags.isNotEmpty) 'quality_tags': qualityTags,
+      if (beforePhotoUrl != null) 'before_photo_url': beforePhotoUrl,
+      if (afterPhotoUrl != null) 'after_photo_url': afterPhotoUrl,
     });
     return response.status == 'success';
+  }
+
+  @override
+  Future<String?> uploadReviewPhoto(String filePath) async {
+    final response = await _apiClient.uploadReviewPhoto(filePath);
+    if (response.status == 'success' && response.data != null) {
+      return response.data!['photo_url']?.toString();
+    }
+    return null;
   }
 }
